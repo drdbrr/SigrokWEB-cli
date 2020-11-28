@@ -1,30 +1,17 @@
-import * as THREE from 'three';
-import React, { useRef, useEffect, useState } from 'react';
-import { useFrame } from 'react-three-fiber';
+import { Vector3, BufferGeometry, LineDashedMaterial, Line } from 'three';
+import React, { useEffect, useState } from 'react';
 
-const SrZeroLine = ({mouseRef}) =>{
+const SrZeroLine = ({zeroRef}) =>{
     console.log('Render ZeroLine');
-    const zeroRef = useRef();
     const points = [];
-    points.push( new THREE.Vector3( 0, -1000, 0 ) );
-    points.push( new THREE.Vector3( 0, 1000, 0 ) );
-    const lineGeometry = new THREE.BufferGeometry().setFromPoints( points );
-    
-    const col = new THREE.Color(0xFF1465C0);
-    
-    const lineMaterial = new THREE.LineDashedMaterial( { color: col, linewidth: 2, dashSize: 10, gapSize: 10 } );
-    
-    //const [line] = useState(() => new  THREE.Line(lineGeometry, lineMaterial));
-    
-    const [line] = useState(() => new  THREE.Line(lineGeometry, lineMaterial));
-    
-    useEffect(()=>{
-        line.computeLineDistances();
-    }, []);
-    
-    useFrame(()=>{
-        zeroRef.current.position.x -= mouseRef.current.dx;
-    });
+    points.push( new Vector3( 0, -1000, 0 ) );
+    points.push( new Vector3( 0, 1000, 0 ) );
+
+    const lineGeometry = new BufferGeometry().setFromPoints( points );
+    const lineMaterial = new LineDashedMaterial( { color: 0xFF1465C0, linewidth: 2, dashSize: 10, gapSize: 10 } );
+    const [line] = useState(() => new Line(lineGeometry, lineMaterial));
+
+    useEffect(()=>line.computeLineDistances(), []);
     
     return (
         <primitive dispose={undefined} object={line} ref={zeroRef} />

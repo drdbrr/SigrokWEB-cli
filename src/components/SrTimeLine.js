@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import React, { memo, useRef, useMemo, useEffect, useState } from 'react';
 import { useFrame, useThree } from 'react-three-fiber';
 import { Text } from '@react-three/drei';
+import Roboto from '../fonts/Roboto.woff';
 
 const Mark = ({mouseRef, pos, i, max, timeLineWidth, leftEdge, rightEdge, step, markElems}) =>{
     console.log('Render Mark');
@@ -43,7 +44,12 @@ const Mark = ({mouseRef, pos, i, max, timeLineWidth, leftEdge, rightEdge, step, 
                 <lineBasicMaterial attach="material" color="black"/>
             </line>
             <mesh position={[0,20,0]} >
-                <Text fontSize={12} color='black' ref={txtRef} >{i.toString()}</Text>
+                <Text
+                    fontSize={12}
+                    color='black'
+                    ref={txtRef}
+                    font={Roboto}
+                >{i.toString()}</Text>
             </mesh>
             { elems.map((item, i)=>
                 <line position={item} key={i}>
@@ -62,17 +68,15 @@ const Mark = ({mouseRef, pos, i, max, timeLineWidth, leftEdge, rightEdge, step, 
     )
 }
 
-const Marks = ({mouseRef, scale, timeLinePlaneHeight}) =>{
+const Marks = ({mouseRef, timeLinePlaneHeight}) =>{
     console.log("Render Marks");
     const { size } = useThree();
     const marks = [];
-    const step = (scale % 2) ? 17 : 10;
-    
-    const markElems = (scale % 2) ? 5 : 4;
+    const { zoom } = mouseRef.current;
+    const step = (zoom % 2) ? 17 : 10;
+    const markElems = (zoom % 2) ? 5 : 4;
     const markWidth = markElems  * step;
-    
     const markNums = Math.ceil( (2000 / markWidth) / 5) * 5;
-    
     const Txro = Math.ceil(mouseRef.current.cursor/markWidth);
     const Wo = (Txro * markWidth) - mouseRef.current.cursor;
     
@@ -94,7 +98,7 @@ const Marks = ({mouseRef, scale, timeLinePlaneHeight}) =>{
             <Mark
                 max={marks.length}
                 mouseRef={mouseRef}
-                key={i + scale}
+                key={i + mouseRef.current.zoom.toString()}
                 pos={item.pos}
                 markElems={markElems}
                 step={step}
@@ -108,7 +112,7 @@ const Marks = ({mouseRef, scale, timeLinePlaneHeight}) =>{
 
 
 
-const SrTimeLine =({mouseRef, scale, timeLinePlaneWidth, timeLinePlaneHeight})=>{
+const SrTimeLine =({mouseRef, timeLinePlaneWidth, timeLinePlaneHeight})=>{
     console.log("Render SrTimeLine");
     const { size } = useThree();
     const cursorRef = useRef();
@@ -139,7 +143,7 @@ const SrTimeLine =({mouseRef, scale, timeLinePlaneWidth, timeLinePlaneHeight})=>
                     <planeBufferGeometry attach="geometry" args={[ timeLinePlaneWidth  , timeLinePlaneHeight, 0]}/>
                 </mesh>
                 
-                <Marks mouseRef={mouseRef} scale={scale} timeLinePlaneWidth={timeLinePlaneWidth} timeLinePlaneHeight={timeLinePlaneHeight}/>
+                <Marks mouseRef={mouseRef} timeLinePlaneWidth={timeLinePlaneWidth} timeLinePlaneHeight={timeLinePlaneHeight}/>
                 
             </group>
             

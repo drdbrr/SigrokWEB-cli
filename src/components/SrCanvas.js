@@ -5,6 +5,8 @@ import SrTimeLine from './SrTimeLine';
 import SrRowsPanel from './SrRowsPanel';
 import SrZeroLine from './SrZeroLine';
 
+import { SrLineOrthoCamera } from './SrLineOrthoCamera';
+
 /*
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
@@ -37,11 +39,17 @@ function Effect() {
 
 const Layout = ({analog, logic, ws}) =>{
     console.log('Render Layout');
-    const { size } = useThree();
+    const { size, camera } = useThree();
     const linesGroupRef = useRef();
     const rowsGroupRef = useRef();
     
-    const mouseRef = useRef({ x: 0, y: 0, dx: 0, rmb: false, cursor:0, scale: 1 });
+    const zeroRef = useRef();
+    
+    const virtualCam = useRef(new SrLineOrthoCamera(0, 0, 0, 0, 0.1, 1000));
+    
+    //virtualCam.current.zoom = 1;
+    
+    const mouseRef = useRef({ x: 0, y: 0, dx: 0, dy: 0, rmb: false, cursor:0, cursorY:0, /*scaleX: 1,*/ scaleY:50, zoom:1, offset:0, deltaX:0, scale:0.001 });
     
     /*
     setInterval(()=>{
@@ -52,27 +60,55 @@ const Layout = ({analog, logic, ws}) =>{
     
     //scale props
     const zoomSpeed = 2;
-    const minZoom = 0.00000000000001;
-    const maxZoom = 1000; //Infinity
+    const minZoom = 0.0000000001;
+    const maxZoom = 10000; //Infinity
+    
     const dollyScale =  Math.pow( 0.9, zoomSpeed );
     
-    const [scale, setScale] = useState(2);
-    const mouseScaleCallback = useCallback((event)=>{
-        linesGroupRef.current.scale.x = mouseRef.current.scale;
+    const mouseScaleCallback = useCallback( (event)=>{
+        let newScale = null;
         if ( event.deltaY > 0 ) {
-            mouseRef.current.scale = Math.max( minZoom, Math.min( maxZoom, mouseRef.current.scale * dollyScale ) );
-        } else if ( event.deltaY < 0 ) {
-            mouseRef.current.scale = Math.max( minZoom, Math.min( maxZoom, mouseRef.current.scale / dollyScale ) );
+            newScale = Math.max(Math.min(linesGroupRef.current.scale.x * Math.pow(3/2, 1), maxZoom), minZoom);
+        } else { // if ( event.deltaY < 0 ) {
+            newScale = Math.max(Math.min(linesGroupRef.current.scale.x * Math.pow(3/2, -1), maxZoom), minZoom);
         }
-        setScale(mouseRef.current.scale);
-        ws.current.send(JSON.stringify({scale: mouseRef.current.scale}));
+        
+        const deltaScale = newScale - linesGroupRef.current.scale.x;
+        const deltaX = deltaScale * mouseRef.current.x;
+        
+        linesGroupRef.current.position.x -= deltaX;
+        zeroRef.current.position.x -= deltaX;
+        mouseRef.current.cursor += deltaX;        
+        linesGroupRef.current.scale.x = newScale;
+
+        /*
+        let ns = null;
+        if ( event.deltaY > 0 ) {
+            ns = Math.max( minZoom, Math.min( maxZoom, linesGroupRef.current.scale.x * dollyScale ) );
+        } else { // if ( event.deltaY < 0 ) {
+            ns = Math.max( minZoom, Math.min( maxZoom, linesGroupRef.current.scale.x / dollyScale ) );
+        }
+        
+        const ds = linesGroupRef.current.scale.x - ns;
+        const dsx = mouseRef.current.x * ds;
+         
+        linesGroupRef.current.position.x += dsx;
+        zeroRef.current.position.x += dsx;
+        mouseRef.current.cursor -= dsx;
+        linesGroupRef.current.scale.x = ns;
+        */
+        
+        //virtualCam.current.zoom = zoom;
+        //virtualCam.current.updateProjectionMatrix();
     },[]);
     
-    const prevRef = useRef(0);
+    const prevRef = useRef([0, 0]);
     
     useFrame(()=>{
-        mouseRef.current.dx = mouseRef.current.cursor - prevRef.current;
-        prevRef.current = mouseRef.current.cursor;
+        mouseRef.current.dx = mouseRef.current.cursor - prevRef.current[0];
+        mouseRef.current.dy = mouseRef.current.cursorY - prevRef.current[1];
+        prevRef.current[0] = mouseRef.current.cursor;
+        prevRef.current[1] = mouseRef.current.cursorY;
     });
 
     const mouseMoveCallback = useCallback( (event)=>{
@@ -81,8 +117,14 @@ const Layout = ({analog, logic, ws}) =>{
         
         if (mouseRef.current.rmb){
             mouseRef.current.cursor -= event.movementX;
-            rowsGroupRef.current.position.y -= event.movementY;
-            //linesGroupRef.current.position.x += event.movementX;
+            
+            //(event.movementX > 0 /*&& event.movementX !== 0*/) ? mouseRef.current.deltaX++ : mouseRef.current.deltaX--;
+            //mouseRef.current.deltaX += event.movementX;
+            
+            linesGroupRef.current.position.y = rowsGroupRef.current.position.y -= event.movementY;
+            //linesGroupRef.current.position.x += event.movementX / virtualCam.current.zoom; //WARNING
+            linesGroupRef.current.position.x += event.movementX;
+            zeroRef.current.position.x += event.movementX;
             ws.current.send(JSON.stringify( {x: -event.movementX} ));
         }
     }, []);
@@ -90,6 +132,8 @@ const Layout = ({analog, logic, ws}) =>{
     const upCallback = useCallback((event)=>{
         if (event.button == 2 ){
             mouseRef.current.rmb = false;
+            //mouseRef.current.offset -= linesGroupRef.current.scale.x * mouseRef.current.deltaX;
+            //mouseRef.current.deltaX = 0;
         }
     },[]);
     
@@ -111,8 +155,8 @@ const Layout = ({analog, logic, ws}) =>{
     const mainPlaneGeo = [mainPlaneWidth, mainPlaneHeight, 0];
     
     return(<>
-        <SrTimeLine mouseRef={mouseRef} scale={scale} timeLinePlaneWidth={size.width - rowsPanelPlaneWidth} timeLinePlaneHeight={timeLinePlaneHeight} />
-        <SrRowsPanel logic={logic} linesGroupRef={linesGroupRef} rowsGroupRef={rowsGroupRef} rowsPanelPlaneWidth={rowsPanelPlaneWidth}/>
+        <SrTimeLine mouseRef={mouseRef} timeLinePlaneWidth={size.width - rowsPanelPlaneWidth} timeLinePlaneHeight={timeLinePlaneHeight} />
+        <SrRowsPanel virtualCam={virtualCam} mouseRef={mouseRef} logic={logic} linesGroupRef={linesGroupRef} rowsGroupRef={rowsGroupRef} rowsPanelPlaneWidth={rowsPanelPlaneWidth}/>
         <mesh
             position={mainPlanePos}
             onPointerMove={mouseMoveCallback}
@@ -120,18 +164,18 @@ const Layout = ({analog, logic, ws}) =>{
             onPointerUp={upCallback}
             onWheel={mouseScaleCallback}
         >
-            <meshBasicMaterial attach="material" color="#575757"/>
+            <meshBasicMaterial attach="material" color="#575757" transparent opacity={0.1}/>
             <planeBufferGeometry attach="geometry" args={mainPlaneGeo}/>
         </mesh>
         
-        <mesh position={[(-mainPlaneWidth + rowsPanelPlaneWidth)/2 - mouseRef.current.cursor, 0, 0]}>
-            <SrZeroLine mouseRef={mouseRef}/>
+        <mesh position={[-size.width / 2 + 50 + mouseRef.current.cursor, 0, 0]}>
+            <SrZeroLine zeroRef={zeroRef}/>
         </mesh>
     </>)
     
 }
 
-export const SrCanvas = ({analog, logic, ws}) => {
+export const SrCanvas = memo(({analog, logic, ws}) => {
     console.log('Render SrCanvas');
     const rmbCallback = useCallback((event)=>event.preventDefault(),[]);
     return(<>
@@ -146,4 +190,4 @@ export const SrCanvas = ({analog, logic, ws}) => {
             {/*<Effect />*/}
         </Canvas>
     </>)
-}
+})

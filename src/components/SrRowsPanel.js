@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 import React, { useRef, useMemo, memo, useEffect, useState, useCallback } from 'react';
-import { useThree, useFrame } from 'react-three-fiber';
-import { Text } from '@react-three/drei';
+import { useThree, useFrame, createPortal } from 'react-three-fiber';
+import { Text, OrthographicCamera } from '@react-three/drei';
 
+//added 04/11/2020
 import clamp from 'lodash-es/clamp';
 import swap from 'lodash-move';
-import { useGesture /*, useDrag*/ } from 'react-use-gesture';
-import { animated, interpolate, useSprings, a } from 'react-spring/three';
+//import { useGesture } from 'react-with-gesture';
+//import { useSprings, animated, interpolate, a } from 'react-spring';
 
 //////////////////////////////////////////////
 const colorsArray = ['#fce94f', '#edd400', '#c4a000', '#16191a', '#fcaf3e', '#f57900', '#ce5c00', '#2e3436', '#e9b96e', '#c17d11', '#8f5902', '#555753', '#8ae234', '#73d216', '#4e9a06', '#888a8f', '#729fcf', '#3465a4', '#204a87', '#babdb6', '#ad7fa8', '#75507b', '#5c3566', '#d3d7cf', '#cf72c3', '#a33496', '#87207a', '#eeeeec', '#ef2929', '#cc0000', '#a40000', '#ffffff'];
@@ -18,21 +19,30 @@ function shuffle(array) {
 const colors = shuffle(colorsArray);
 //////////////////////////////////////////////
 
-//const rowHeight = 50;
+const rowHeight = 50;
 
 const SrLine = ({i, lineRef}) => {
     console.log("SR Line:", i);
-    //const positionY = i * rowHeight;
-    const arLen = 300000;
-    const lineData = new Float32Array(arLen);
-    lineData.set(new Float32Array([0, 0, 0, (arLen / 3) * 50, 0, 0]), 0);
+    const positionY = i * rowHeight;
+    const data = [];
+    for (let i = 0; i < 3000; i++){
+        const val = Math.round(Math.random());
+        data.push(i, val, 0, i + 1, val, 0)
+    }
     
+    const arLen = 300000;
+    
+    const lineData = new Float32Array(data);//arLen);
+    
+    /*
+    lineData.set(new Float32Array([0, 0, 0, (arLen / 3) * 50, 0, 0]), 0);
     useEffect(()=>{
         lineRef.current.children[0].geometry.setDrawRange(0, 0);
     });
+    */
     
-    return(
-        <mesh /*scale-y={10}*/ ref={lineRef}>
+    return (
+        <mesh position-y={positionY - 25} scale-x={1} scale-y={50} ref={lineRef}>
             <line>
                 <bufferGeometry attach="geometry" >
                     <bufferAttribute
@@ -57,34 +67,34 @@ const labelShape = new THREE.Shape();
     
 const labelGeometry = new THREE.ShapeBufferGeometry( labelShape );
     
-const SrChannelRow = ({ bind, i, text, id, rowRef, rowsPanelPlaneWidth })=>{
+const SrChannelRow = memo(({ mouseRef, i, text, id, rowRef, lineRef, rowswapRef, rowsPanelPlaneWidth })=>{
     console.log('SrChannelRow:', id);
-    const { size } = useThree();
-    /*
     const positionY = rowHeight * i;
-    const mouseDownRef = useRef();
+    const { size } = useThree();
+    //const mouseDownRef = useRef();
     
     const down = useCallback((e) => {
-        mouseDownRef.current = true;
+        rowswapRef.current.index = i;
+        rowswapRef.current.down = true;
+        //mouseDownRef.current = true;
         e.stopPropagation();
         e.target.setPointerCapture(e.pointerId);
     }, []);
 
     const up = useCallback((e) => {
-        mouseDownRef.current = false;
+        //mouseDownRef.current = false;
+        //rowswapRef.current.index = null;
+        rowswapRef.current.down = false;
         e.stopPropagation();
         e.target.releasePointerCapture(e.pointerId);
     }, []);
-    */
     
-    /*
     const move = useCallback((event) => {
-        if (mouseDownRef.current) {
+        if (rowswapRef.current.down) {
             event.stopPropagation();
-            rowRef.current.position.y -= event.movementY;
+            mouseRef.current.curY -= event.movementY
         }
     }, []);
-    */
     
     const over = useCallback(()=>{
         rowRef.current.children[0].children[1].material.color.set('red');
@@ -95,13 +105,13 @@ const SrChannelRow = ({ bind, i, text, id, rowRef, rowsPanelPlaneWidth })=>{
     }, []);
     
     return(
-        <group ref={rowRef} >
+        <group ref={rowRef} position={[0, positionY, 0]}>
             <group position={[-size.width/2+35, 0, 2]}>
-                <mesh position={[-4, 0, 0]}>
+                <mesh position={[-3, 0, 0]}>
                     <Text fontSize={12} >{text}</Text>
                 </mesh>
-                <mesh geometry={labelGeometry}  {...bind(i)} onPointerOver={over} onPointerOut={out}>
-                    <meshBasicMaterial attach="material" color={'blue'}/>
+                <mesh geometry={labelGeometry} onPointerUp={up} onPointerDown={down} onPointerMove={move} onPointerOut={out} onPointerOver={over} >
+                    <meshBasicMaterial attach="material" color={'blue'/*colors[i]*/} />
                 </mesh>
             </group>
             <mesh  scale={[1, 50, 1]}>
@@ -110,96 +120,91 @@ const SrChannelRow = ({ bind, i, text, id, rowRef, rowsPanelPlaneWidth })=>{
             </mesh>
         </group>
     )
-};
+});
 
+/*
+const fn = (order, down, originalIndex, curIndex, y) => index =>
+    down && index === originalIndex
+        ? { y: curIndex * 100 + y }
+        : { y: order.indexOf(index) * 100 }
+*/
 
-const dragFn = (order, down, originalIndex, curIndex, y) => index =>
-    down && index === originalIndex ?
-        { position: [0, curIndex * 50 - y, 0] } :
-        { position: [0, order.indexOf(index) * 50, 0] }
-        
-const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth})=>{
+const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef, virtualCam})=>{
     console.log('Render SrRowsPannel');
-    const { size } = useThree();
+    const { size, scene, camera, gl } = useThree();
     const barPos = [ (rowsPanelPlaneWidth-size.width)/2, 0, 2];
+    const rowswapRef = useRef({ index: null, down: false });
+    
+    const virtualScene = useMemo(() => new THREE.Scene(), []);
+    
+    useEffect(() => {
+        virtualCam.current.position.z = 200;
+        virtualCam.current.left = -(size.width / 2);//!!!!!!!!!!!
+        virtualCam.current.right = size.width / 2;//!!!!!!!!!
+        virtualCam.current.top = size.height / 2;
+        virtualCam.current.bottom = size.height / -2;
+        virtualCam.current.updateProjectionMatrix();
+    }, []);
+    
+    const [ channelsRows, channelsLines ] = useMemo(()=>{
+        const rows = [];
+        const lines = [];
+        logic.map((item, i)=>{
+            rows.push(
+            <SrChannelRow
+                key={i}
+                i={i}
+                text={item.name}
+                id={item.name}
+                rowRef={item.rowRef}
+                lineRef={item.lineRef}
+                rowswapRef={rowswapRef}
+                rowsPanelPlaneWidth={rowsPanelPlaneWidth}
+                mouseRef={mouseRef}
+            />);
+            
+            lines.push(
+            <SrLine
+                key={i}
+                i={i}
+                lineRef={item.lineRef}
+                mouseRef={mouseRef}
+            />);
+        });
+        return [rows, lines]
+    }, [logic]);
     
     const order = useRef([]);
-    
     useMemo(()=>logic.map((_, index) =>order.current.push(index)), [logic]);
     
-    const [springs, setSprings] = useSprings(logic.length, dragFn(order.current));
-    
-    /*
-    const bind = useDrag(({ args: [originalIndex], down, movement: [, y] }) => {
-        const curIndex = order.current.indexOf(originalIndex);
-        const curRow = clamp(Math.round((curIndex * 10 - y) / 10), 0, logic.length - 1);
-        const newOrder = swap(order.current, curIndex, curRow);
-        setSprings(fn(newOrder, down, originalIndex, curIndex, y));
-        if (!down) order.current = newOrder;
-    })
-    */
-    
-    const bind = useGesture({
-        onDrag: ({ args: [originalIndex], down, movement: [, y] }) =>{
-            const curIndex = order.current.indexOf(originalIndex);
-            const curRow = clamp(Math.round((curIndex * 10 - y) / 10), 0, logic.length - 1);
-            const newOrder = swap(order.current, curIndex, curRow);
-            setSprings(dragFn(newOrder, down, originalIndex, curIndex, y));
-            if (!down) order.current = newOrder;
-        },
-        /*
-        onHover: ({  args: [originalIndex], hovering }) =>{
-            const curIndex = order.current.indexOf(originalIndex);
-            setSprings(dragFn({order: order.current, originalIndex: originalIndex, curIndex: curIndex, hovering: hovering}));
+    useFrame(()=>{
+        if (rowswapRef.current.down && rowswapRef.current.index !== null && mouseRef.current.dy){
+            const {lineRef, rowRef} = logic[rowswapRef.current.index];
+            lineRef.current.position.y = rowRef.current.position.y += mouseRef.current.dy;
+            lineRef.current.position.y -= 25;
+            /*
+            const curRow = clamp(Math.round(rowRef.current.position.y / rowHeight), 0, logic.length - 1);
+            if (curRow !== order.current.indexOf(rowswapRef.current.index)){
+                const newOrder = swap(order.current, rowswapRef.current.index, curRow)
+                order.current = newOrder;
+                console.log('selected:', rowswapRef.current.index, ' ', 'curRow:', curRow, 'order.current:', order.current);
+            }
+            */
         }
-        */
+        if (!rowswapRef.current.down && rowswapRef.current.index !== null){
+            const pos = order.current.indexOf(rowswapRef.current.index) * rowHeight;
+            const { lineRef, rowRef } = logic[rowswapRef.current.index];
+            rowRef.current.position.y = pos;
+            lineRef.current.position.y = pos - 25;
+        }
+        
+        gl.autoClear = true
+        gl.render(scene, camera)
+        gl.autoClear = false
+        gl.clearDepth()
+        gl.render(virtualScene, virtualCam.current)
     });
-
-    return(<>
-        <mesh position={barPos} >
-            <meshBasicMaterial attach="material" color="#2d3136"/>
-            <planeBufferGeometry attach="geometry" args={[rowsPanelPlaneWidth, size.height, 0]}/>
-        </mesh>
-        <group ref={rowsGroupRef}>
-            {
-                logic.map((item, i)=>
-                    <a.group  key={i} {...springs[i]} >
-                        <SrChannelRow
-                            bind={bind}
-                            i={i}
-                            text={item.name}
-                            id={item.name}
-                            rowRef={item.rowRef}
-                            rowsPanelPlaneWidth={rowsPanelPlaneWidth}
-                        />    
-                        <SrLine
-                            i={i}
-                            lineRef={item.lineRef}
-                        />
-                    </a.group>)
-                
-                /*springs.map((item, i)=>{
-                return (
-                    <a.group  key={i} >
-                        <SrChannelRow
-                            bind={bind}
-                            i={i}
-                            text={logic[i].name}
-                            id={logic[i].name}
-                            rowRef={logic[i].rowRef}
-                            rowsPanelPlaneWidth={rowsPanelPlaneWidth}
-                        />    
-                        <SrLine
-                            i={i}
-                            lineRef={logic[i].lineRef}
-                        />
-                    </a.group>
-                )
-            })
-            */}
-        </group>
-    </>)
-    /*
+    
     return(<>
         <mesh position={barPos} >
             <meshBasicMaterial attach="material" color="#2d3136"/>
@@ -207,12 +212,11 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth})=>
         </mesh>
         <group ref={rowsGroupRef}>
             { channelsRows }
-            <group ref={linesGroupRef} >
-                { channelsLines }
-            </group>
+            { createPortal(
+                <group position={[-size.width / 2 + 50 + mouseRef.current.cursor, 0, 0]} ref={linesGroupRef}>{ channelsLines }</group>
+            , virtualScene) }
         </group>
     </>)
-    */
 }
 
 export default SrRowsPanel
