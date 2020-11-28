@@ -13,7 +13,7 @@ export const DeviceMenu = ({session}) => {
     if (loading) return <SrLoading />;
     return (
         <SrDeviceMenu
-            sourcename={session.sourcename}
+            label={session.sourcename}
             drivers={data.drivers}
             devices={ (scanDevices) ? scanDevices : [] }
             getScanDevices={ (drv)=>getScanDevices({ variables: { id: session.id, drv:drv } }) }

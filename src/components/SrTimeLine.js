@@ -110,12 +110,10 @@ const Marks = ({mouseRef, timeLinePlaneHeight}) =>{
     </group>)
 }
 
-
-
-const SrTimeLine =({mouseRef, timeLinePlaneWidth, timeLinePlaneHeight})=>{
+const SrTimeLine =({cursorRef, mouseRef, timeLinePlaneWidth, timeLinePlaneHeight})=>{
     console.log("Render SrTimeLine");
     const { size } = useThree();
-    const cursorRef = useRef();
+    //const cursorRef = useRef();
     const lineRef = useRef();
     
     const cursorGeometry = useMemo(() => {
@@ -125,22 +123,20 @@ const SrTimeLine =({mouseRef, timeLinePlaneWidth, timeLinePlaneHeight})=>{
         return new Float32Array([ 0, size.height/2-timeLinePlaneHeight, 0, 0, -size.height/2, 0 ])
     }, [size]);
     
-    useFrame(()=>{
-        cursorRef.current.position.x = mouseRef.current.x - size.width/2;
-    });
-    
     const barCrusor = new Float32Array([
         -6.0, 8.0,  0,
         0.0, 0.0,  0,
         6.0,  8.0,  0
     ]);
     
+    //useFrame(()=>cursorRef.current.position.x = mouseRef.current.x - size.width/2);
+    
     return(
         <>
             <group position={[(size.width - timeLinePlaneWidth)/2, (size.height - timeLinePlaneHeight)/2, 1]}>
                 <mesh>
                     <meshBasicMaterial attach="material" color='white' />
-                    <planeBufferGeometry attach="geometry" args={[ timeLinePlaneWidth  , timeLinePlaneHeight, 0]}/>
+                    <planeBufferGeometry attach="geometry" args={[ timeLinePlaneWidth  , timeLinePlaneHeight ]}/>
                 </mesh>
                 
                 <Marks mouseRef={mouseRef} timeLinePlaneWidth={timeLinePlaneWidth} timeLinePlaneHeight={timeLinePlaneHeight}/>

@@ -1,21 +1,12 @@
-import React, { useState, useCallback } from 'react';
-import onClickOutside from 'react-onclickoutside';
-import { FormDown } from 'grommet-icons';
+import React, { useState, useCallback, } from 'react';
 import { ScSrDropDownContent } from '../styled/ScSrDropDownContent';
-import { ScSrDropDown } from '../styled/ScSrDropDown';
+import SrDropDownMenu from './SrDropDownMenu';
 
 const SrDeviceMenuContent = ({toggle, drivers, devices, getScanDevices, getDevice})=>{
     console.log('Render SrDeviceMenuContent');
-    
-    //let devNum = true;
-    
     const [devNum, setDevNum] = useState(true);
-    //const [devices, setDevices] = useState([]);
     const [driver, setDriver] = useState(false);
-    
-    const scanCb = useCallback((data)=>setDevices(data.scanDevices), []);
-    //const [ getScanDevices ] = useLazyQuery(GET_SCAN_DEVICES, {variables: { srpid: srpid, drv: driver }, onCompleted:scanCb});
-    
+    //const scanCb = useCallback((data)=>setDevices(data.scanDevices), []);
     const closeOk = (devNum) =>{
         getDevice(devNum)
         toggle();
@@ -63,25 +54,13 @@ const SrDeviceMenuContent = ({toggle, drivers, devices, getScanDevices, getDevic
     )
 }
 
-const SrDeviceMenu = ({drivers, devices, getScanDevices, getDevice, sourcename}) =>{
-    console.log('Render SrDeviceMenu');
-    const [isOpen, setIsOpen] = useState(false);
-    const toggle = () => setIsOpen(!isOpen);
-    SrDeviceMenu.handleClickOutside = () => setIsOpen(false);
-    const content = <SrDeviceMenuContent toggle={toggle} drivers={drivers} devices={devices} getScanDevices={getScanDevices} getDevice={getDevice} />
+const SrDeviceMenu = (props) =>{
     return(
-        <div>
-            <ScSrDropDown onClick={toggle}>
-                <span>{ (sourcename) ? sourcename : 'Device' }</span>
-                <FormDown size='small' color='white' />
-            </ScSrDropDown>
-            { isOpen? content : null }
-        </div>
+        <SrDropDownMenu label={ (props.label) ? props.label : 'Device' } >
+            <SrDeviceMenuContent { ...props }/>
+        </SrDropDownMenu>
     )
-};
+}
 
-const clickOutsideConfig = {
-    handleClickOutside: () => SrDeviceMenu.handleClickOutside
-};
-
-export default onClickOutside(SrDeviceMenu, clickOutsideConfig); 
+export default SrDeviceMenu
+//export default onClickOutside(SrDeviceMenu, clickOutsideConfig); 

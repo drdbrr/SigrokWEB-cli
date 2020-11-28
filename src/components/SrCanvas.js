@@ -42,7 +42,7 @@ const Layout = ({analog, logic, ws}) =>{
     const { size, camera } = useThree();
     const linesGroupRef = useRef();
     const rowsGroupRef = useRef();
-    
+    const cursorRef = useRef();
     const zeroRef = useRef();
     
     const virtualCam = useRef(new SrLineOrthoCamera(0, 0, 0, 0, 0.1, 1000));
@@ -115,6 +115,8 @@ const Layout = ({analog, logic, ws}) =>{
         mouseRef.current.x = event.clientX;
         mouseRef.current.y = event.clientY;
         
+        cursorRef.current.position.x = event.clientX - size.width/2;
+        
         if (mouseRef.current.rmb){
             mouseRef.current.cursor -= event.movementX;
             
@@ -152,10 +154,11 @@ const Layout = ({analog, logic, ws}) =>{
     const mainPlaneHeight = size.height - timeLinePlaneHeight;
     //const mainPlanePos = [(mainPlaneWidth - size.width)/2 + rowsPanelPlaneWidth, ( size.height - mainPlaneHeight )/2 - timeLinePlaneHeight, 0];
     const mainPlanePos = [0 + rowsPanelPlaneWidth/2, 0 - timeLinePlaneHeight/2, 0];
-    const mainPlaneGeo = [mainPlaneWidth, mainPlaneHeight, 0];
+    const mainPlaneGeo = [mainPlaneWidth, mainPlaneHeight];
     
     return(<>
-        <SrTimeLine mouseRef={mouseRef} timeLinePlaneWidth={size.width - rowsPanelPlaneWidth} timeLinePlaneHeight={timeLinePlaneHeight} />
+    
+        <SrTimeLine cursorRef={cursorRef} mouseRef={mouseRef} timeLinePlaneWidth={size.width - rowsPanelPlaneWidth} timeLinePlaneHeight={timeLinePlaneHeight} />
         <SrRowsPanel virtualCam={virtualCam} mouseRef={mouseRef} logic={logic} linesGroupRef={linesGroupRef} rowsGroupRef={rowsGroupRef} rowsPanelPlaneWidth={rowsPanelPlaneWidth}/>
         <mesh
             position={mainPlanePos}
@@ -164,15 +167,17 @@ const Layout = ({analog, logic, ws}) =>{
             onPointerUp={upCallback}
             onWheel={mouseScaleCallback}
         >
-            <meshBasicMaterial attach="material" color="#575757" transparent opacity={0.1}/>
+            <meshBasicMaterial attach="material" color="#575757"/>
             <planeBufferGeometry attach="geometry" args={mainPlaneGeo}/>
         </mesh>
-        
+
+
         <mesh position={[-size.width / 2 + 50 + mouseRef.current.cursor, 0, 0]}>
             <SrZeroLine zeroRef={zeroRef}/>
         </mesh>
-    </>)
-    
+        
+    </>
+    )
 }
 
 export const SrCanvas = memo(({analog, logic, ws}) => {
@@ -182,7 +187,6 @@ export const SrCanvas = memo(({analog, logic, ws}) => {
         <Canvas
             orthographic
             style={{background:'purple'}}
-            camera={{ zoom: 1 }}
             gl={{ antialias: false, logarithmicDepthBuffer: true }} //FXAA https://www.airtightinteractive.com/2013/02/intro-to-pixel-shaders-in-three-js/
             onContextMenu={rmbCallback}
         >

@@ -16,12 +16,12 @@ export const SrMenuPanel = memo(({toggleDecoderMenu, toggleTabularMenu, session,
                 : null
             }
             
-            <SrFileMenu />
-            
+            { <SrFileMenu /> }
             { (session)?
                 <DeviceMenu session={session} />
                 : null
             }
+            
             
             { (session && session.samplerates)?
                 <Samplerates samplerates={session.samplerates} samplerate={session.samplerate} />

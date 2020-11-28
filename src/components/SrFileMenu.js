@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import onClickOutside from "react-onclickoutside";
-import { FormDown, Document } from 'grommet-icons';
+import React from 'react';
+import { Document } from 'grommet-icons';
 import { ScSrDropDownContent } from '../styled/ScSrDropDownContent';
-import { ScSrDropDown } from '../styled/ScSrDropDown';
+import SrDropDownMenu from './SrDropDownMenu';
 
 const SrFileMenuContent=()=>{
     console.log('Render SrFileMenuContent');
@@ -13,25 +12,13 @@ const SrFileMenuContent=()=>{
     )
 }
 
-const SrFileMenu = () =>{
-    console.log('Render SrFileMenu');
-    const [ isOpen, setIsOpen ] = useState(false);
-    const toggle = () => setIsOpen(!isOpen);
-    SrFileMenu.handleClickOutside = () => setIsOpen(false);
-    const content = <SrFileMenuContent toggleOpen={toggle} />
+const SrFileMenu = (props) =>{
+    const icon = <Document size='small' color='white' />
     return(
-        <div> {/*WARNING: <---- MUST BE EXACT <DIV> */}
-            <ScSrDropDown onClick={toggle} >
-                <Document size='small' color='white' />
-                <FormDown size='small' color='white' />
-            </ScSrDropDown>
-            { isOpen? content : null }
-        </div>
+        <SrDropDownMenu icon={icon} >
+            <SrFileMenuContent { ...props }/>
+        </SrDropDownMenu>
     )
 }
 
-const clickOutsideConfig = {
-    handleClickOutside: () => SrFileMenu.handleClickOutside
-};
-
-export default onClickOutside(SrFileMenu, clickOutsideConfig);
+export default SrFileMenu

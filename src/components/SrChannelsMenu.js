@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import onClickOutside from "react-onclickoutside";
+//import onClickOutside from "react-onclickoutside";
 import { FormDown } from 'grommet-icons';
 import { ScSrDropDownContent } from '../styled/ScSrDropDownContent';
 import { ScSrDropDown } from '../styled/ScSrDropDown';
 import { SketchPicker } from 'react-color';
+import SrDropDownMenu from './SrDropDownMenu';
 
 const SrChannelsMenuContent=({logic, analog})=>{
     console.log('Render SrChannelsMenuContent');
@@ -54,6 +55,7 @@ const SrChannelsMenuContent=({logic, analog})=>{
     )
 }
 
+/*
 const SrChannelsMenu = ({logic, analog}) =>{
     console.log('Render SrChannelsMenu');
     const [ isOpen, setIsOpen ] = useState(false);
@@ -61,7 +63,7 @@ const SrChannelsMenu = ({logic, analog}) =>{
     SrChannelsMenu.handleClickOutside = () => setIsOpen(false);
     const content = <SrChannelsMenuContent logic={logic} analog={analog} toggleOpen={toggle} />
     return(
-        <div> {/*WARNING: <---- MUST BE EXACT <DIV> */}
+        <div> {/*WARNING: <---- MUST BE EXACT <DIV> */      /*}
             <ScSrDropDown onClick={toggle} >
                 <span>Channels</span>
                 <FormDown size='small' color='white' />
@@ -76,4 +78,14 @@ const clickOutsideConfig = {
 };
 
 export default onClickOutside(SrChannelsMenu, clickOutsideConfig);
- 
+*/
+
+const SrChannelsMenu = (props) =>{
+    return(
+        <SrDropDownMenu label='Channels' >
+            <SrChannelsMenuContent { ...props }/>
+        </SrDropDownMenu>
+    )
+}
+
+export default SrChannelsMenu

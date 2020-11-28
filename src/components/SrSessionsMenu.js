@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import onClickOutside from "react-onclickoutside";
-import { Menu, FormClose, FormDown } from 'grommet-icons';
+import React from 'react';
+import { Menu, FormClose } from 'grommet-icons';
 import { ScSrDropDownContent } from '../styled/ScSrDropDownContent';
-import { ScSrDropDown } from '../styled/ScSrDropDown';
 import { ScSrDropDownItem } from '../styled/ScSrDropDownItem';
+import SrDropDownMenu from './SrDropDownMenu';
+
 //import { selectedSessionVar } from '../ApolloClient';
 
-const SrSessionsContent = ({selectSession, session, toggle, sessions, createSession, deleteSession})=>{
-    console.log('Render SrSessionsContent');
+const SrSessionsMenuContent = ({selectSession, session, toggle, sessions, createSession, deleteSession})=>{
+    console.log('Render SrSessionsMenuContent');
     const newSession = () =>{
         createSession();
         toggle();
@@ -30,28 +30,14 @@ const SrSessionsContent = ({selectSession, session, toggle, sessions, createSess
     )
 }
 
-const SrSessionsMenu = ({sessions, session, selectSession, createSession, deleteSession}) =>{
-    console.log('Render SrSessionsMenu');
-    const [isOpen, setIsOpen] = useState(false);
-    const toggle = () =>setIsOpen(!isOpen);
-    SrSessionsMenu.handleClickOutside = () => setIsOpen(false);
-    const content = <SrSessionsContent selectSession={selectSession} session={session} sessions={sessions} createSession={createSession} toggle={toggle} deleteSession={deleteSession}/>
-    
+const SrSessionsMenu = (props) =>{
+    const icon = <Menu size='small' color='white' />;
     return(
-        <div>
-            <ScSrDropDown onClick={toggle}>
-                <span>{session.name}</span>
-                <Menu size='small' color='white' />
-                <FormDown size='small' color='white' />
-            </ScSrDropDown>
-            { isOpen? content : null }
-        </div>
+        <SrDropDownMenu label={ props.session.name } icon={icon} >
+            <SrSessionsMenuContent { ...props }/>
+        </SrDropDownMenu>
     )
-};
+}
 
-const clickOutsideConfig = {
-    handleClickOutside: () => SrSessionsMenu.handleClickOutside
-};
-
-export default onClickOutside(SrSessionsMenu, clickOutsideConfig); 
+export default SrSessionsMenu
  

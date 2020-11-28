@@ -115,7 +115,7 @@ const SrChannelRow = memo(({ mouseRef, i, text, id, rowRef, lineRef, rowswapRef,
                 </mesh>
             </group>
             <mesh  scale={[1, 50, 1]}>
-                <planeBufferGeometry attach="geometry" args={[size.width , 1, 3]}/>
+                <planeBufferGeometry attach="geometry" args={[size.width , 0]}/>
                 <meshBasicMaterial attach="material" transparent opacity={0.2}  color={colors[i]} />
             </mesh>
         </group>
@@ -208,7 +208,7 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mo
     return(<>
         <mesh position={barPos} >
             <meshBasicMaterial attach="material" color="#2d3136"/>
-            <planeBufferGeometry attach="geometry" args={[rowsPanelPlaneWidth, size.height, 0]}/>
+            <planeBufferGeometry attach="geometry" args={[rowsPanelPlaneWidth, size.height]}/>
         </mesh>
         <group ref={rowsGroupRef}>
             { channelsRows }

@@ -1,10 +1,8 @@
-import React, { useState, useCallback } from 'react';
-import onClickOutside from 'react-onclickoutside';
-import { FormDown } from 'grommet-icons';
+import React from 'react';
 import { ScSrDropDownContent } from '../styled/ScSrDropDownContent';
-import { ScSrDropDown } from '../styled/ScSrDropDown';
 import { ScSrDropDownItem } from '../styled/ScSrDropDownItem';
 import { formNum } from '../helpers';
+import SrDropDownMenu from './SrDropDownMenu';
 
 const SrSamplesContent = ({toggle, sample, samples, selectSample})=>{
     console.log('Render SrSamplesContent');
@@ -23,26 +21,13 @@ const SrSamplesContent = ({toggle, sample, samples, selectSample})=>{
     )
 }
 
-const SrSamples = ({sample, samples, selectSample}) =>{
-    console.log('Render SrSamples');
-    const [isOpen, setIsOpen] = useState(false);
-    const toggle = () => setIsOpen(!isOpen);
-    SrSamples.handleClickOutside = () => setIsOpen(false);
-    const content = <SrSamplesContent toggle={toggle} sample={sample} samples={samples} selectSample={selectSample} />
-    const { num, text } = formNum(sample);
+const SrSamples = (props) =>{
+    const { num, text } = formNum(props.sample);
     return(
-        <div>
-            <ScSrDropDown onClick={toggle}>
-                <span>{num + text + ' samples'}</span>
-                <FormDown size='small' color='white' />
-            </ScSrDropDown>
-            { isOpen? content : null }
-        </div>
+        <SrDropDownMenu label={num + text + ' samples'} >
+            <SrSamplesContent { ...props }/>
+        </SrDropDownMenu>
     )
-};
+}
 
-const clickOutsideConfig = {
-    handleClickOutside: () => SrSamples.handleClickOutside
-};
-
-export default onClickOutside(SrSamples, clickOutsideConfig); 
+export default SrSamples
