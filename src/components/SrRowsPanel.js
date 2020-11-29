@@ -77,13 +77,10 @@ const SrChannelRow = ({ mouseRef, i, text, id, rowRef, lineRef, rowswapRef /*, r
         rowswapRef.current.down = true;
         e.stopPropagation();
         e.target.setPointerCapture(e.pointerId);
-        rowswapRef.current.moved = true;
     }, []);
 
     const up = useCallback((e) => {
-        //rowswapRef.current.index = 0;
         rowswapRef.current.down = false;
-        //rowswapRef.current.moved = false;
         e.stopPropagation();
         e.target.releasePointerCapture(e.pointerId);
     }, []);
@@ -92,7 +89,6 @@ const SrChannelRow = ({ mouseRef, i, text, id, rowRef, lineRef, rowswapRef /*, r
         if (rowswapRef.current.down) {
             event.stopPropagation();
             mouseRef.current.dy += event.movementY;
-            //rowswapRef.current.moved = true;
         }
     }, []);
     
@@ -133,7 +129,7 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mo
     console.log('Render SrRowsPannel');
     const { size, scene, camera, gl } = useThree();
     const barPos = [ (rowsPanelPlaneWidth-size.width)/2, 0, 2];
-    const rowswapRef = useRef({ index: 0, down: false, ch:false });
+    const rowswapRef = useRef({ index: null, down: false});
     
     const virtualScene = useMemo(() => new THREE.Scene(), []);
     
@@ -178,7 +174,7 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mo
     useMemo(()=>logic.map((_, index) =>order.current.push(index)), [logic]);
     
     useFrame(()=>{
-        if (rowswapRef.current.down && mouseRef.current.dy ){
+        if (rowswapRef.current.down && rowswapRef.current.index !== null ){
             const {lineRef, rowRef} = logic[rowswapRef.current.index];
             lineRef.current.position.y = rowRef.current.position.y -= mouseRef.current.dy;
             lineRef.current.position.y -= 25;
@@ -193,13 +189,12 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mo
             }
             */
         }
-        if (!rowswapRef.current.down && rowswapRef.current.moved/* && rowswapRef.current.index !== 0*/){
-            console.log('WTTTFFF!!!');
+        if (!rowswapRef.current.down && rowswapRef.current.index !== null){
             const pos = order.current.indexOf(rowswapRef.current.index) * rowHeight;
             const { lineRef, rowRef } = logic[rowswapRef.current.index];
             rowRef.current.position.y = pos;
             lineRef.current.position.y = pos - 25;
-            rowswapRef.current.moved = false;
+            rowswapRef.current.index = null;
         }
         
         gl.autoClear = true
