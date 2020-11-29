@@ -42,7 +42,7 @@ const SrLine = ({i, lineRef}) => {
     */
     
     return (
-        <mesh position-y={positionY - 25} scale-x={1} scale-y={50} ref={lineRef}>
+        <mesh position={[0, positionY - 25, 0]} scale-x={1} scale-y={50} ref={lineRef}>
             <line>
                 <bufferGeometry attach="geometry" >
                     <bufferAttribute
@@ -67,24 +67,23 @@ const labelShape = new THREE.Shape();
     
 const labelGeometry = new THREE.ShapeBufferGeometry( labelShape );
     
-const SrChannelRow = memo(({ mouseRef, i, text, id, rowRef, lineRef, rowswapRef, rowsPanelPlaneWidth })=>{
+const SrChannelRow = ({ mouseRef, i, text, id, rowRef, lineRef, rowswapRef /*, rowsPanelPlaneWidth*/ })=>{
     console.log('SrChannelRow:', id);
     const positionY = rowHeight * i;
     const { size } = useThree();
-    //const mouseDownRef = useRef();
     
     const down = useCallback((e) => {
         rowswapRef.current.index = i;
         rowswapRef.current.down = true;
-        //mouseDownRef.current = true;
         e.stopPropagation();
         e.target.setPointerCapture(e.pointerId);
+        rowswapRef.current.moved = true;
     }, []);
 
     const up = useCallback((e) => {
-        //mouseDownRef.current = false;
-        //rowswapRef.current.index = null;
+        //rowswapRef.current.index = 0;
         rowswapRef.current.down = false;
+        //rowswapRef.current.moved = false;
         e.stopPropagation();
         e.target.releasePointerCapture(e.pointerId);
     }, []);
@@ -92,7 +91,8 @@ const SrChannelRow = memo(({ mouseRef, i, text, id, rowRef, lineRef, rowswapRef,
     const move = useCallback((event) => {
         if (rowswapRef.current.down) {
             event.stopPropagation();
-            mouseRef.current.curY -= event.movementY
+            mouseRef.current.dy += event.movementY;
+            //rowswapRef.current.moved = true;
         }
     }, []);
     
@@ -115,12 +115,12 @@ const SrChannelRow = memo(({ mouseRef, i, text, id, rowRef, lineRef, rowswapRef,
                 </mesh>
             </group>
             <mesh  scale={[1, 50, 1]}>
-                <planeBufferGeometry attach="geometry" args={[size.width , 0]}/>
+                <planeBufferGeometry attach="geometry" args={[size.width , 1]}/>
                 <meshBasicMaterial attach="material" transparent opacity={0.2}  color={colors[i]} />
             </mesh>
         </group>
     )
-});
+}
 
 /*
 const fn = (order, down, originalIndex, curIndex, y) => index =>
@@ -133,7 +133,7 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mo
     console.log('Render SrRowsPannel');
     const { size, scene, camera, gl } = useThree();
     const barPos = [ (rowsPanelPlaneWidth-size.width)/2, 0, 2];
-    const rowswapRef = useRef({ index: null, down: false });
+    const rowswapRef = useRef({ index: 0, down: false, ch:false });
     
     const virtualScene = useMemo(() => new THREE.Scene(), []);
     
@@ -178,10 +178,12 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mo
     useMemo(()=>logic.map((_, index) =>order.current.push(index)), [logic]);
     
     useFrame(()=>{
-        if (rowswapRef.current.down && rowswapRef.current.index !== null && mouseRef.current.dy){
+        if (rowswapRef.current.down && mouseRef.current.dy ){
             const {lineRef, rowRef} = logic[rowswapRef.current.index];
-            lineRef.current.position.y = rowRef.current.position.y += mouseRef.current.dy;
+            lineRef.current.position.y = rowRef.current.position.y -= mouseRef.current.dy;
             lineRef.current.position.y -= 25;
+            //rowRef.current.position.y += mouseRef.current.dy;
+            //lineRef.current.position.y -= 25;
             /*
             const curRow = clamp(Math.round(rowRef.current.position.y / rowHeight), 0, logic.length - 1);
             if (curRow !== order.current.indexOf(rowswapRef.current.index)){
@@ -191,11 +193,13 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mo
             }
             */
         }
-        if (!rowswapRef.current.down && rowswapRef.current.index !== null){
+        if (!rowswapRef.current.down && rowswapRef.current.moved/* && rowswapRef.current.index !== 0*/){
+            console.log('WTTTFFF!!!');
             const pos = order.current.indexOf(rowswapRef.current.index) * rowHeight;
             const { lineRef, rowRef } = logic[rowswapRef.current.index];
             rowRef.current.position.y = pos;
             lineRef.current.position.y = pos - 25;
+            rowswapRef.current.moved = false;
         }
         
         gl.autoClear = true
@@ -213,7 +217,7 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mo
         <group ref={rowsGroupRef}>
             { channelsRows }
             { createPortal(
-                <group position={[-size.width / 2 + 50 + mouseRef.current.cursor, 0, 0]} ref={linesGroupRef}>{ channelsLines }</group>
+                <group position={[-size.width / 2 + 50 + mouseRef.current.cursor, 0, 1]} ref={linesGroupRef}>{ channelsLines }</group>
             , virtualScene) }
         </group>
     </>)

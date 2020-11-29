@@ -126,6 +126,7 @@ const Layout = ({analog, logic, ws}) =>{
             linesGroupRef.current.position.y = rowsGroupRef.current.position.y -= event.movementY;
             //linesGroupRef.current.position.x += event.movementX / virtualCam.current.zoom; //WARNING
             linesGroupRef.current.position.x += event.movementX;
+            
             zeroRef.current.position.x += event.movementX;
             ws.current.send(JSON.stringify( {x: -event.movementX} ));
         }
@@ -159,7 +160,6 @@ const Layout = ({analog, logic, ws}) =>{
     return(<>
     
         <SrTimeLine cursorRef={cursorRef} mouseRef={mouseRef} timeLinePlaneWidth={size.width - rowsPanelPlaneWidth} timeLinePlaneHeight={timeLinePlaneHeight} />
-        <SrRowsPanel virtualCam={virtualCam} mouseRef={mouseRef} logic={logic} linesGroupRef={linesGroupRef} rowsGroupRef={rowsGroupRef} rowsPanelPlaneWidth={rowsPanelPlaneWidth}/>
         <mesh
             position={mainPlanePos}
             onPointerMove={mouseMoveCallback}
@@ -167,10 +167,11 @@ const Layout = ({analog, logic, ws}) =>{
             onPointerUp={upCallback}
             onWheel={mouseScaleCallback}
         >
-            <meshBasicMaterial attach="material" color="#575757"/>
+            <meshBasicMaterial attach="material" color="#575757" transparent opacity={0.0}/>
             <planeBufferGeometry attach="geometry" args={mainPlaneGeo}/>
         </mesh>
-
+        
+        <SrRowsPanel virtualCam={virtualCam} mouseRef={mouseRef} logic={logic} linesGroupRef={linesGroupRef} rowsGroupRef={rowsGroupRef} rowsPanelPlaneWidth={rowsPanelPlaneWidth}/>
 
         <mesh position={[-size.width / 2 + 50 + mouseRef.current.cursor, 0, 0]}>
             <SrZeroLine zeroRef={zeroRef}/>
@@ -186,7 +187,7 @@ export const SrCanvas = memo(({analog, logic, ws}) => {
     return(<>
         <Canvas
             orthographic
-            style={{background:'purple'}}
+            style={{background:'#575757'}}
             gl={{ antialias: false, logarithmicDepthBuffer: true }} //FXAA https://www.airtightinteractive.com/2013/02/intro-to-pixel-shaders-in-three-js/
             onContextMenu={rmbCallback}
         >
