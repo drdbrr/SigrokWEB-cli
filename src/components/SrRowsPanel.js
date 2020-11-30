@@ -5,6 +5,8 @@ import { Text, OrthographicCamera } from '@react-three/drei';
 
 //added 04/11/2020
 import clamp from 'lodash-es/clamp';
+
+//import  difference from 'lodash-es/difference';
 import swap from 'lodash-move';
 //import { useGesture } from 'react-with-gesture';
 //import { useSprings, animated, interpolate, a } from 'react-spring';
@@ -173,23 +175,33 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mo
     const order = useRef([]);
     useMemo(()=>logic.map((_, index) =>order.current.push(index)), [logic]);
     
+    let prevRow = null;
     useFrame(()=>{
-        if (rowswapRef.current.down && rowswapRef.current.index !== null ){
+        if (rowswapRef.current.down && rowswapRef.current.index !== null && mouseRef.current.dy ){
             const {lineRef, rowRef} = logic[rowswapRef.current.index];
             lineRef.current.position.y = rowRef.current.position.y -= mouseRef.current.dy;
             lineRef.current.position.y -= 25;
-            //rowRef.current.position.y += mouseRef.current.dy;
-            //lineRef.current.position.y -= 25;
-            /*
+            
             const curRow = clamp(Math.round(rowRef.current.position.y / rowHeight), 0, logic.length - 1);
-            if (curRow !== order.current.indexOf(rowswapRef.current.index)){
-                const newOrder = swap(order.current, rowswapRef.current.index, curRow)
+            
+            if( curRow !== prevRow && prevRow !== null){
+                
+                
+                
+                const newOrder = swap(order.current, rowswapRef.current.index, curRow);
+                
+                const ind = order.current.indexOf(rowswapRef.current.index);
+                
                 order.current = newOrder;
-                console.log('selected:', rowswapRef.current.index, ' ', 'curRow:', curRow, 'order.current:', order.current);
+                
+                const ff = logic[order.current[ind]];
+                const pp = ind * rowHeight;
+                ff.lineRef.current.position.y = pp - 25;
+                ff.rowRef.current.position.y = pp;
             }
-            */
+            prevRow = curRow;
         }
-        if (!rowswapRef.current.down && rowswapRef.current.index !== null){
+        else if (!rowswapRef.current.down && rowswapRef.current.index !== null){
             const pos = order.current.indexOf(rowswapRef.current.index) * rowHeight;
             const { lineRef, rowRef } = logic[rowswapRef.current.index];
             rowRef.current.position.y = pos;
