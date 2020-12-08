@@ -9,9 +9,8 @@ import { useReactiveVar, useQuery } from '@apollo/client';
 import { GET_SESSION } from '../operations/queries/getSession';
 
 export const App =()=>{
-    const id = useReactiveVar(selectedSessionVar);
-    
-    const session = useQuery(GET_SESSION, {skip:(!id), variables:{id:id}});
+    const id = useReactiveVar(selectedSessionVar);    
+    const session = useQuery(GET_SESSION, { variables:{id: id}, skip: (!id) });
     
     const [ analog, logic ] = useMemo(()=>{
         const analog = [];
@@ -55,6 +54,6 @@ export const App =()=>{
     }, []);
     
     return(
-        <SrApp ws={ws} analog={analog} logic={logic} />
+        <SrApp ws={ws} analog={analog} logic={logic}/>
     )
 }

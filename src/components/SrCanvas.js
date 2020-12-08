@@ -167,7 +167,7 @@ const Layout = ({analog, logic, ws}) =>{
             onPointerUp={upCallback}
             onWheel={mouseScaleCallback}
         >
-            <meshBasicMaterial attach="material" color="#575757" transparent opacity={0.0}/>
+            <meshBasicMaterial attach="material" color="#2a2a2a" transparent opacity={0.0}/>
             <planeBufferGeometry attach="geometry" args={mainPlaneGeo}/>
         </mesh>
         
@@ -181,16 +181,36 @@ const Layout = ({analog, logic, ws}) =>{
     )
 }
 
+
+function Lights() {
+  return (
+    <group>
+      
+      <ambientLight intensity={1} />
+      <spotLight
+        castShadow
+        intensity={0.2}
+        angle={Math.PI / 7}
+        position={[150, 150, 250]}
+        penumbra={1}
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+      />
+    </group>
+  )
+}
+
 export const SrCanvas = memo(({analog, logic, ws}) => {
     console.log('Render SrCanvas');
     const rmbCallback = useCallback((event)=>event.preventDefault(),[]);
     return(<>
         <Canvas
             orthographic
-            style={{background:'#575757'}}
+            style={{background:'#2a2a2a'}}
             gl={{ antialias: false, logarithmicDepthBuffer: true }} //FXAA https://www.airtightinteractive.com/2013/02/intro-to-pixel-shaders-in-three-js/
             onContextMenu={rmbCallback}
         >
+            <Lights />
             <Layout analog={analog} logic={logic} ws={ws}/>
             {/*<Effect />*/}
         </Canvas>

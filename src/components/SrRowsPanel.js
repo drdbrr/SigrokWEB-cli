@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import React, { useRef, useMemo, memo, useEffect, useState, useCallback } from 'react';
 import { useThree, useFrame, createPortal } from 'react-three-fiber';
-import { Text, OrthographicCamera } from '@react-three/drei';
+import { Text, Html } from '@react-three/drei';
+
+import SrChannelPopUp from './SrChannelPopUp';
 
 //added 04/11/2020
 import clamp from 'lodash-es/clamp';
@@ -13,6 +15,8 @@ import swap from 'lodash-move';
 
 //////////////////////////////////////////////
 const colorsArray = ['#fce94f', '#edd400', '#c4a000', '#16191a', '#fcaf3e', '#f57900', '#ce5c00', '#2e3436', '#e9b96e', '#c17d11', '#8f5902', '#555753', '#8ae234', '#73d216', '#4e9a06', '#888a8f', '#729fcf', '#3465a4', '#204a87', '#babdb6', '#ad7fa8', '#75507b', '#5c3566', '#d3d7cf', '#cf72c3', '#a33496', '#87207a', '#eeeeec', '#ef2929', '#cc0000', '#a40000', '#ffffff'];
+
+
 
 function shuffle(array) {
   array.sort(() => Math.random() - 0.5);
@@ -68,27 +72,55 @@ const labelShape = new THREE.Shape();
     labelShape.lineTo(-14,-8);
     
 const labelGeometry = new THREE.ShapeBufferGeometry( labelShape );
+
+function rgbToYIQ({ r, g, b }){
+    return ((r * 299) + (g * 587) + (b * 114)) / 1000;
+}
+
+function contrast(colorHex){
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(colorHex);
+
+        const r = parseInt(result[1], 16)
+        const g = parseInt(result[2], 16)
+        const b = parseInt(result[3], 16)
     
-const SrChannelRow = ({ mouseRef, i, text, id, rowRef, lineRef, rowswapRef /*, rowsPanelPlaneWidth*/ })=>{
+    const color = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+    
+    return color >= 128 ? '#000' : '#fff';
+}
+
+    
+const SrChannelRow = ({ mouseRef, i, text, id, rowRef, lineRef, rowActRef /*, rowsPanelPlaneWidth*/ })=>{
     console.log('SrChannelRow:', id);
+    const [ popUp, setPopUp ] = useState(false);
     const positionY = rowHeight * i;
     const { size } = useThree();
     
+    const rowColor = new THREE.Color(colors[i]);
+    
+    const textColor = contrast(colors[i]);
+    
     const down = useCallback((e) => {
-        rowswapRef.current.index = i;
-        rowswapRef.current.down = true;
+        rowActRef.current.index = i;
+        rowActRef.current.down = true;
         e.stopPropagation();
         e.target.setPointerCapture(e.pointerId);
     }, []);
 
     const up = useCallback((e) => {
-        rowswapRef.current.down = false;
+        
+        if (!rowActRef.current.moved)
+            setPopUp(true);
+        
+        rowActRef.current.moved = false;
+        rowActRef.current.down = false;
         e.stopPropagation();
         e.target.releasePointerCapture(e.pointerId);
     }, []);
     
     const move = useCallback((event) => {
-        if (rowswapRef.current.down) {
+        if (rowActRef.current.down) {
+            rowActRef.current.moved = true;
             event.stopPropagation();
             mouseRef.current.dy += event.movementY;
         }
@@ -99,39 +131,37 @@ const SrChannelRow = ({ mouseRef, i, text, id, rowRef, lineRef, rowswapRef /*, r
     }, []);
     
     const out = useCallback(()=>{
-        rowRef.current.children[0].children[1].material.color.set('blue');
+        rowRef.current.children[0].children[1].material.color.set(rowColor);
     }, []);
+    
+    
     
     return(
         <group ref={rowRef} position={[0, positionY, 0]}>
             <group position={[-size.width/2+35, 0, 2]}>
                 <mesh position={[-3, 0, 0]}>
-                    <Text fontSize={12} >{text}</Text>
+                    <Text fontSize={12} color={textColor}>{text}</Text>
                 </mesh>
                 <mesh geometry={labelGeometry} onPointerUp={up} onPointerDown={down} onPointerMove={move} onPointerOut={out} onPointerOver={over} >
-                    <meshBasicMaterial attach="material" color={'blue'/*colors[i]*/} />
+                    <meshStandardMaterial color={rowColor} />
                 </mesh>
+                
+                <SrChannelPopUp open={popUp} setOpen={setPopUp} />
+
             </group>
             <mesh  scale={[1, 50, 1]}>
                 <planeBufferGeometry attach="geometry" args={[size.width , 1]}/>
-                <meshBasicMaterial attach="material" transparent opacity={0.2}  color={colors[i]} />
+                <meshBasicMaterial attach="material" transparent opacity={0.2}  color={rowColor} />
             </mesh>
         </group>
     )
 }
 
-/*
-const fn = (order, down, originalIndex, curIndex, y) => index =>
-    down && index === originalIndex
-        ? { y: curIndex * 100 + y }
-        : { y: order.indexOf(index) * 100 }
-*/
-
 const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef, virtualCam})=>{
     console.log('Render SrRowsPannel');
     const { size, scene, camera, gl } = useThree();
     const barPos = [ (rowsPanelPlaneWidth-size.width)/2, 0, 2];
-    const rowswapRef = useRef({ index: null, down: false});
+    const rowActRef = useRef({ index: null, down: false, moved:false});
     
     const virtualScene = useMemo(() => new THREE.Scene(), []);
     
@@ -156,7 +186,7 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mo
                 id={item.name}
                 rowRef={item.rowRef}
                 lineRef={item.lineRef}
-                rowswapRef={rowswapRef}
+                rowActRef={rowActRef}
                 rowsPanelPlaneWidth={rowsPanelPlaneWidth}
                 mouseRef={mouseRef}
             />);
@@ -177,8 +207,8 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mo
     
     let prevRow = null;
     useFrame(()=>{
-        if (rowswapRef.current.down && rowswapRef.current.index !== null && mouseRef.current.dy ){
-            const {lineRef, rowRef} = logic[rowswapRef.current.index];
+        if (rowActRef.current.down && rowActRef.current.index !== null && mouseRef.current.dy ){
+            const {lineRef, rowRef} = logic[rowActRef.current.index];
             lineRef.current.position.y = rowRef.current.position.y -= mouseRef.current.dy;
             lineRef.current.position.y -= 25;
             
@@ -186,11 +216,9 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mo
             
             if( curRow !== prevRow && prevRow !== null){
                 
+                const newOrder = swap(order.current, rowActRef.current.index, curRow);
                 
-                
-                const newOrder = swap(order.current, rowswapRef.current.index, curRow);
-                
-                const ind = order.current.indexOf(rowswapRef.current.index);
+                const ind = order.current.indexOf(rowActRef.current.index);
                 
                 order.current = newOrder;
                 
@@ -201,12 +229,12 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mo
             }
             prevRow = curRow;
         }
-        else if (!rowswapRef.current.down && rowswapRef.current.index !== null){
-            const pos = order.current.indexOf(rowswapRef.current.index) * rowHeight;
-            const { lineRef, rowRef } = logic[rowswapRef.current.index];
+        else if (!rowActRef.current.down && rowActRef.current.index !== null){
+            const pos = order.current.indexOf(rowActRef.current.index) * rowHeight;
+            const { lineRef, rowRef } = logic[rowActRef.current.index];
             rowRef.current.position.y = pos;
             lineRef.current.position.y = pos - 25;
-            rowswapRef.current.index = null;
+            rowActRef.current.index = null;
         }
         
         gl.autoClear = true
@@ -216,10 +244,12 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mo
         gl.render(virtualScene, virtualCam.current)
     });
     
+    const color2 = new THREE.Color( "hsl(0, 0%, 24%)" );
+    
     return(<>
         <mesh position={barPos} >
-            <meshBasicMaterial attach="material" color="#2d3136"/>
             <planeBufferGeometry attach="geometry" args={[rowsPanelPlaneWidth, size.height]}/>
+            <meshStandardMaterial color="#3c3c3c" roughness={0.75} metalness={0.3} />
         </mesh>
         <group ref={rowsGroupRef}>
             { channelsRows }

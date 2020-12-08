@@ -9,6 +9,7 @@ import { SessionsMenu } from '../containers/SessionsMenu';
 
 export const SrMenuPanel = memo(({toggleDecoderMenu, toggleTabularMenu, session, sessions, logic}) =>{
     console.log('Render SrMenuPanel');
+    
     return(
         <ScSrMenuPanel>
             { (session)?
@@ -17,14 +18,14 @@ export const SrMenuPanel = memo(({toggleDecoderMenu, toggleTabularMenu, session,
             }
             
             { <SrFileMenu /> }
+            
             { (session)?
                 <DeviceMenu session={session} />
                 : null
             }
             
-            
-            { (session && session.samplerates)?
-                <Samplerates samplerates={session.samplerates} samplerate={session.samplerate} />
+            { (session && session.samplerates) ?
+                <Samplerates />
                 : null
             }
             
