@@ -22,7 +22,10 @@ const SrChannelsMenuContent=({logic, analog})=>{
                     name='hg'
                     type="number"
                     defaultValue={item.rowRef.current.children[1].scale.y}
-                    onChange={(e)=>{item.rowRef.current.children[1].scale.y = item.lineRef.current.scale.y = e.target.value;}}
+                    onChange={(e)=>{
+                        item.lineRef.current.position.y = -e.target.value/2;
+                        item.rowRef.current.children[1].scale.y = item.lineRef.current.scale.y = e.target.value;
+                    }}
                     css={`width:30px`}
                 />
                 

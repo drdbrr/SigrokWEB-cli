@@ -48,7 +48,7 @@ const SrLine = ({i, lineRef}) => {
     */
     
     return (
-        <mesh position={[0, positionY - 25, 0]} scale-x={1} scale-y={50} ref={lineRef}>
+        <mesh position={[0, positionY, 0]}  scale-y={1} ref={lineRef}>
             <line>
                 <bufferGeometry attach="geometry" >
                     <bufferAttribute
@@ -149,7 +149,7 @@ const SrChannelRow = ({ mouseRef, i, text, id, rowRef, lineRef, rowActRef /*, ro
                 <SrChannelPopUp open={popUp} setOpen={setPopUp} />
 
             </group>
-            <mesh  scale={[1, 50, 1]}>
+            <mesh  scale-y={1}>
                 <planeBufferGeometry attach="geometry" args={[size.width , 1]}/>
                 <meshBasicMaterial attach="material" transparent opacity={0.2}  color={rowColor} />
             </mesh>
