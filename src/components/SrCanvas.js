@@ -104,6 +104,8 @@ const Layout = ({analog, logic, ws}) =>{
     
     const prevRef = useRef([0, 0]);
     
+    //const testRef =useRef();
+    
     useFrame(()=>{
         mouseRef.current.dx = mouseRef.current.cursor - prevRef.current[0];
         mouseRef.current.dy = mouseRef.current.cursorY - prevRef.current[1];
@@ -119,6 +121,19 @@ const Layout = ({analog, logic, ws}) =>{
         
         if (mouseRef.current.rmb){
             mouseRef.current.cursor -= event.movementX;
+            
+            /*
+            const arr = [
+                30,-60,0,
+                30,60,0,
+                event.clientX,-60,0,
+                event.clientX,60,0
+            ];
+            const geom = new Float32Array(arr);
+        
+            testRef.current.geometry.attributes.position.array = geom;
+            testRef.current.geometry.attributes.position.needsUpdate = true
+            */
             
             //(event.movementX > 0 /*&& event.movementX !== 0*/) ? mouseRef.current.deltaX++ : mouseRef.current.deltaX--;
             //mouseRef.current.deltaX += event.movementX;
@@ -158,7 +173,12 @@ const Layout = ({analog, logic, ws}) =>{
     const mainPlaneGeo = [mainPlaneWidth, mainPlaneHeight];
     
     return(<>
-    
+        {/*
+        <mesh position={[0,0,0]} ref={testRef}>
+            <meshBasicMaterial attach="material" color="white"/>
+            <planeBufferGeometry attach="geometry" args={[300,300]}/>
+        </mesh>
+        */}
         <SrTimeLine cursorRef={cursorRef} mouseRef={mouseRef} timeLinePlaneWidth={size.width - rowsPanelPlaneWidth} timeLinePlaneHeight={timeLinePlaneHeight} />
         <mesh
             position={mainPlanePos}

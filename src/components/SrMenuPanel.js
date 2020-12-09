@@ -34,7 +34,7 @@ export const SrMenuPanel = memo(({toggleDecoderMenu, toggleTabularMenu, session,
                 : null
             }
             
-            { (session && (logic))?
+            { (session && session.samplerates)?
                 <SrChannelsMenu logic={logic} analog={session.analog} />
                 : null
             }
