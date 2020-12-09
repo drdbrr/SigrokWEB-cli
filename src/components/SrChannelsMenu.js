@@ -10,7 +10,6 @@ const SrChannelsMenuContent=({logic, analog})=>{
     console.log('Render SrChannelsMenuContent');
     const [ colorOpen, setColorOpen ] = useState(false);
     const [ color, setColor ] = useState('#F17013');
-    //tt    
     const logicChannels = logic.map((item, i)=>{
         return(
             <div key={i} css={`border:1px solid black; display:flex; flex-direction:row; align-items:center; height:30px`} >
@@ -23,8 +22,8 @@ const SrChannelsMenuContent=({logic, analog})=>{
                     type="number"
                     defaultValue={item.rowRef.current.children[1].scale.y}
                     onChange={(e)=>{
-                        item.lineRef.current.position.y = -e.target.value/2;
                         item.rowRef.current.children[1].scale.y = item.lineRef.current.scale.y = e.target.value;
+                        item.lineRef.current.position.y = item.rowRef.current.position.y - e.target.value/2;
                     }}
                     css={`width:30px`}
                 />

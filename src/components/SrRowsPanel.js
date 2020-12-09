@@ -5,6 +5,8 @@ import { Text, Html } from '@react-three/drei';
 
 import SrChannelPopUp from './SrChannelPopUp';
 
+//import srShaderMaterial from './srShaderMaterial';
+
 //added 04/11/2020
 import clamp from 'lodash-es/clamp';
 
@@ -15,8 +17,6 @@ import swap from 'lodash-move';
 
 //////////////////////////////////////////////
 const colorsArray = ['#fce94f', '#edd400', '#c4a000', '#16191a', '#fcaf3e', '#f57900', '#ce5c00', '#2e3436', '#e9b96e', '#c17d11', '#8f5902', '#555753', '#8ae234', '#73d216', '#4e9a06', '#888a8f', '#729fcf', '#3465a4', '#204a87', '#babdb6', '#ad7fa8', '#75507b', '#5c3566', '#d3d7cf', '#cf72c3', '#a33496', '#87207a', '#eeeeec', '#ef2929', '#cc0000', '#a40000', '#ffffff'];
-
-
 
 function shuffle(array) {
   array.sort(() => Math.random() - 0.5);
@@ -48,7 +48,7 @@ const SrLine = ({i, lineRef}) => {
     */
     
     return (
-        <mesh position={[0, positionY, 0]}  scale-y={1} ref={lineRef}>
+        <mesh position={[0, positionY-17, 0]}  scale-y={34} ref={lineRef}>
             <line>
                 <bufferGeometry attach="geometry" >
                     <bufferAttribute
@@ -122,7 +122,10 @@ const SrChannelRow = ({ mouseRef, i, text, id, rowRef, lineRef, rowActRef /*, ro
         if (rowActRef.current.down) {
             rowActRef.current.moved = true;
             event.stopPropagation();
-            mouseRef.current.dy += event.movementY;
+            //mouseRef.current.dy += event.movementY;
+            
+            lineRef.current.position.y = rowRef.current.position.y -= event.movementY;
+            lineRef.current.position.y -= lineRef.current.scale.y / 2;
         }
     }, []);
     
@@ -140,7 +143,7 @@ const SrChannelRow = ({ mouseRef, i, text, id, rowRef, lineRef, rowActRef /*, ro
         <group ref={rowRef} position={[0, positionY, 0]}>
             <group position={[-size.width/2+35, 0, 2]}>
                 <mesh position={[-3, 0, 0]}>
-                    <Text fontSize={12} color={textColor}>{text}</Text>
+                    <Text fontSize={12} color={'black'/*textColor*/}>{text}</Text>
                 </mesh>
                 <mesh geometry={labelGeometry} onPointerUp={up} onPointerDown={down} onPointerMove={move} onPointerOut={out} onPointerOver={over} >
                     <meshStandardMaterial color={rowColor} />
@@ -149,7 +152,7 @@ const SrChannelRow = ({ mouseRef, i, text, id, rowRef, lineRef, rowActRef /*, ro
                 <SrChannelPopUp open={popUp} setOpen={setPopUp} />
 
             </group>
-            <mesh  scale-y={1}>
+            <mesh  scale-y={34}>
                 <planeBufferGeometry attach="geometry" args={[size.width , 1]}/>
                 <meshBasicMaterial attach="material" transparent opacity={0.2}  color={rowColor} />
             </mesh>
@@ -207,6 +210,7 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mo
     
     let prevRow = null;
     useFrame(()=>{
+        /*
         if (rowActRef.current.down && rowActRef.current.index !== null && mouseRef.current.dy ){
             const {lineRef, rowRef} = logic[rowActRef.current.index];
             lineRef.current.position.y = rowRef.current.position.y -= mouseRef.current.dy;
@@ -236,6 +240,7 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mo
             lineRef.current.position.y = pos - 25;
             rowActRef.current.index = null;
         }
+        */
         
         gl.autoClear = true
         gl.render(scene, camera)
