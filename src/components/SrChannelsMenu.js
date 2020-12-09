@@ -10,7 +10,7 @@ const SrChannelsMenuContent=({logic, analog})=>{
     console.log('Render SrChannelsMenuContent');
     const [ colorOpen, setColorOpen ] = useState(false);
     const [ color, setColor ] = useState('#F17013');
-    
+    //tt    
     const logicChannels = logic.map((item, i)=>{
         return(
             <div key={i} css={`border:1px solid black; display:flex; flex-direction:row; align-items:center; height:30px`} >
