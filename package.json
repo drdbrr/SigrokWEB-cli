@@ -4,7 +4,6 @@
     "dependencies": {
         "@apollo/client": "^3.2.7",
         "@react-three/drei": "^2.2.7",
-        "babel-plugin-glsl": "^1.0.0",
         "graphql": "^15.4.0",
         "grommet-icons": "^4.5.0",
         "lodash-es": "^4.17.15",

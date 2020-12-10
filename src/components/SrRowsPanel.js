@@ -5,8 +5,6 @@ import { Text, Html } from '@react-three/drei';
 
 import SrChannelPopUp from './SrChannelPopUp';
 
-//import srShaderMaterial from './srShaderMaterial';
-
 //added 04/11/2020
 import clamp from 'lodash-es/clamp';
 
@@ -27,18 +25,36 @@ const colors = shuffle(colorsArray);
 
 const rowHeight = 50;
 
+const vertexShader =`
+    attribute vec3 customColor;
+    varying vec3 vColor;
+    void main() {
+        vColor = customColor;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+    }
+`;
+
+const fragmentShader = `
+    uniform vec3 color;
+
+    varying vec3 vColor;
+    void main() {
+        gl_FragColor = vec4( color * vColor, 1.0 );
+    }
+`;
+
 const SrLine = ({i, lineRef}) => {
     console.log("SR Line:", i);
     const positionY = i * rowHeight;
-    const data = [];
+    const lineArray = [];
     for (let i = 0; i < 3000; i++){
         const val = Math.round(Math.random());
-        data.push(i, val, 0, i + 1, val, 0)
+        lineArray.push(i, val, 0, i + 1, val, 0)
     }
     
-    const arLen = 300000;
+    //const arLen = 300000;
     
-    const lineData = new Float32Array(data);//arLen);
+    const lineData = new Float32Array(lineArray);//arLen);
     
     /*
     lineData.set(new Float32Array([0, 0, 0, (arLen / 3) * 50, 0, 0]), 0);
@@ -46,6 +62,28 @@ const SrLine = ({i, lineRef}) => {
         lineRef.current.children[0].geometry.setDrawRange(0, 0);
     });
     */
+    
+    const args = useMemo(() => {
+        return({
+            uniforms:{
+                color: { value: new THREE.Color( 0xffffff ) }
+            },
+            vertexShader,
+            fragmentShader,
+            blending: THREE.AdditiveBlending,
+            depthTest: false,
+            transparent: true
+        })
+    },[]);
+    
+    const color = new THREE.Color( 0xffffff );
+    
+    const colorArray = [];
+    for ( let i = 0, l = 6000; i < l; i ++ ) {
+        color.setHSL( i / l, 0.5, 0.5 );
+        color.toArray( colorArray, i * 3 );
+    }
+    const customColor = new Float32Array(colorArray);
     
     return (
         <mesh position={[0, positionY-17, 0]}  scale-y={34} ref={lineRef}>
@@ -57,8 +95,14 @@ const SrLine = ({i, lineRef}) => {
                         array={lineData}
                         itemSize={3}
                     />
+                    <bufferAttribute
+                        attachObject={['attributes', 'customColor']}
+                        count={customColor.length / 3}
+                        array={customColor} 
+                        itemSize={3}
+                    />
                 </bufferGeometry>
-                <lineBasicMaterial attach="material" color="red"/>
+                <shaderMaterial attach="material" args={[args]} />
             </line>
         </mesh>
     )

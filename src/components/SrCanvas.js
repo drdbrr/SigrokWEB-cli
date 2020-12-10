@@ -1,6 +1,6 @@
 import React, { memo, useRef, useCallback, useMemo, useEffect, useState } from 'react';
 import * as THREE from 'three';
-import { Canvas, useThree, useFrame } from 'react-three-fiber';
+import { Canvas, useThree, useFrame, extend } from 'react-three-fiber';
 import SrTimeLine from './SrTimeLine';
 import SrRowsPanel from './SrRowsPanel';
 import SrZeroLine from './SrZeroLine';
@@ -13,27 +13,34 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
 
-function Effect() {
-    const { gl, scene, camera, size } = useThree()
-    const final = useMemo(() => {
-        const renderScene = new RenderPass(scene, camera)
-        const finalComposer = new EffectComposer(gl)
-        finalComposer.addPass(renderScene)
-        const fxaa = new ShaderPass(FXAAShader)
-        fxaa.material.uniforms['resolution'].value.x = 1 / size.width
-        fxaa.material.uniforms['resolution'].value.y = 1 / size.height
-        finalComposer.addPass(fxaa)
-        return finalComposer
-    }, [gl, scene, camera, size.width, size.height])
+extend({ EffectComposer, RenderPass, ShaderPass })
 
-    useEffect(() => {
-        final.setSize(size.width, size.height)
-    }, [final, size]);
-    
-    useFrame(() => {
-        final.render()
-    }, 10)
-    return null
+function Effect() {
+  const { gl, scene, camera, size } = useThree()
+  const composer = useRef()
+
+  useEffect(() => {
+    composer.current.setSize(size.width, size.height)
+  }, [size])
+
+  useFrame(() => {
+    camera.layers.set(0)
+    composer.current.render()
+  }, 1)
+
+  return (
+    <>
+      <effectComposer ref={composer} args={[gl]}>
+        <renderPass attachArray="passes" args={[scene, camera]} />
+        <shaderPass
+          attachArray="passes"
+          args={[FXAAShader]}
+          material-uniforms-resolution-value={[1 / size.width, 1 / size.height]}
+          renderToScreen
+        />
+      </effectComposer>
+    </>
+  )
 }
 */
 
