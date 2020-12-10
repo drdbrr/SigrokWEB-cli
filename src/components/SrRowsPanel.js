@@ -28,18 +28,28 @@ const rowHeight = 50;
 const vertexShader =`
     attribute vec3 customColor;
     varying vec3 vColor;
+    varying vec3 pos;
     void main() {
         vColor = customColor;
+        pos = position;
         gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
     }
 `;
 
 const fragmentShader = `
     uniform vec3 color;
-
     varying vec3 vColor;
+    varying vec3 pos;
+    vec4 clr = vec4(0.0, 0.0, 0.0, 1.0);
     void main() {
-        gl_FragColor = vec4( color * vColor, 1.0 );
+        if(pos.y == 1.0){
+            vec3 green = vec3(0.0, pos.y, 0.0);
+            clr = vec4(color * green, 1.0);
+        }else if(pos.y == 0.0){
+            vec3 red = vec3(1.0, 0.0, 0.0);
+            clr = vec4(color * red, 1.0);
+        }
+        gl_FragColor = clr;
     }
 `;
 
@@ -70,9 +80,9 @@ const SrLine = ({i, lineRef}) => {
             },
             vertexShader,
             fragmentShader,
-            blending: THREE.AdditiveBlending,
-            depthTest: false,
-            transparent: true
+            //blending: THREE.AdditiveBlending,
+            //depthTest: false,
+            //transparent: true
         })
     },[]);
     
