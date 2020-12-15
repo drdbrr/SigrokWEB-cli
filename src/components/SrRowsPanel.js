@@ -10,15 +10,8 @@ import SrChannelPopUp from './SrChannelPopUp';
 import clamp from 'lodash-es/clamp';
 import swap from 'lodash-move';
 
-//////////////////////////////////////////////
-const colorsArray = ['#fce94f', '#edd400', '#c4a000', '#16191a', '#fcaf3e', '#f57900', '#ce5c00', '#2e3436', '#e9b96e', '#c17d11', '#8f5902', '#555753', '#8ae234', '#73d216', '#4e9a06', '#888a8f', '#729fcf', '#3465a4', '#204a87', '#babdb6', '#ad7fa8', '#75507b', '#5c3566', '#d3d7cf', '#cf72c3', '#a33496', '#87207a', '#eeeeec', '#ef2929', '#cc0000', '#a40000', '#ffffff'];
-
-function shuffle(array) {
-  array.sort(() => Math.random() - 0.5);
-  return array
-}
-const colors = shuffle(colorsArray);
-//////////////////////////////////////////////
+import { channelsVar } from '../ApolloClient';
+import { useReactiveVar } from '@apollo/client';
 
 const rowHeight = 50;
 
@@ -101,33 +94,12 @@ const labelShape = new THREE.Shape();
     labelShape.lineTo(-14,-8);
     
 const labelGeometry = new THREE.ShapeBufferGeometry( labelShape );
-
-function rgbToYIQ({ r, g, b }){
-    return ((r * 299) + (g * 587) + (b * 114)) / 1000;
-}
-
-function contrast(colorHex){
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(colorHex);
-
-        const r = parseInt(result[1], 16)
-        const g = parseInt(result[2], 16)
-        const b = parseInt(result[3], 16)
     
-    const color = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-    
-    return color >= 128 ? '#000' : '#fff';
-}
-
-    
-const SrChannelRow = ({ mouseRef, i, text, id, rowRef, lineRef, rowActRef /*, rowsPanelPlaneWidth*/ })=>{
+const SrChannelRow = ({ rowColor, mouseRef, i, text, id, rowRef, lineRef, rowActRef /*, rowsPanelPlaneWidth*/ })=>{
     console.log('SrChannelRow:', id);
     const [ popUp, setPopUp ] = useState(false);
     const positionY = rowHeight * i;
     const { size } = useThree();
-    
-    const rowColor = new THREE.Color(colors[i]);
-    
-    const textColor = contrast(colors[i]);
     
     const down = useCallback((e) => {
         rowActRef.current.index = i;
@@ -201,9 +173,7 @@ const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth
     
     const virtualScene = useMemo(() => new THREE.Scene(), []);
     
-    const logic = []//useReactiveVar(testVar);
-    
-    //const logic = [];//testVar();
+    const { logic } = useReactiveVar(channelsVar);
     
     useEffect(() => {
         virtualCam.current.position.z = 200;
@@ -229,6 +199,7 @@ const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth
                 rowActRef={rowActRef}
                 rowsPanelPlaneWidth={rowsPanelPlaneWidth}
                 mouseRef={mouseRef}
+                rowColor={item.color}
             />);
             
             lines.push(
@@ -240,10 +211,11 @@ const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth
             />);
         });
         return [rows, lines]
-    }, []);
+    }, [logic]);
     
     const order = useRef([]);
-    useMemo(()=>logic.map((_, index) =>order.current.push(index)), [logic]);
+    
+    //useMemo(()=>logic.map((_, index) =>order.current.push(index)), [logic]);
     
     let prevRow = null;
     useFrame(()=>{

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScSrMenuPanel } from '../styled/ScSrMenuPanel';
 import SrFileMenu from './SrFileMenu';
-import { SrChannelsMenu } from './SrChannelsMenu';
+import { ChannelsMenu } from '../containers/ChannelsMenu';
 import { DeviceMenu } from '../containers/DeviceMenu';
 import { Samplerates } from '../containers/Samplerates';
 import { Samples } from '../containers/Samples';
@@ -26,7 +26,7 @@ export const SrMenuPanel = ({toggleDecoderMenu, toggleTabularMenu, session, logi
             }
             
             { (session.channels && (session.channels.includes('LOGIC') || session.channels.includes('ANALOG')) )?
-                <SrChannelsMenu />
+                <ChannelsMenu />
                 : null
             }
             

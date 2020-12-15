@@ -2,6 +2,7 @@ import { ApolloClient, HttpLink, InMemoryCache, makeVar/*, ApolloLink*/, ApolloL
 
 export const selectedSessionVar = makeVar('');
 export const sessionVar = makeVar({});
+export const channelsVar = makeVar({logic:[], analog:[]});
 
 const cache = new InMemoryCache();
 

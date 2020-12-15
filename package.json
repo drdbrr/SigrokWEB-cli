@@ -9,7 +9,6 @@
         "lodash-es": "^4.17.15",
         "lodash-move": "^1.1.1",
         "react": "^17.0.1",
-        "react-color": "^2.19.3",
         "react-dom": "^17.0.1",
         "react-helmet": "^6.1.0",
         "react-three-fiber": "^5.3.3",
