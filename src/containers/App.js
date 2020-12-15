@@ -1,16 +1,19 @@
 import React, { useEffect, useRef, useMemo, createRef } from 'react';
-//import { useQuery } from '@apollo/client';
-//import { createGlobalStyle, ThemeProvider } from 'styled-components';
-import { lightTheme, darkTheme, blueTheme, redTheme } from '../styled/Themes';
 import { SrApp } from '../components/SrApp';
-
-import { selectedSessionVar, testVar } from '../ApolloClient';
-import { useReactiveVar, useQuery } from '@apollo/client';
+import { selectedSessionVar, sessionVar } from '../ApolloClient';
+import { useReactiveVar, useQuery, useLazyQuery } from '@apollo/client';
 import { GET_SESSION } from '../operations/queries/getSession';
 
 export const App =()=>{
     const id = useReactiveVar(selectedSessionVar);
-    const {data: { session } = {}} = useQuery(GET_SESSION, { variables:{id: id}, skip: (!id) });
+    
+    const [loadGreeting, { called, loading, data }] = useLazyQuery(GET_SESSION, { variables:{id: id}, skip: (!id), onCompleted:(session)=>console.log('OOONMNNNGNGNGNNGDDSS') });
+    
+    const {data: { session } = {}} = useQuery(GET_SESSION, { variables:{id: id}, skip: (!id), onCompleted:(session)=>{
+        sessionVar(session);
+        loadGreeting()
+    }
+    });
     
     /*
     const [ analog, logic ] = useMemo(()=>{

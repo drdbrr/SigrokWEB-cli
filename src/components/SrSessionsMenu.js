@@ -4,9 +4,7 @@ import { ScSrDropDownContent } from '../styled/ScSrDropDownContent';
 import { ScSrDropDownItem } from '../styled/ScSrDropDownItem';
 import SrDropDownMenu from './SrDropDownMenu';
 
-//import { selectedSessionVar } from '../ApolloClient';
-
-const SrSessionsMenuContent = ({session, sessions, toggle, createSession, selectSession, deleteSession})=>{
+const SrSessionsMenuContent = ({id, sessions, toggle, createSession, selectSession, deleteSession})=>{
     console.log('Render SrSessionsMenuContent');
     const newSession = () =>{
         createSession();
@@ -17,7 +15,7 @@ const SrSessionsMenuContent = ({session, sessions, toggle, createSession, select
         <ScSrDropDownContent>
             <div>
             { sessions.map((item)=>
-                <ScSrDropDownItem key={item.id} isSelected={(session.id === item.id)} >
+                <ScSrDropDownItem key={item.id} isSelected={(id === item.id)} >
                     <span onClick={()=>{selectSession(item.id);toggle()}}  >{item.name}</span>
                     <FormClose size='small' color='white' onClick={()=>deleteSession(item.id)} />
                 </ScSrDropDownItem>
@@ -33,7 +31,7 @@ const SrSessionsMenuContent = ({session, sessions, toggle, createSession, select
 const SrSessionsMenu = (props) =>{
     const icon = <Menu size='small' color='white' />;
     return(
-        <SrDropDownMenu label={ props.session.name } icon={icon} >
+        <SrDropDownMenu label={ props.name } icon={icon} >
             <SrSessionsMenuContent { ...props }/>
         </SrDropDownMenu>
     )

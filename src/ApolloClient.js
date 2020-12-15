@@ -1,7 +1,7 @@
 import { ApolloClient, HttpLink, InMemoryCache, makeVar/*, ApolloLink*/, ApolloLink, Observable } from '@apollo/client';
 
 export const selectedSessionVar = makeVar('');
-export const testVar = makeVar({});
+export const sessionVar = makeVar({});
 
 const cache = new InMemoryCache();
 

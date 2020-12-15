@@ -6,9 +6,6 @@ import Roboto from '../fonts/Roboto.woff';
 
 import SrChannelPopUp from './SrChannelPopUp';
 
-import { testVar } from '../ApolloClient';
-import { useReactiveVar } from '@apollo/client';
-
 //added 04/11/2020
 import clamp from 'lodash-es/clamp';
 import swap from 'lodash-move';
@@ -243,7 +240,7 @@ const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth
             />);
         });
         return [rows, lines]
-    }, [testVar()]);
+    }, []);
     
     const order = useRef([]);
     useMemo(()=>logic.map((_, index) =>order.current.push(index)), [logic]);

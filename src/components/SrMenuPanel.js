@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+import React from 'react';
 import { ScSrMenuPanel } from '../styled/ScSrMenuPanel';
 import SrFileMenu from './SrFileMenu';
 import { SrChannelsMenu } from './SrChannelsMenu';
@@ -7,20 +7,13 @@ import { Samplerates } from '../containers/Samplerates';
 import { Samples } from '../containers/Samples';
 import { SessionsMenu } from '../containers/SessionsMenu';
 
-import { useReactiveVar } from '@apollo/client';
-import { testVar } from '../ApolloClient';
-
 export const SrMenuPanel = ({toggleDecoderMenu, toggleTabularMenu, session, logic}) =>{
     console.log('Render SrMenuPanel');
-    
-    
-    //const session = testVar();
-    
     return(
         <ScSrMenuPanel>
-            <SessionsMenu session={session} />
+            <SessionsMenu name={session.name} />
             <SrFileMenu />
-            <DeviceMenu session={session} />
+            <DeviceMenu label={session.sourcename}/>
             
             { (session.config && session.config.includes('SAMPLERATE')) ?
                 <Samplerates />
