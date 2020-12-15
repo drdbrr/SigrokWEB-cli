@@ -6,16 +6,8 @@ export const GET_SESSION = gql`
             id
             name
             sourcename
-            samplerates
-            samplerate
-            sample
-            samples
-            logic {
-                name
-            }
-            analog {
-                name
-            }
+            config
+            channels
         }
     }
-`; 
+`;

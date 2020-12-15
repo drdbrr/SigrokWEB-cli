@@ -1,6 +1,28 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Html } from '@react-three/drei';
 
+const SrLogicPopUp = () =>{
+    //Height, color, text
+    return(
+        <div css={`padding:10px; padding-top:5px; display:flex; flex-direction:column; background-color:#363636; border:1px solid black; border-radius:4px`}>
+            <div css={`width: max-content`} >
+                <span css={`color:white; padding-right: 10px; position:relative; float:left`}>Name</span>
+                <input  css={`height:13px; position:relative; float:left; width:50px`} type="text" list="cars" />
+                <datalist id="cars">
+                    <option>Volvo</option>
+                    <option>Saab</option>
+                    <option>Mercedes</option>
+                    <option>Audi</option>
+                </datalist>
+            </div>
+            <div css={`width: max-content;`} >
+                <span css={`color:white; padding-right: 10px; position:relative; float:left`}>Color</span>
+                <input css={`height:13px; width:50px`} type="text" name="myText" value="Norway" selectBoxOptions="Canada;Denmark;Finland;Germany;Mexico"/>
+            </div>
+        </div>
+    )
+}
+
 const SrChannelPopUp = ({open, setOpen}) =>{
     console.log('Render SrChannelPopUp');
     const toggle = () =>setOpen(!open);
@@ -21,26 +43,10 @@ const SrChannelPopUp = ({open, setOpen}) =>{
     
     const content =
         <Html position-x={17} position-y={20} ref={node}>
-        <div css={`padding-left:10px; padding-top:5px; display:flex; flex-direction:column; background-color:#363636; border:1px solid black; border-radius:4px`}>
-            <div css={`width: max-content`} >
-                <span css={`color:white; padding-right: 10px; position:relative; float:left`}>Name</span>
-                <input  css={`height:20px; position:relative; float:left; width:50px`} type="text" list="cars" />
-                <datalist id="cars">
-                    <option>Volvo</option>
-                    <option>Saab</option>
-                    <option>Mercedes</option>
-                    <option>Audi</option>
-                </datalist>
-            </div>
-    
-    <div css={`width: max-content;`} >
-    <span css={`color:white; padding-right: 10px; position:relative; float:left`}>Color</span>
-<input css={`height:20px; width:50px`} type="text" name="myText" value="Norway" selectBoxOptions="Canada;Denmark;Finland;Germany;Mexico"/>
-    </div>
-    </div>
-            </Html>
+            <SrLogicPopUp />
+        </Html>
             
-    return( <>{ open && content }</> )
+    return (<>{ open && content }</>)
 } 
 
 export default SrChannelPopUp

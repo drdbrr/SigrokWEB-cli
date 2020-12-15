@@ -6,7 +6,7 @@ import SrDropDownMenu from './SrDropDownMenu';
 
 //import { selectedSessionVar } from '../ApolloClient';
 
-const SrSessionsMenuContent = ({selectSession, session, toggle, sessions, createSession, deleteSession})=>{
+const SrSessionsMenuContent = ({session, sessions, toggle, createSession, selectSession, deleteSession})=>{
     console.log('Render SrSessionsMenuContent');
     const newSession = () =>{
         createSession();

@@ -2,10 +2,10 @@ import React, { useCallback, useState, memo, useRef } from 'react';
 import { ScSrApp } from '../styled/ScSrApp';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
 import { lightTheme, darkTheme, blueTheme, redTheme } from "../styled/Themes"
-import { MenuPanel } from '../containers/MenuPanel';
 import { SrDecoderMenu } from './SrDecoderMenu';
 import { SrTabularMenu } from './SrTabularMenu';
 import { SrCanvas } from './SrCanvas';
+import { SrMenuPanel } from './SrMenuPanel';
 
 const GlobalStyle = createGlobalStyle`
     body {
@@ -14,7 +14,7 @@ const GlobalStyle = createGlobalStyle`
     }
 `;
 
-export const SrApp = ({ws, analog, logic}) =>{
+export const SrApp = ({ws, analog, logic, session}) =>{
     console.log('Render SrApp');
     const [ decoderMenu, setDecoderMenul ] = useState(false);
     const [ tabularMenu, setTabularMenu ] = useState(false);
@@ -34,7 +34,12 @@ export const SrApp = ({ws, analog, logic}) =>{
         <ThemeProvider theme={blueTheme}>
             <GlobalStyle />
             <ScSrApp>
-                <MenuPanel ws={ws} toggleDecoderMenu={toggleDecoderMenu} toggleTabularMenu={toggleTabularMenu} logic={logic}/>
+                <SrMenuPanel
+                    toggleDecoderMenu={toggleDecoderMenu}
+                    toggleTabularMenu={toggleTabularMenu}
+                    session={session}
+                    ws={ws}
+                />
                 <SrCanvas analog={analog} logic={logic} ws={ws}/>
                 { (decoderMenu) ? <SrDecoderMenu /> : null }
                 { (tabularMenu) ? <SrTabularMenu /> : null }

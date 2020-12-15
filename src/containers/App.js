@@ -4,14 +4,15 @@ import React, { useEffect, useRef, useMemo, createRef } from 'react';
 import { lightTheme, darkTheme, blueTheme, redTheme } from '../styled/Themes';
 import { SrApp } from '../components/SrApp';
 
-import { selectedSessionVar } from '../ApolloClient';
+import { selectedSessionVar, testVar } from '../ApolloClient';
 import { useReactiveVar, useQuery } from '@apollo/client';
 import { GET_SESSION } from '../operations/queries/getSession';
 
 export const App =()=>{
-    const id = useReactiveVar(selectedSessionVar);    
-    const session = useQuery(GET_SESSION, { variables:{id: id}, skip: (!id) });
+    const id = useReactiveVar(selectedSessionVar);
+    const {data: { session } = {}} = useQuery(GET_SESSION, { variables:{id: id}, skip: (!id) });
     
+    /*
     const [ analog, logic ] = useMemo(()=>{
         const analog = [];
         const logic = [];
@@ -22,6 +23,7 @@ export const App =()=>{
         }
         return [ analog, logic ];
     }, [session.data]);
+    */
     
     const ws = useRef(null);
     useEffect(() => {
@@ -54,6 +56,6 @@ export const App =()=>{
     }, []);
     
     return(
-        <SrApp ws={ws} analog={analog} logic={logic}/>
+        <SrApp ws={ws} analog={[]} logic={[]} session={session ? session : {}}/>
     )
 }

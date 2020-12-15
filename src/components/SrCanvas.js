@@ -7,42 +7,8 @@ import SrZeroLine from './SrZeroLine';
 
 import { SrLineOrthoCamera } from './SrLineOrthoCamera';
 
-/*
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
-import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
-
-extend({ EffectComposer, RenderPass, ShaderPass })
-
-function Effect() {
-  const { gl, scene, camera, size } = useThree()
-  const composer = useRef()
-
-  useEffect(() => {
-    composer.current.setSize(size.width, size.height)
-  }, [size])
-
-  useFrame(() => {
-    camera.layers.set(0)
-    composer.current.render()
-  }, 1)
-
-  return (
-    <>
-      <effectComposer ref={composer} args={[gl]}>
-        <renderPass attachArray="passes" args={[scene, camera]} />
-        <shaderPass
-          attachArray="passes"
-          args={[FXAAShader]}
-          material-uniforms-resolution-value={[1 / size.width, 1 / size.height]}
-          renderToScreen
-        />
-      </effectComposer>
-    </>
-  )
-}
-*/
+import { ApolloProvider } from '@apollo/client';
+import { Client } from '../ApolloClient';
 
 const Layout = ({analog, logic, ws}) =>{
     console.log('Render Layout');
@@ -212,7 +178,6 @@ const Layout = ({analog, logic, ws}) =>{
 function Lights() {
   return (
     <group>
-      
       <ambientLight intensity={1} />
       <spotLight
         castShadow
@@ -238,8 +203,9 @@ export const SrCanvas = memo(({analog, logic, ws}) => {
             onContextMenu={rmbCallback}
         >
             <Lights />
-            <Layout analog={analog} logic={logic} ws={ws}/>
-            {/*<Effect />*/}
+            <ApolloProvider client={Client}>
+                <Layout analog={analog} logic={logic} ws={ws}/>
+            </ApolloProvider>
         </Canvas>
     </>)
 })

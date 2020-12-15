@@ -6,7 +6,9 @@ import { ScSrDropDown } from '../styled/ScSrDropDown';
 import { SketchPicker } from 'react-color';
 import SrDropDownMenu from './SrDropDownMenu';
 
-const SrChannelsMenuContent=({logic, analog})=>{
+import LogicChannelMenu from '../containers/LogicChannelsMenu';
+
+export const SrChannelsMenuContent=({logic, analog})=>{
     console.log('Render SrChannelsMenuContent');
     const [ colorOpen, setColorOpen ] = useState(false);
     const [ color, setColor ] = useState('#F17013');
@@ -82,12 +84,10 @@ const clickOutsideConfig = {
 export default onClickOutside(SrChannelsMenu, clickOutsideConfig);
 */
 
-const SrChannelsMenu = (props) =>{
+export const SrChannelsMenu = (props) =>{
     return(
         <SrDropDownMenu label='Channels' >
-            <SrChannelsMenuContent { ...props }/>
+            <LogicChannelMenu { ...props }/>
         </SrDropDownMenu>
     )
 }
-
-export default SrChannelsMenu

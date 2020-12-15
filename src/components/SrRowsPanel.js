@@ -2,16 +2,16 @@ import * as THREE from 'three';
 import React, { useRef, useMemo, memo, useEffect, useState, useCallback } from 'react';
 import { useThree, useFrame, createPortal } from 'react-three-fiber';
 import { Text, Html } from '@react-three/drei';
+import Roboto from '../fonts/Roboto.woff';
 
 import SrChannelPopUp from './SrChannelPopUp';
 
+import { testVar } from '../ApolloClient';
+import { useReactiveVar } from '@apollo/client';
+
 //added 04/11/2020
 import clamp from 'lodash-es/clamp';
-
-//import  difference from 'lodash-es/difference';
 import swap from 'lodash-move';
-//import { useGesture } from 'react-with-gesture';
-//import { useSprings, animated, interpolate, a } from 'react-spring';
 
 //////////////////////////////////////////////
 const colorsArray = ['#fce94f', '#edd400', '#c4a000', '#16191a', '#fcaf3e', '#f57900', '#ce5c00', '#2e3436', '#e9b96e', '#c17d11', '#8f5902', '#555753', '#8ae234', '#73d216', '#4e9a06', '#888a8f', '#729fcf', '#3465a4', '#204a87', '#babdb6', '#ad7fa8', '#75507b', '#5c3566', '#d3d7cf', '#cf72c3', '#a33496', '#87207a', '#eeeeec', '#ef2929', '#cc0000', '#a40000', '#ffffff'];
@@ -26,28 +26,21 @@ const colors = shuffle(colorsArray);
 const rowHeight = 50;
 
 const vertexShader =`
-    attribute vec3 customColor;
-    varying vec3 vColor;
-    varying vec3 pos;
+    out vec3 pos;
     void main() {
-        vColor = customColor;
         pos = position;
         gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
     }
 `;
 
 const fragmentShader = `
-    uniform vec3 color;
-    varying vec3 vColor;
-    varying vec3 pos;
-    vec4 clr = vec4(0.0, 0.0, 0.0, 1.0);
+    in vec3 pos;
+    vec4 clr = vec4(0.0, 0.0, 0.0, 1.0);    
     void main() {
         if(pos.y == 1.0){
-            vec3 green = vec3(0.0, pos.y, 0.0);
-            clr = vec4(color * green, 1.0);
+            clr = vec4(0.0, 1.0, 0.0, 1.0);
         }else if(pos.y == 0.0){
-            vec3 red = vec3(1.0, 0.0, 0.0);
-            clr = vec4(color * red, 1.0);
+            clr = vec4(1.0, 0.0, 0.0, 1.0);
         }
         gl_FragColor = clr;
     }
@@ -76,7 +69,7 @@ const SrLine = ({i, lineRef}) => {
     const args = useMemo(() => {
         return({
             uniforms:{
-                color: { value: new THREE.Color( 0xffffff ) }
+                //color: { value: new THREE.Color( 0xffffff ) }
             },
             vertexShader,
             fragmentShader,
@@ -86,15 +79,6 @@ const SrLine = ({i, lineRef}) => {
         })
     },[]);
     
-    const color = new THREE.Color( 0xffffff );
-    
-    const colorArray = [];
-    for ( let i = 0, l = 6000; i < l; i ++ ) {
-        color.setHSL( i / l, 0.5, 0.5 );
-        color.toArray( colorArray, i * 3 );
-    }
-    const customColor = new Float32Array(colorArray);
-    
     return (
         <mesh position={[0, positionY-17, 0]}  scale-y={34} ref={lineRef}>
             <line>
@@ -103,12 +87,6 @@ const SrLine = ({i, lineRef}) => {
                         attachObject={['attributes', 'position']}
                         count={lineData.length / 3}
                         array={lineData}
-                        itemSize={3}
-                    />
-                    <bufferAttribute
-                        attachObject={['attributes', 'customColor']}
-                        count={customColor.length / 3}
-                        array={customColor} 
                         itemSize={3}
                     />
                 </bufferGeometry>
@@ -197,7 +175,11 @@ const SrChannelRow = ({ mouseRef, i, text, id, rowRef, lineRef, rowActRef /*, ro
         <group ref={rowRef} position={[0, positionY, 0]}>
             <group position={[-size.width/2+35, 0, 2]}>
                 <mesh position={[-3, 0, 0]}>
-                    <Text fontSize={12} color={'black'/*textColor*/}>{text}</Text>
+                    <Text
+                        fontSize={12}
+                        color={'black'}
+                        font={Roboto}
+                    >{text}</Text>
                 </mesh>
                 <mesh geometry={labelGeometry} onPointerUp={up} onPointerDown={down} onPointerMove={move} onPointerOut={out} onPointerOver={over} >
                     <meshStandardMaterial color={rowColor} />
@@ -214,13 +196,17 @@ const SrChannelRow = ({ mouseRef, i, text, id, rowRef, lineRef, rowActRef /*, ro
     )
 }
 
-const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef, virtualCam})=>{
+const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef, virtualCam})=>{
     console.log('Render SrRowsPannel');
     const { size, scene, camera, gl } = useThree();
     const barPos = [ (rowsPanelPlaneWidth-size.width)/2, 0, 2];
     const rowActRef = useRef({ index: null, down: false, moved:false});
     
     const virtualScene = useMemo(() => new THREE.Scene(), []);
+    
+    const logic = []//useReactiveVar(testVar);
+    
+    //const logic = [];//testVar();
     
     useEffect(() => {
         virtualCam.current.position.z = 200;
@@ -257,7 +243,7 @@ const SrRowsPanel =({logic, linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mo
             />);
         });
         return [rows, lines]
-    }, [logic]);
+    }, [testVar()]);
     
     const order = useRef([]);
     useMemo(()=>logic.map((_, index) =>order.current.push(index)), [logic]);

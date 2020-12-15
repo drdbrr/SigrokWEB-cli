@@ -1,41 +1,39 @@
 import React, { memo, useMemo } from 'react';
 import { ScSrMenuPanel } from '../styled/ScSrMenuPanel';
 import SrFileMenu from './SrFileMenu';
-import SrChannelsMenu from './SrChannelsMenu';
+import { SrChannelsMenu } from './SrChannelsMenu';
 import { DeviceMenu } from '../containers/DeviceMenu';
 import { Samplerates } from '../containers/Samplerates';
 import { Samples } from '../containers/Samples';
 import { SessionsMenu } from '../containers/SessionsMenu';
 
-export const SrMenuPanel = memo(({toggleDecoderMenu, toggleTabularMenu, session, sessions, logic}) =>{
+import { useReactiveVar } from '@apollo/client';
+import { testVar } from '../ApolloClient';
+
+export const SrMenuPanel = ({toggleDecoderMenu, toggleTabularMenu, session, logic}) =>{
     console.log('Render SrMenuPanel');
+    
+    
+    //const session = testVar();
     
     return(
         <ScSrMenuPanel>
-            { (session)?
-                <SessionsMenu sessions={sessions} session={session} />
-                : null
-            }
+            <SessionsMenu session={session} />
+            <SrFileMenu />
+            <DeviceMenu session={session} />
             
-            { <SrFileMenu /> }
-            
-            { (session)?
-                <DeviceMenu session={session} />
-                : null
-            }
-            
-            { (session && session.samplerates) ?
+            { (session.config && session.config.includes('SAMPLERATE')) ?
                 <Samplerates />
                 : null
             }
             
-            { (session && session.samples)?
+            { (session.config && session.config.includes('LIMIT_SAMPLES'))?
                 <Samples sample={session.sample} samples={session.samples} />
                 : null
             }
             
-            { (session && session.samplerates)?
-                <SrChannelsMenu logic={logic} analog={session.analog} />
+            { (session.channels && (session.channels.includes('LOGIC') || session.channels.includes('ANALOG')) )?
+                <SrChannelsMenu />
                 : null
             }
             
@@ -45,4 +43,4 @@ export const SrMenuPanel = memo(({toggleDecoderMenu, toggleTabularMenu, session,
             </div>
         </ScSrMenuPanel>
     )
-})
+}
