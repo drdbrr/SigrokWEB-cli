@@ -36,7 +36,7 @@ const fragmentShader = `
     }
 `;
 
-const SrLine = ({i, lineRef}) => {
+const SrLine = ({height, i, lineRef}) => {
     console.log("SR Line:", i);
     const positionY = i * rowHeight;
     const lineArray = [];
@@ -70,7 +70,7 @@ const SrLine = ({i, lineRef}) => {
     },[]);
     
     return (
-        <mesh position={[0, positionY-17, 0]}  scale-y={34} ref={lineRef}>
+        <mesh position={[0, positionY-17, 0]}  scale-y={height} ref={lineRef}>
             <line>
                 <bufferGeometry attach="geometry" >
                     <bufferAttribute
@@ -95,35 +95,34 @@ const labelShape = new THREE.Shape();
     
 const labelGeometry = new THREE.ShapeBufferGeometry( labelShape );
     
-const SrChannelRow = ({ rowColor, mouseRef, i, text, id, rowRef, lineRef, rowActRef /*, rowsPanelPlaneWidth*/ })=>{
-    console.log('SrChannelRow:', id);
+const SrChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActionRef })=>{
+    console.log('SrChannelRow:', text);
     const [ popUp, setPopUp ] = useState(false);
     const positionY = rowHeight * i;
     const { size } = useThree();
     
     const down = useCallback((e) => {
-        rowActRef.current.index = i;
-        rowActRef.current.down = true;
+        rowActionRef.current.index = i;
+        rowActionRef.current.down = true;
         e.stopPropagation();
         e.target.setPointerCapture(e.pointerId);
     }, []);
 
     const up = useCallback((e) => {
         
-        if (!rowActRef.current.moved)
+        if (!rowActionRef.current.moved)
             setPopUp(true);
         
-        rowActRef.current.moved = false;
-        rowActRef.current.down = false;
+        rowActionRef.current.moved = false;
+        rowActionRef.current.down = false;
         e.stopPropagation();
         e.target.releasePointerCapture(e.pointerId);
     }, []);
     
     const move = useCallback((event) => {
-        if (rowActRef.current.down) {
-            rowActRef.current.moved = true;
+        if (rowActionRef.current.down) {
+            rowActionRef.current.moved = true;
             event.stopPropagation();
-            //mouseRef.current.dy += event.movementY;
             
             lineRef.current.position.y = rowRef.current.position.y -= event.movementY;
             lineRef.current.position.y -= lineRef.current.scale.y / 2;
@@ -157,7 +156,7 @@ const SrChannelRow = ({ rowColor, mouseRef, i, text, id, rowRef, lineRef, rowAct
                 <SrChannelPopUp open={popUp} setOpen={setPopUp} rowRef={rowRef} lineRef={lineRef} />
 
             </group>
-            <mesh  scale-y={34}>
+            <mesh scale-y={height}>
                 <planeBufferGeometry attach="geometry" args={[size.width , 1]}/>
                 <meshBasicMaterial attach="material" transparent opacity={0.2}  color={rowColor} />
             </mesh>
@@ -169,13 +168,11 @@ const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth
     console.log('Render SrRowsPannel');
     const { size, scene, camera, gl } = useThree();
     const barPos = [ (rowsPanelPlaneWidth-size.width)/2, 0, 2];
-    const rowActRef = useRef({ index: null, down: false, moved:false});
+    const rowActionRef = useRef({ index: null, down: false, moved:false});
     
     const virtualScene = useMemo(() => new THREE.Scene(), []);
     
     const { logic } = useReactiveVar(channelsVar);
-    
-    console.log('', logic);
     
     useEffect(() => {
         virtualCam.current.position.z = 200;
@@ -195,13 +192,11 @@ const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth
                 key={i}
                 i={i}
                 text={item.name}
-                id={item.name}
                 rowRef={item.rowRef}
                 lineRef={item.lineRef}
-                rowActRef={rowActRef}
-                rowsPanelPlaneWidth={rowsPanelPlaneWidth}
-                mouseRef={mouseRef}
+                rowActionRef={rowActionRef}
                 rowColor={item.color}
+                height={item.traceHeight}
             />);
             
             lines.push(
@@ -209,7 +204,7 @@ const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth
                 key={i}
                 i={i}
                 lineRef={item.lineRef}
-                mouseRef={mouseRef}
+                height={item.traceHeight}
             />);
         });
         return [rows, lines]
@@ -222,8 +217,8 @@ const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth
     let prevRow = null;
     useFrame(()=>{
         /*
-        if (rowActRef.current.down && rowActRef.current.index !== null && mouseRef.current.dy ){
-            const {lineRef, rowRef} = logic[rowActRef.current.index];
+        if (rowActionRef.current.down && rowActionRef.current.index !== null && mouseRef.current.dy ){
+            const {lineRef, rowRef} = logic[rowActionRef.current.index];
             lineRef.current.position.y = rowRef.current.position.y -= mouseRef.current.dy;
             lineRef.current.position.y -= 25;
             
@@ -231,9 +226,9 @@ const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth
             
             if( curRow !== prevRow && prevRow !== null){
                 
-                const newOrder = swap(order.current, rowActRef.current.index, curRow);
+                const newOrder = swap(order.current, rowActionRef.current.index, curRow);
                 
-                const ind = order.current.indexOf(rowActRef.current.index);
+                const ind = order.current.indexOf(rowActionRef.current.index);
                 
                 order.current = newOrder;
                 
@@ -244,12 +239,12 @@ const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth
             }
             prevRow = curRow;
         }
-        else if (!rowActRef.current.down && rowActRef.current.index !== null){
-            const pos = order.current.indexOf(rowActRef.current.index) * rowHeight;
-            const { lineRef, rowRef } = logic[rowActRef.current.index];
+        else if (!rowActionRef.current.down && rowActionRef.current.index !== null){
+            const pos = order.current.indexOf(rowActionRef.current.index) * rowHeight;
+            const { lineRef, rowRef } = logic[rowActionRef.current.index];
             rowRef.current.position.y = pos;
             lineRef.current.position.y = pos - 25;
-            rowActRef.current.index = null;
+            rowActionRef.current.index = null;
         }
         */
         
