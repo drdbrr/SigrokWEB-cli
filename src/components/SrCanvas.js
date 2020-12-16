@@ -18,7 +18,7 @@ const Layout = ({analog, logic, ws}) =>{
     const cursorRef = useRef();
     const zeroRef = useRef();
     
-    const virtualCam = useRef(new SrLineOrthoCamera(0, 0, 0, 0, 0.1, 1000));
+    //const virtualCam = useRef(new SrLineOrthoCamera(0, 0, 0, 0, 0.1, 1000));
     
     //virtualCam.current.zoom = 1;
     
@@ -111,8 +111,7 @@ const Layout = ({analog, logic, ws}) =>{
             //(event.movementX > 0 /*&& event.movementX !== 0*/) ? mouseRef.current.deltaX++ : mouseRef.current.deltaX--;
             //mouseRef.current.deltaX += event.movementX;
             
-            linesGroupRef.current.position.y = rowsGroupRef.current.position.y -= event.movementY;
-            //linesGroupRef.current.position.x += event.movementX / virtualCam.current.zoom; //WARNING
+            rowsGroupRef.current.position.y -= event.movementY;
             linesGroupRef.current.position.x += event.movementX;
             
             zeroRef.current.position.x += event.movementX;
@@ -164,7 +163,7 @@ const Layout = ({analog, logic, ws}) =>{
             <planeBufferGeometry attach="geometry" args={mainPlaneGeo}/>
         </mesh>
         
-        <SrRowsPanel virtualCam={virtualCam} mouseRef={mouseRef} logic={logic} linesGroupRef={linesGroupRef} rowsGroupRef={rowsGroupRef} rowsPanelPlaneWidth={rowsPanelPlaneWidth}/>
+        <SrRowsPanel  mouseRef={mouseRef} logic={logic} linesGroupRef={linesGroupRef} rowsGroupRef={rowsGroupRef} rowsPanelPlaneWidth={rowsPanelPlaneWidth}/>
 
         <mesh position={[-size.width / 2 + 50 + mouseRef.current.cursor, 0, 0]}>
             <SrZeroLine zeroRef={zeroRef}/>

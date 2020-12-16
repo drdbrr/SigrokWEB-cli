@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import React, { useRef, useMemo, memo, useEffect, useState, useCallback } from 'react';
-import { useThree, useFrame, createPortal } from 'react-three-fiber';
+import { useThree, useFrame/*, createPortal*/ } from 'react-three-fiber';
 import { Text, Html } from '@react-three/drei';
 import Roboto from '../fonts/Roboto.woff';
 
@@ -13,7 +13,7 @@ import swap from 'lodash-move';
 import { channelsVar } from '../ApolloClient';
 import { useReactiveVar } from '@apollo/client';
 
-const rowHeight = 50;
+//const rowHeight = 50;
 
 const vertexShader =`
     out vec3 pos;
@@ -38,7 +38,7 @@ const fragmentShader = `
 
 const SrLine = ({height, i, lineRef}) => {
     console.log("SR Line:", i);
-    const positionY = i * rowHeight;
+    const positionY = i * (height + 15);
     const lineArray = [];
     for (let i = 0; i < 3000; i++){
         const val = Math.round(Math.random());
@@ -98,7 +98,7 @@ const labelGeometry = new THREE.ShapeBufferGeometry( labelShape );
 const SrChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActionRef })=>{
     console.log('SrChannelRow:', text);
     const [ popUp, setPopUp ] = useState(false);
-    const positionY = rowHeight * i;
+    const positionY = (height + 15) * i;
     const { size } = useThree();
     
     const down = useCallback((e) => {
@@ -153,7 +153,7 @@ const SrChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActionRef
                     <meshStandardMaterial color={rowColor} />
                 </mesh>
                 
-                <SrChannelPopUp open={popUp} setOpen={setPopUp} rowRef={rowRef} lineRef={lineRef} />
+                <SrChannelPopUp open={popUp} rowColor={rowColor} setOpen={setPopUp} rowRef={rowRef} lineRef={lineRef} />
 
             </group>
             <mesh scale-y={height}>
@@ -164,7 +164,7 @@ const SrChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActionRef
     )
 }
 
-const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef, virtualCam})=>{
+const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef/*, virtualCam*/})=>{
     console.log('Render SrRowsPannel');
     const { size, scene, camera, gl } = useThree();
     const barPos = [ (rowsPanelPlaneWidth-size.width)/2, 0, 2];
@@ -174,6 +174,7 @@ const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth
     
     const { logic } = useReactiveVar(channelsVar);
     
+    /*
     useEffect(() => {
         virtualCam.current.position.z = 200;
         virtualCam.current.left = -(size.width / 2);//!!!!!!!!!!!
@@ -182,6 +183,7 @@ const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth
         virtualCam.current.bottom = size.height / -2;
         virtualCam.current.updateProjectionMatrix();
     }, []);
+    */
     
     const [ channelsRows, channelsLines ] = useMemo(()=>{
         const rows = [];
@@ -250,12 +252,12 @@ const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth
         
         gl.autoClear = true
         gl.render(scene, camera)
+        /*
         gl.autoClear = false
         gl.clearDepth()
         gl.render(virtualScene, virtualCam.current)
+        */
     });
-    
-    const color2 = new THREE.Color( "hsl(0, 0%, 24%)" );
     
     return(<>
         <mesh position={barPos} >
@@ -264,9 +266,7 @@ const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth
         </mesh>
         <group ref={rowsGroupRef}>
             { channelsRows }
-            { createPortal(
                 <group position={[-size.width / 2 + 50 + mouseRef.current.cursor, 0, 1]} ref={linesGroupRef}>{ channelsLines }</group>
-            , virtualScene) }
         </group>
     </>)
 }

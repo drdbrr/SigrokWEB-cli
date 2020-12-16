@@ -1,9 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Html } from '@react-three/drei';
 
-const SrLogicPopUp = ({lineRef, rowRef}) =>{
-    //Height, color, text
-    
+const SrLogicPopUp = ({lineRef, rowRef, rowColor}) =>{
+    //const [clSel, openClsel] = useState(false);
     return(
         <div css={`padding:10px; padding-top:5px; display:flex; flex-direction:column; background-color:#363636; border:1px solid black; border-radius:4px`}>
             <div css={`width: max-content`} >
@@ -26,7 +25,7 @@ const SrLogicPopUp = ({lineRef, rowRef}) =>{
             </div>
 
             
-            <div css={`width: max-content`} >
+            <div css={`width: max-content;padding-top:10px;`} >
                 <span css={`color:white; padding-right: 10px; position:relative; float:left`}>Height:</span>
                 <input 
                     name='hg'
@@ -39,17 +38,19 @@ const SrLogicPopUp = ({lineRef, rowRef}) =>{
                     css={`height:13px; position:relative; float:left; width:50px`}
                 />
             </div>
-            {/*
-            <div css={`width: max-content;`} >
-                <span css={`color:white; padding-right: 10px; position:relative; float:left`}>Color</span>
-                <input css={`height:13px; width:50px`} type="text" name="myText" value="Norway" selectBoxOptions="Canada;Denmark;Finland;Germany;Mexico"/>
+            <div css={`width: max-content;padding-top:10px;`} >
+                <span css={` color:white; padding-right: 10px; position:relative; float:left`}>Color:</span>
+                <div css={`float:left;background-color: #474747;border: 1px solid black; border-radius: 3px; padding:6px;`}>
+                
+                    <div css={`width:50px; height:8px; background-color:${rowColor};`}></div>
+                
+                </div>
             </div>
-            */}
         </div>
     )
 }
 
-export const SrChannelPopUp = ({open, setOpen, lineRef, rowRef}) =>{
+export const SrChannelPopUp = ({open, setOpen, lineRef, rowRef, rowColor}) =>{
     console.log('Render SrChannelPopUp');
     const toggle = () =>setOpen(!open);
     const node = useRef();    
@@ -69,7 +70,7 @@ export const SrChannelPopUp = ({open, setOpen, lineRef, rowRef}) =>{
     
     const content =
         <Html position-x={17} position-y={20} ref={node}>
-            <SrLogicPopUp rowRef={rowRef} lineRef={lineRef}/>
+            <SrLogicPopUp rowRef={rowRef} lineRef={lineRef} rowColor={rowColor}/>
         </Html>
             
     return (<>{ open && content }</>)
