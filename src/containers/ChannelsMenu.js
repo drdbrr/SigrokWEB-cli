@@ -9,7 +9,7 @@ import { SrChannelsMenu } from '../components/SrChannelsMenu';
 export const ChannelsMenu = (props) => {
     const id = useReactiveVar(selectedSessionVar);
     const channels = useReactiveVar(channelsVar);
-    const { data, error, loading }  = useQuery(GET_CHANNELS, { variables:{id:id}, onCompleted:({getChannels})=>{
+    const { data, error, loading }  = useQuery(GET_CHANNELS, { fetchPolicy: 'no-cache', variables:{id:id}, onCompleted:({getChannels})=>{
         const logic = [];
         const analog = [];
         if (getChannels.logic){

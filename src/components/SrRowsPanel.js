@@ -4,7 +4,7 @@ import { useThree, useFrame, createPortal } from 'react-three-fiber';
 import { Text, Html } from '@react-three/drei';
 import Roboto from '../fonts/Roboto.woff';
 
-import SrChannelPopUp from './SrChannelPopUp';
+import { SrChannelPopUp } from './SrChannelPopUp';
 
 //added 04/11/2020
 import clamp from 'lodash-es/clamp';
@@ -154,7 +154,7 @@ const SrChannelRow = ({ rowColor, mouseRef, i, text, id, rowRef, lineRef, rowAct
                     <meshStandardMaterial color={rowColor} />
                 </mesh>
                 
-                <SrChannelPopUp open={popUp} setOpen={setPopUp} />
+                <SrChannelPopUp open={popUp} setOpen={setPopUp} rowRef={rowRef} lineRef={lineRef} />
 
             </group>
             <mesh  scale-y={34}>
@@ -174,6 +174,8 @@ const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth
     const virtualScene = useMemo(() => new THREE.Scene(), []);
     
     const { logic } = useReactiveVar(channelsVar);
+    
+    console.log('', logic);
     
     useEffect(() => {
         virtualCam.current.position.z = 200;

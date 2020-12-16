@@ -19,18 +19,7 @@ const SrChannelsMenuContent=(/*{logic, analog}*/)=>{
         );
     });
     /*
-                <div css={`width:20px`} ></div>
-                <label htmlFor='hg' css={`color:white`}>Height:</label>
-                <input 
-                    name='hg'
-                    type="number"
-                    defaultValue={item.rowRef.current.children[1].scale.y}
-                    onChange={(e)=>{
-                        item.rowRef.current.children[1].scale.y = item.lineRef.current.scale.y = e.target.value;
-                        item.lineRef.current.position.y = item.rowRef.current.position.y - e.target.value/2;
-                    }}
-                    css={`width:30px`}
-                />
+
                 */
     
     return(
