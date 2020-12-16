@@ -60,6 +60,6 @@ export const App =()=>{
     }, []);
     
     return(
-        <SrApp ws={ws} analog={[]} logic={[]} session={session ? session : {}}/>
+        <SrApp ws={ws} session={session ? session : {}}/>
     )
 }

@@ -95,8 +95,8 @@ const labelShape = new THREE.Shape();
     
 const labelGeometry = new THREE.ShapeBufferGeometry( labelShape );
     
-const SrChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActionRef })=>{
-    console.log('SrChannelRow:', text);
+const SrLogicChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActionRef })=>{
+    console.log('SrLogicChannelRow:', text);
     const [ popUp, setPopUp ] = useState(false);
     const positionY = (height + 15) * i;
     const { size } = useThree();
@@ -164,35 +164,122 @@ const SrChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActionRef
     )
 }
 
-const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef/*, virtualCam*/})=>{
+//self._analog_channels.append({'name': item.name, 'text':item.name, 'color':colorsArray[i], 'visible':True, 'pVertDivs':1, 'nVertDivs':1, 'divHeight':50, 'vRes':20.0, 'autoranging':True, 'conversion':'', 'convThres':'', 'showTraces':'' })                
+
+const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, pVertDivs, nVertDivs, divHeight, vRes, autoranging}) =>{
+    console.log('SrAnalogChannelRow:', text);
+    const [ popUp, setPopUp ] = useState(false);
+    
+    const positionY = (34 + 15) * i;
+    //const positionY = (pVertDivs + nVertDivs) * divHeight * i;
+    
+    /*
+    const pVertDivs =()=> {
+        const arr = []
+        for (let i = 0; i <= pVertDivs; i++){
+            arr.push(
+                <mesh position-y={i*divHeight} >
+                    <planeBufferGeometry attach="geometry" args={[size.width , 1]}/>
+                    <meshBasicMaterial attach="material" transparent opacity={0.2}  color={rowColor} />
+                </mesh>
+            );
+        }
+    }
+    
+    const nVertDivs =()=> {
+        const arr = []
+        for (let i = 0; i >= nVertDivs; i--){
+            arr.push(
+                <mesh position-y={i*divHeight} >
+                    <planeBufferGeometry attach="geometry" args={[size.width , 1]}/>
+                    <meshBasicMaterial attach="material" transparent opacity={0.2}  color={rowColor} />
+                </mesh>
+            );
+        }
+    }
+    */
+    
+    const { size } = useThree();
+    
+    const down = useCallback((e) => {
+        rowActionRef.current.index = i;
+        rowActionRef.current.down = true;
+        e.stopPropagation();
+        e.target.setPointerCapture(e.pointerId);
+    }, []);
+
+    const up = useCallback((e) => {
+        
+        if (!rowActionRef.current.moved)
+            setPopUp(true);
+        
+        rowActionRef.current.moved = false;
+        rowActionRef.current.down = false;
+        e.stopPropagation();
+        e.target.releasePointerCapture(e.pointerId);
+    }, []);
+    
+    const move = useCallback((event) => {
+        if (rowActionRef.current.down) {
+            rowActionRef.current.moved = true;
+            event.stopPropagation();
+            
+            lineRef.current.position.y = rowRef.current.position.y -= event.movementY;
+            lineRef.current.position.y -= lineRef.current.scale.y / 2;
+        }
+    }, []);
+    
+    const over = useCallback(()=>{
+        rowRef.current.children[0].children[1].material.color.set('red');
+    }, []);
+    
+    const out = useCallback(()=>{
+        rowRef.current.children[0].children[1].material.color.set(rowColor);
+    }, []);
+    
+    return(
+        <group ref={rowRef} position={[0, positionY, 0]}>
+            <group position={[-size.width/2+35, 0, 2]}>
+                <mesh position={[-3, 0, 0]}>
+                    <Text
+                        fontSize={12}
+                        color={'black'}
+                        font={Roboto}
+                    >{text}</Text>
+                </mesh>
+                <mesh geometry={labelGeometry} onPointerUp={up} onPointerDown={down} onPointerMove={move} onPointerOut={out} onPointerOver={over} >
+                    <meshStandardMaterial color={rowColor} />
+                </mesh>
+                
+                <SrChannelPopUp open={popUp} rowColor={rowColor} setOpen={setPopUp} rowRef={rowRef} lineRef={lineRef} pVertDivs={pVertDivs} nVertDivs={nVertDivs} divHeight={divHeight} vRes={vRes} autoranging={autoranging} />
+
+            </group>
+            
+            <mesh>
+                <planeBufferGeometry attach="geometry" args={[size.width , 1]}/>
+                <meshBasicMaterial attach="material" transparent opacity={0.2}  color={rowColor} />
+            </mesh>
+            
+        </group>
+    )
+}
+
+const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef/*, virtualCam*/})=>{
     console.log('Render SrRowsPannel');
     const { size, scene, camera, gl } = useThree();
     const barPos = [ (rowsPanelPlaneWidth-size.width)/2, 0, 2];
     const rowActionRef = useRef({ index: null, down: false, moved:false});
     
-    const virtualScene = useMemo(() => new THREE.Scene(), []);
-    
-    const { logic } = useReactiveVar(channelsVar);
-    
-    /*
-    useEffect(() => {
-        virtualCam.current.position.z = 200;
-        virtualCam.current.left = -(size.width / 2);//!!!!!!!!!!!
-        virtualCam.current.right = size.width / 2;//!!!!!!!!!
-        virtualCam.current.top = size.height / 2;
-        virtualCam.current.bottom = size.height / -2;
-        virtualCam.current.updateProjectionMatrix();
-    }, []);
-    */
+    const { logic, analog } = useReactiveVar(channelsVar);
     
     const [ channelsRows, channelsLines ] = useMemo(()=>{
         const rows = [];
         const lines = [];
         logic.map((item, i)=>{
             rows.push(
-            <SrChannelRow
-                key={i}
-                i={i}
+            <SrLogicChannelRow
+                key={item.name + i}
+                i={-i}
                 text={item.name}
                 rowRef={item.rowRef}
                 lineRef={item.lineRef}
@@ -203,14 +290,42 @@ const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth
             
             lines.push(
             <SrLine
-                key={i}
-                i={i}
+                key={item.name + i + 'srl'}
+                i={-i}
                 lineRef={item.lineRef}
                 height={item.traceHeight}
             />);
         });
+        
+        analog.map((item, i)=>{
+            rows.push(
+            <SrAnalogChannelRow
+                key={item.name + i}
+                i={-i - logic.length}
+                text={item.name}
+                rowRef={item.rowRef}
+                lineRef={item.lineRef}
+                rowActionRef={rowActionRef}
+                rowColor={item.color}
+                
+                pVertDivs={item.pVertDivs}
+                nVertDivs={item.nVertDivs}
+                divHeight={item.divHeight}
+                vRes={item.vRes}
+                autoranging={item.autoranging}
+            />);
+            
+            lines.push(
+            <SrLine
+                key={item.name + i + 'sra'}
+                i={-i - logic.length}
+                lineRef={item.lineRef}
+                height={34}
+            />);
+        });
+        
         return [rows, lines]
-    }, [logic]);
+    }, [logic, analog]);
     
     const order = useRef([]);
     
@@ -264,9 +379,11 @@ const SrRowsPanel =({/*logic,*/ linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth
             <planeBufferGeometry attach="geometry" args={[rowsPanelPlaneWidth, size.height]}/>
             <meshStandardMaterial color="#3c3c3c" roughness={0.75} metalness={0.3} />
         </mesh>
-        <group ref={rowsGroupRef}>
+        <group ref={rowsGroupRef} position-y={size.height/2-60}>
             { channelsRows }
-                <group position={[-size.width / 2 + 50 + mouseRef.current.cursor, 0, 1]} ref={linesGroupRef}>{ channelsLines }</group>
+                <group position={[-size.width / 2 + 50 + mouseRef.current.cursor, 0, 1]} ref={linesGroupRef}>
+                    { channelsLines }
+                </group>
         </group>
     </>)
 }

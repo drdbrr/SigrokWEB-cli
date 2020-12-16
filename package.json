@@ -2,8 +2,8 @@
     "name": "webrok-cli",
     "version": "0.5.5",
     "dependencies": {
-        "@apollo/client": "^3.2.7",
-        "@react-three/drei": "^2.2.7",
+        "@apollo/client": "^3.3.6",
+        "@react-three/drei": "^2.2.12",
         "graphql": "^15.4.0",
         "grommet-icons": "^4.5.0",
         "lodash-es": "^4.17.15",

@@ -14,7 +14,7 @@ const GlobalStyle = createGlobalStyle`
     }
 `;
 
-export const SrApp = ({ws, analog, logic, session}) =>{
+export const SrApp = ({ws, session}) =>{
     console.log('Render SrApp');
     const [ decoderMenu, setDecoderMenul ] = useState(false);
     const [ tabularMenu, setTabularMenu ] = useState(false);
@@ -40,7 +40,7 @@ export const SrApp = ({ws, analog, logic, session}) =>{
                     session={session}
                     ws={ws}
                 />
-                <SrCanvas analog={analog} logic={logic} ws={ws}/>
+                <SrCanvas ws={ws}/>
                 { (decoderMenu) ? <SrDecoderMenu /> : null }
                 { (tabularMenu) ? <SrTabularMenu /> : null }
             </ScSrApp>

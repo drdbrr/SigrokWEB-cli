@@ -10,7 +10,7 @@ import { SrLineOrthoCamera } from './SrLineOrthoCamera';
 import { ApolloProvider } from '@apollo/client';
 import { Client } from '../ApolloClient';
 
-const Layout = ({analog, logic, ws}) =>{
+const Layout = ({ws}) =>{
     console.log('Render Layout');
     const { size, camera } = useThree();
     const linesGroupRef = useRef();
@@ -163,7 +163,7 @@ const Layout = ({analog, logic, ws}) =>{
             <planeBufferGeometry attach="geometry" args={mainPlaneGeo}/>
         </mesh>
         
-        <SrRowsPanel  mouseRef={mouseRef} logic={logic} linesGroupRef={linesGroupRef} rowsGroupRef={rowsGroupRef} rowsPanelPlaneWidth={rowsPanelPlaneWidth}/>
+        <SrRowsPanel  mouseRef={mouseRef} linesGroupRef={linesGroupRef} rowsGroupRef={rowsGroupRef} rowsPanelPlaneWidth={rowsPanelPlaneWidth}/>
 
         <mesh position={[-size.width / 2 + 50 + mouseRef.current.cursor, 0, 0]}>
             <SrZeroLine zeroRef={zeroRef}/>
@@ -191,7 +191,7 @@ function Lights() {
   )
 }
 
-export const SrCanvas = memo(({analog, logic, ws}) => {
+export const SrCanvas = memo(({ws}) => {
     console.log('Render SrCanvas');
     const rmbCallback = useCallback((event)=>event.preventDefault(),[]);
     return(<>
@@ -203,7 +203,7 @@ export const SrCanvas = memo(({analog, logic, ws}) => {
         >
             <Lights />
             <ApolloProvider client={Client}>
-                <Layout analog={analog} logic={logic} ws={ws}/>
+                <Layout ws={ws}/>
             </ApolloProvider>
         </Canvas>
     </>)
