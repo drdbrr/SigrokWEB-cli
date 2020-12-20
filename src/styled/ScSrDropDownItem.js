@@ -9,8 +9,9 @@ export const ScSrDropDownItem = styled.div`
     color: white;
     
     ${props => props.isSelected && css`
-        background-color: #2f3f51;
-        border-left: 2px solid red;
+        background-color: #2a82da;
+        border: 1px solid #53a0ed;
+        border-radius: 2px;
     `}
     
     :hover{

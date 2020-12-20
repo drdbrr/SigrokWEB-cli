@@ -246,8 +246,8 @@ const SrRowGroupSlider = ({color, position, height}) =>{
     
     return(
         <mesh position={position} ref={slRef}>
-            <planeBufferGeometry attach="geometry" args={[10, height]}/>
-            <meshStandardMaterial color={color} roughness={0.75} metalness={0.3} />
+            <planeBufferGeometry attach="geometry" args={[50, height]}/>
+            <meshStandardMaterial color={color} roughness={1} />
         </mesh>
     )
 }
@@ -353,15 +353,15 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef/
     //useMemo(()=>logic.map((_, index) =>order.current.push(index)), [logic]);
     
     useFrame(()=>{
+        rowActionRef.current.logicHeight = logic.reduce((total, obj) =>{
+            if(obj.lineRef.current.visible)
+                return parseInt(obj.lineRef.current.scale.y) + total + 15
+        },0)
         
-        
-        rowActionRef.current.logicHeight = logic.reduce((total, obj) =>parseInt(obj.lineRef.current.scale.y) + total + 15,0)
-        
-        let zm = 0;
-        analog.map((item)=>{
-            zm += (item.pVertDivs + item.nVertDivs) * item.divHeight
-        });
-        rowActionRef.current.analogHeight = zm;
+        rowActionRef.current.analogHeight = analog.reduce((total, obj) =>{
+            if(obj.lineRef.current.visible)
+                return parseInt(obj.pVertDivs + obj.nVertDivs) * obj.divHeight + total + 15
+        },0)
         
         //let zm = 0;
         //analog.map((item)=>)
@@ -401,35 +401,49 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef/
         //ATTENTION: calculates inner rows positions for logic group row
         if (!rowActionRef.current.down){
             let offset = 0;
+            let offs = 0
             logic.map((item, i)=>{
-                offset -= parseInt(item.lineRef.current.scale.y) + 8;
                 item.rowRef.current.position.y = offset;
                 item.lineRef.current.position.y = offset ; 
                 item.lineRef.current.position.y -= parseInt(item.lineRef.current.scale.y);
-                item.rowRef.current.position.y -= parseInt(item.lineRef.current.scale.y) / 2;
+                item.rowRef.current.position.y -= parseInt(item.lineRef.current.scale.y)/2;
+                if (item.lineRef.current.visible)
+                    offset -= parseInt(item.lineRef.current.scale.y) + 8;
+            });
+            
+            analog.map((item, i)=>{
+                item.lineRef.current.position.y = offs;
+                item.rowRef.current.position.y = offs;
+                
+                item.lineRef.current.position.y -= (item.pVertDivs + item.nVertDivs) * item.divHeight;
+                item.rowRef.current.position.y -= (item.pVertDivs + item.nVertDivs) * item.divHeight/2;
+                
+                if (item.lineRef.current.visible)
+                    offs -= parseInt(item.pVertDivs + item.nVertDivs) * item.divHeight + 8;
+            })
+            
+            
+        }
+        
+        if (!mouseRef.current.rmb || rowsGroupRef.current.position.y > size.height/2 - 50){
+            rowsGroupRef.current.position.y = size.height/2 - 50
+        }
+        
+        if (!rowActionRef.current.down){
+            let aoffset = 0
+            order.current.map((item, i)=>{
+                aoffset -= order.current[i].height;
+                item.rowsRef.current.position.y = aoffset + order.current[i].height;
+                item.linesRef.current.position.y = aoffset + order.current[i].height;
+                
+                //item.rowsRef.current.position.y
+                //item.linesRef.current.position.y
             })
         }
-                        /*
-                        analog.map((item, i)=>{
-                            const pos = (item.lineRef.current.scale.y + 15) * ( (analog.length - 1) - i) + rowActionRef.current.logicHeight - 30;
-                            item.lineRef.current.position.y = pos - item.lineRef.current.scale.y;
-                            item.rowRef.current.position.y = pos-item.lineRef.current.scale.y/2;
-                        })
-                    }*/
-                    //console.log(rRef.current)
-                    
-        if(rowsGroupRef.current.position.y > size.height/2 - 50)
-            rowsGroupRef.current.position.y = size.height/2 - 50
         
-        //WARNING
-        /*
-        if (!rowActionRef.current.down){
-            logicRowsRef.current.position.y =  logicLinesRef.current.position.y = size.height/2 - rowActionRef.current.logicHeight;
-            analogRowsRef.current.position.y = analogLinesRef.current.position.y = size.height/2 - 140 - rowActionRef.current.analogHeight - rowActionRef.current.logicHeight;
-        }
-        */
         
         //ATTENTION: calculates channels group rows positions
+        /*
         if (!rowActionRef.current.down){
             let gg = 0;
             order.current.map((item, i, arr)=>{
@@ -438,21 +452,13 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef/
                 gg += item.height;
             });
         }
+        */
         
         gl.autoClear = true
         gl.render(scene, camera)
     });
     
-    /*
-    setInterval(()=>{
-        console.log('logicRows:', logicRows)
-        console.log('logicLine:', logicLines);
-        console.log('analogRows:', analogRows);
-        console.log('analogLines:', analogLines);
-        console.log('logicHeight:', rowActionRef.current.logicHeight);
-        console.log('analogHeight:', rowActionRef.current.analogHeight);
-    }, 5000);
-    */
+    console.log(()=>console.log(order.current), 5000);
     
     return(<>
         <mesh position={barPos} >
@@ -463,14 +469,14 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef/
             
             <group ref={logicRowsRef}>
             { (logicRows.length) ?
-                <SrRowGroupSlider height={rowActionRef.current.logicHeight} color={'red'} position={[-size.width/2+10, -rowActionRef.current.logicHeight/2 + 25, 2 ]}/> :
-                null }
+                <SrRowGroupSlider height={rowActionRef.current.logicHeight-60} color={'#24384d'} position={[-size.width/2+25, -rowActionRef.current.logicHeight/2+32, 2 ]}/> :
+            null }
                 { logicRows }
             </group>
             
             <group ref={analogRowsRef}>
             { (analogRows.length) ?
-                <SrRowGroupSlider height={rowActionRef.current.analogHeight} color={'blue'} position={[-size.width/2+10, rowActionRef.current.logicHeight, 2 ]} /> :
+                <SrRowGroupSlider height={rowActionRef.current.analogHeight} color={'#31363b'} position={[-size.width/2+25, -rowActionRef.current.logicHeight/2-15, 2 ]} /> :
             null }
                 { analogRows }
             </group>
