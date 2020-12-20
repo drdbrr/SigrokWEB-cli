@@ -1,8 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Html } from '@react-three/drei';
+import { useFrame } from 'react-three-fiber';
 
 const SrLogicPopUp = ({lineRef, rowRef, rowColor}) =>{
     //const [clSel, openClsel] = useState(false);
+    
     return(
         <div css={`padding:10px; padding-top:5px; display:flex; flex-direction:column; background-color:#363636; border:1px solid black; border-radius:4px`}>
             <div css={`width: max-content`} >
@@ -32,8 +34,11 @@ const SrLogicPopUp = ({lineRef, rowRef, rowColor}) =>{
                     type="number"
                     defaultValue={rowRef.current.children[1].scale.y}
                     onChange={(e)=>{
-                        rowRef.current.children[1].scale.y = lineRef.current.scale.y = e.target.value;
-                        lineRef.current.position.y = rowRef.current.position.y - e.target.value/2;
+                        rowRef.current.children[1].scale.y = e.target.value;
+                        lineRef.current.scale.y = e.target.value;
+                        
+                        //lineRef.current.position.y -= e.target.value;
+                        //rowRef.current.position.y -= e.target.value;
                     }}
                     css={`height:13px; position:relative; float:left; width:50px`}
                 />
@@ -56,8 +61,10 @@ export const SrChannelPopUp = ({open, setOpen, lineRef, rowRef, rowColor}) =>{
     const node = useRef();    
     
     const handleClick = e => {
-        if (node.current && node.current.contains(e.target))
+        if (node.current && node.current.contains(e.target)){
+            console.log('---------->', node.current);
             return;// inside click
+        }
         setOpen(false);// outside click
     };
     
@@ -68,8 +75,15 @@ export const SrChannelPopUp = ({open, setOpen, lineRef, rowRef, rowColor}) =>{
         return () => document.removeEventListener("mousedown", handleClick)
     }, []);
     
+    /*
+    useFrame(()=>{
+        const pos = node.current.getWorldPosition();
+        node.current.worldToLocal (pos);
+    });
+    */
+    
     const content =
-        <Html position-x={17} position-y={20} ref={node}>
+        <Html position-x={17} position-y={20} ref={node} >
             <SrLogicPopUp rowRef={rowRef} lineRef={lineRef} rowColor={rowColor}/>
         </Html>
             
