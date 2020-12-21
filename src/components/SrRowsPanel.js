@@ -425,19 +425,20 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef/
             
         }
         
-        if (!mouseRef.current.rmb || rowsGroupRef.current.position.y > size.height/2 - 50){
-            rowsGroupRef.current.position.y = size.height/2 - 50
+        if (!mouseRef.current.rmb || rowsGroupRef.current.position.y > size.height - 100){
+            rowsGroupRef.current.position.y = size.height - 100
         }
         
         if (!rowActionRef.current.down){
             let aoffset = 0
             order.current.map((item, i)=>{
-                aoffset -= order.current[i].height;
-                item.rowsRef.current.position.y = aoffset + order.current[i].height;
-                item.linesRef.current.position.y = aoffset + order.current[i].height;
+                item.rowsRef.current.position.y = aoffset;
+                item.linesRef.current.position.y = aoffset;
                 
-                //item.rowsRef.current.position.y
-                //item.linesRef.current.position.y
+                item.rowsRef.current.position.y -= order.current[i].height;
+                item.linesRef.current.position.y -= order.current[i].height;
+                
+                aoffset -= order.current[i].height;
             })
         }
         
