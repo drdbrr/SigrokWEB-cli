@@ -62,7 +62,6 @@ export const SrChannelPopUp = ({open, setOpen, lineRef, rowRef, rowColor}) =>{
     
     const handleClick = e => {
         if (node.current && node.current.contains(e.target)){
-            console.log('---------->', node.current);
             return;// inside click
         }
         setOpen(false);// outside click

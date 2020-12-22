@@ -3,87 +3,19 @@ import React, { useRef, useMemo, memo, useEffect, useState, useCallback } from '
 import { useThree, useFrame/*, createPortal*/ } from 'react-three-fiber';
 import { Text, Html } from '@react-three/drei';
 import Roboto from '../fonts/Roboto.woff';
-
+import _ from 'lodash';
 import { SrChannelPopUp } from './SrChannelPopUp';
+import { SrRowGroupSlider } from './SrRowGroupSlider';
 
-//added 04/11/2020
+import { SrLogicLine } from './SrLogicLine';
+
 import clamp from 'lodash-es/clamp';
 import swap from 'lodash-move';
 
 import { channelsVar } from '../ApolloClient';
 import { useReactiveVar } from '@apollo/client';
 
-const rowHeight = 50;
-
-const vertexShader =`
-    out vec3 pos;
-    void main() {
-        pos = position;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-    }
-`;
-
-const fragmentShader = `
-    in vec3 pos;
-    vec4 clr = vec4(0.0, 0.0, 0.0, 1.0);    
-    void main() {
-        if(pos.y == 1.0){
-            clr = vec4(0.0, 1.0, 0.0, 1.0);
-        }else if(pos.y == 0.0){
-            clr = vec4(1.0, 0.0, 0.0, 1.0);
-        }
-        gl_FragColor = clr;
-    }
-`;
-
-const SrLine = ({height, i, lineRef}) => {
-    console.log("SR Line:", i);
-    const lineArray = [];
-    for (let i = 0; i < 3000; i++){
-        const val = Math.round(Math.random());
-        lineArray.push(i, val, 0, i + 1, val, 0)
-    }
-    
-    //const arLen = 300000;
-    
-    const lineData = new Float32Array(lineArray);//arLen);
-    
-    /*
-    lineData.set(new Float32Array([0, 0, 0, (arLen / 3) * 50, 0, 0]), 0);
-    useEffect(()=>{
-        lineRef.current.children[0].geometry.setDrawRange(0, 0);
-    });
-    */
-    
-    const args = useMemo(() => {
-        return({
-            uniforms:{
-                //color: { value: new THREE.Color( 0xffffff ) }
-            },
-            vertexShader,
-            fragmentShader,
-            //blending: THREE.AdditiveBlending,
-            //depthTest: false,
-            //transparent: true
-        })
-    },[]);
-    
-    return (
-        <mesh   scale-y={height} ref={lineRef}>
-            <line>
-                <bufferGeometry attach="geometry" >
-                    <bufferAttribute
-                        attachObject={['attributes', 'position']}
-                        count={lineData.length / 3}
-                        array={lineData}
-                        itemSize={3}
-                    />
-                </bufferGeometry>
-                <shaderMaterial attach="material" args={[args]} />
-            </line>
-        </mesh>
-    )
-}
+//const rowHeight = 50;
 
 const labelShape = new THREE.Shape();
     labelShape.moveTo(-14, 8);
@@ -162,7 +94,9 @@ const SrLogicChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActi
     )
 }
 
-//self._analog_channels.append({'name': item.name, 'text':item.name, 'color':colorsArray[i], 'visible':True, 'pVertDivs':1, 'nVertDivs':1, 'divHeight':50, 'vRes':20.0, 'autoranging':True, 'conversion':'', 'convThres':'', 'showTraces':'' })                
+//self._analog_channels.append({'name': item.name, 'text':item.name, 'color':colorsArray[i], 'visible':True, 'pVertDivs':1, 'nVertDivs':1, 'divHeight':50, 'vRes':20.0, 'autoranging':True, 'conversion':'', 'convThres':'', 'showTraces':'' })
+
+
 
 const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, pVertDivs, nVertDivs, divHeight, vRes, autoranging}) =>{
     console.log('SrAnalogChannelRow:', text);
@@ -178,12 +112,14 @@ const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, p
     }, []);
 
     const up = useCallback((e) => {
-        
         if (!rowActionRef.current.moved)
             setPopUp(true);
         
         rowActionRef.current.moved = false;
         rowActionRef.current.down = false;
+        
+        rowActionRef.current.index = null;//????????
+        
         e.stopPropagation();
         e.target.releasePointerCapture(e.pointerId);
     }, []);
@@ -233,28 +169,27 @@ const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, p
     )
 }
 
-const SrRowGroupSlider = ({color, position, height}) =>{
-    const slRef = useRef();
-    
-    /*
-    useEffect(()=>{
-        const size = new THREE.Vector3()
-        slRef.current.geometry.computeBoundingBox();
-        slRef.current.geometry.boundingBox.getSize(size)
-    }, []);
-    */
-    
-    return(
-        <mesh position={position} ref={slRef}>
-            <planeBufferGeometry attach="geometry" args={[50, height]}/>
-            <meshStandardMaterial color={color} roughness={1} />
-        </mesh>
-    )
+function useRowAnimation (arr, rowActionRef, height, lco, vis, gap){
+    useFrame(()=>{
+        if (!rowActionRef.current.down){
+            let offset = 0
+            arr.map((item)=>{
+                const h = parseInt(_.get(item, height));
+                item.rowRef.current.position.y = offset;
+                item.lineRef.current.position.y = offset;
+                item.rowRef.current.position.y -= h;
+                item.lineRef.current.position.y -= h / lco;
+                if (_.get(item, vis))
+                    offset -= h + gap;
+            })
+        }
+    })
+    return null
 }
 
-const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef/*, virtualCam*/})=>{
+const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef})=>{
     console.log('Render SrRowsPannel');
-    const { size, scene, camera, gl } = useThree();
+    const { size } = useThree();
     const barPos = [ (rowsPanelPlaneWidth-size.width)/2, 0, 2];
     const rowActionRef = useRef({ index: null, down: false, moved:false, logicHeight:0, analogHeight:0, dHeight:0});
     
@@ -268,24 +203,15 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef/
     const analogRowsRef = useRef();
     const analogLinesRef = useRef();
     
-    
-    //const [ channelsRows, channelsLines ] = useMemo(()=>{
-    
     const order = useRef([]);
     
-    //([{index:0, logicRowsRef:logicRowsRef, logicLinesRef:logicLinesRef}, {index:1, analogRowsRef:analogRowsRef, analogLinesRef:analogLinesRef }]);
-    
     const [ logicRows, logicLines, analogRows, analogLines ] = useMemo(()=>{
-        //const rows = [];
-        //const lines = [];
-        
         const logicRows = [];
         const logicLines = [];
-        const analogRows = []
-        const analogLines = []
+        const analogRows = [];
+        const analogLines = [];
         
         logic.map((item, i)=>{
-            
             rowActionRef.current.logicHeight += item.traceHeight + 15;
             
             logicRows.push(
@@ -301,7 +227,7 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef/
             />);
             
             logicLines.push(
-            <SrLine
+            <SrLogicLine
                 key={item.name + i + 'srl'}
                 i={i}
                 lineRef={item.lineRef}
@@ -310,7 +236,6 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef/
         });
         
         analog.map((item, i)=>{
-            
             rowActionRef.current.analogHeight += (item.pVertDivs + item.nVertDivs) * item.divHeight;
             
             analogRows.push(
@@ -331,7 +256,7 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef/
             />);
             
             analogLines.push(
-            <SrLine
+            <SrLogicLine
                 key={item.name + i + 'sra'}
                 i={-i + logic.length}
                 lineRef={item.lineRef}
@@ -340,8 +265,8 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef/
         });
         
         order.current = [
-            {index:0, rowsRef:logicRowsRef, linesRef:logicLinesRef, height:rowActionRef.current.logicHeight},
-            {index:1, rowsRef:analogRowsRef, linesRef:analogLinesRef, height:rowActionRef.current.analogHeight}
+            {index:0, rowRef:logicRowsRef, lineRef:logicLinesRef, height:rowActionRef.current.logicHeight},
+            {index:1, rowRef:analogRowsRef, lineRef:analogLinesRef, height:rowActionRef.current.analogHeight}
         ];
         
         return [logicRows, logicLines, analogRows, analogLines]
@@ -349,22 +274,15 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef/
     
     
     //const order = useRef([]);
-    
     //useMemo(()=>logic.map((_, index) =>order.current.push(index)), [logic]);
     
+    setInterval(()=>console.log(rowActionRef.current), 1000);
+    
+    //let prevRow = null;
     useFrame(()=>{
-        rowActionRef.current.logicHeight = logic.reduce((total, obj) =>{
-            if(obj.lineRef.current.visible)
-                return parseInt(obj.lineRef.current.scale.y) + total + 15
-        },0)
+        rowActionRef.current.logicHeight = logic.reduce((total, obj) =>(obj.lineRef.current.visible) ? parseInt(obj.lineRef.current.scale.y) + parseInt(total) + 15 : total, 0);
+        rowActionRef.current.analogHeight = analog.reduce((total, obj) =>(obj.lineRef.current.visible) ? parseInt(obj.pVertDivs + obj.nVertDivs) * obj.divHeight + total + 15 : total, 0);
         
-        rowActionRef.current.analogHeight = analog.reduce((total, obj) =>{
-            if(obj.lineRef.current.visible)
-                return parseInt(obj.pVertDivs + obj.nVertDivs) * obj.divHeight + total + 15
-        },0)
-        
-        //let zm = 0;
-        //analog.map((item)=>)
         /*
         if (rowActionRef.current.down && rowActionRef.current.index !== null && mouseRef.current.dy ){
             const {lineRef, rowRef} = logic[rowActionRef.current.index];
@@ -398,68 +316,48 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef/
             rowActionRef.current.index = null;
         }*/
         
-        //ATTENTION: calculates inner rows positions for logic group row
         if (!rowActionRef.current.down){
-            let offset = 0;
-            let offs = 0
-            logic.map((item, i)=>{
-                item.rowRef.current.position.y = offset;
-                item.lineRef.current.position.y = offset ; 
+            let loffset = 0;
+            logic.map((item)=>{
+                item.rowRef.current.position.y = loffset;
+                item.lineRef.current.position.y = loffset;
                 item.lineRef.current.position.y -= parseInt(item.lineRef.current.scale.y);
                 item.rowRef.current.position.y -= parseInt(item.lineRef.current.scale.y)/2;
                 if (item.lineRef.current.visible)
-                    offset -= parseInt(item.lineRef.current.scale.y) + 8;
+                    loffset -= parseInt(item.lineRef.current.scale.y) + 8;
             });
-            
-            analog.map((item, i)=>{
-                item.lineRef.current.position.y = offs;
-                item.rowRef.current.position.y = offs;
-                
+        }
+        
+        if (!rowActionRef.current.down){
+            let aoffset = 0;
+            analog.map((item)=>{
+                item.lineRef.current.position.y = aoffset;
+                item.rowRef.current.position.y = aoffset;
                 item.lineRef.current.position.y -= (item.pVertDivs + item.nVertDivs) * item.divHeight;
                 item.rowRef.current.position.y -= (item.pVertDivs + item.nVertDivs) * item.divHeight/2;
-                
                 if (item.lineRef.current.visible)
-                    offs -= parseInt(item.pVertDivs + item.nVertDivs) * item.divHeight + 8;
+                    aoffset -= parseInt(item.pVertDivs + item.nVertDivs) * item.divHeight + 8;
             })
-            
-            
         }
         
-        if (!mouseRef.current.rmb || rowsGroupRef.current.position.y > size.height - 100){
+        if (!mouseRef.current.rmb || rowsGroupRef.current.position.y > size.height - 100)
             rowsGroupRef.current.position.y = size.height - 100
-        }
         
         if (!rowActionRef.current.down){
-            let aoffset = 0
+            let offset = 0
             order.current.map((item, i)=>{
-                item.rowsRef.current.position.y = aoffset;
-                item.linesRef.current.position.y = aoffset;
-                
-                item.rowsRef.current.position.y -= order.current[i].height;
-                item.linesRef.current.position.y -= order.current[i].height;
-                
-                aoffset -= order.current[i].height;
+                item.rowRef.current.position.y = offset;
+                item.lineRef.current.position.y = offset;
+                item.rowRef.current.position.y -= item.height;
+                item.lineRef.current.position.y -= item.height;
+                offset -= item.height;
             })
         }
-        
-        
-        //ATTENTION: calculates channels group rows positions
-        /*
-        if (!rowActionRef.current.down){
-            let gg = 0;
-            order.current.map((item, i, arr)=>{
-                item.rowsRef.current.position.y =  gg;
-                item.linesRef.current.position.y = gg;
-                gg += item.height;
-            });
-        }
-        */
-        
-        gl.autoClear = true
-        gl.render(scene, camera)
     });
     
-    console.log(()=>console.log(order.current), 5000);
+    //useRowAnimation(order.current, rowActionRef, 'height', 1, 'height', 0);
+    //useRowAnimation(logic, rowActionRef, 'lineRef.current.scale.y', 2, 'lineRef.current.visible', 8);
+    //useRowAnimation(analog, rowActionRef, 'height', 2, 'lineRef.current.visible');
     
     return(<>
         <mesh position={barPos} >
@@ -482,14 +380,14 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef/
                 { analogRows }
             </group>
             
-                <group position={[-size.width / 2 + 50 + mouseRef.current.cursor, 0, 1]} ref={linesGroupRef}>
-                    <group ref={logicLinesRef}>
-                        { logicLines }
-                    </group>
-                    <group ref={analogLinesRef}>
-                        { analogLines }
-                    </group>
+            <group position={[-size.width / 2 + 50 + mouseRef.current.cursor, 0, 1]} ref={linesGroupRef}>
+                <group ref={logicLinesRef}>
+                    { logicLines }
                 </group>
+                <group ref={analogLinesRef}>
+                    { analogLines }
+                </group>
+            </group>
                 
         </group>
     </>)

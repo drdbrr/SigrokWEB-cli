@@ -12,7 +12,7 @@ import { Client } from '../ApolloClient';
 
 const Layout = ({ws}) =>{
     console.log('Render Layout');
-    const { size, camera } = useThree();
+    const { size, camera, scene, gl } = useThree();
     const linesGroupRef = useRef();
     const rowsGroupRef = useRef();
     const cursorRef = useRef();
@@ -84,6 +84,10 @@ const Layout = ({ws}) =>{
         mouseRef.current.dy = mouseRef.current.cursorY - prevRef.current[1];
         prevRef.current[0] = mouseRef.current.cursor;
         prevRef.current[1] = mouseRef.current.cursorY;
+        
+        
+        gl.autoClear = true
+        gl.render(scene, camera)
     });
 
     const mouseMoveCallback = useCallback( (event)=>{
