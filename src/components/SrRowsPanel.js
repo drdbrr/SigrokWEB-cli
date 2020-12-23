@@ -2,11 +2,14 @@ import * as THREE from 'three';
 import React, { useRef, useMemo, useState, useCallback } from 'react';
 import { useThree, useFrame } from 'react-three-fiber';
 import { Text, Html } from '@react-three/drei';
+
 import { channelsVar } from '../ApolloClient';
 import { useReactiveVar } from '@apollo/client';
+
 import { SrChannelPopUp } from './SrChannelPopUp';
 import { SrRowGroupSlider } from './SrRowGroupSlider';
-import { SrLogicLine } from './SrLogicLine';
+
+import { SrLogicChannelsLines, SrAnalogChannelsLines } from './SrChannelsLines';
 
 import Roboto from '../fonts/Roboto.woff';
 import clamp from 'lodash-es/clamp';
@@ -210,27 +213,6 @@ const SrLogicChannelsRows = ({rowActionRef, order}) =>{
     </>)
 }
 
-const SrLogicChannelsLines = () =>{
-    const { logic } = useReactiveVar(channelsVar);
-    const logicLines = useMemo((item, i)=>{
-        const logicLines = [];
-        logic.map((item, i)=>{
-            logicLines.push(
-                <SrLogicLine
-                    key={item.name + i + 'srl'}
-                    i={i}
-                    lineRef={item.lineRef}
-                    height={item.traceHeight}
-                />);
-        })
-        return logicLines
-    }, [logic]);
-    
-    return <>{ logicLines }</>
-}
-
-
-
 const SrAnalogChannelsRows = ({rowActionRef, order}) =>{
     const { size } = useThree();
     const { analog, logic } = useReactiveVar(channelsVar);
@@ -282,24 +264,6 @@ const SrAnalogChannelsRows = ({rowActionRef, order}) =>{
         />
         { analogRows }
     </>)
-}
-
-const SrAnalogChannelsLines = () =>{
-    const { analog, logic } = useReactiveVar(channelsVar);
-    const analogLines = useMemo((item, i)=>{
-        const analogLines = [];
-        analog.map((item, i)=>{
-            analogLines.push(
-                <SrLogicLine
-                    key={item.name + i + 'sra'}
-                    i={-i + logic.length} //WARNING????????????????
-                    lineRef={item.lineRef}
-                    height={34}
-                />);
-        })
-        return analogLines
-    }, [analog]);
-    return <>{ analogLines }</>
 }
 
 const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef})=>{

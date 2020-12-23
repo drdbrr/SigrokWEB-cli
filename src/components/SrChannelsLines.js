@@ -1,4 +1,6 @@
 import React, { useMemo } from 'react';
+import { channelsVar } from '../ApolloClient';
+import { useReactiveVar } from '@apollo/client';
 
 //https://github.com/mrdoob/three.js/blob/dev/examples/webgl_custom_attributes_lines.html
 const vertexShader =`
@@ -22,8 +24,8 @@ const fragmentShader = `
     }
 `;
 
-export const SrLogicLine = ({height, i, lineRef}) => {
-    console.log("SR Line:", i);
+const SrLogicLine = ({height, lineRef}) => {
+    console.log("SR Line:");
     const lineArray = [];
     for (let i = 0; i < 3000; i++){
         const val = Math.round(Math.random());
@@ -69,4 +71,40 @@ export const SrLogicLine = ({height, i, lineRef}) => {
             </line>
         </mesh>
     )
+} 
+
+
+export const SrLogicChannelsLines = () =>{
+    const { logic } = useReactiveVar(channelsVar);
+    const logicLines = useMemo((item, i)=>{
+        const logicLines = [];
+        logic.map((item, i)=>{
+            logicLines.push(
+                <SrLogicLine
+                    key={item.name + i + 'srl'}
+                    lineRef={item.lineRef}
+                    height={item.traceHeight}
+                />);
+        })
+        return logicLines
+    }, [logic]);
+    
+    return <>{ logicLines }</>
+}
+
+export const SrAnalogChannelsLines = () =>{
+    const { analog } = useReactiveVar(channelsVar);
+    const analogLines = useMemo((item, i)=>{
+        const analogLines = [];
+        analog.map((item, i)=>{
+            analogLines.push(
+                <SrLogicLine
+                    key={item.name + i + 'sra'}
+                    lineRef={item.lineRef}
+                    height={34}
+                />);
+        })
+        return analogLines
+    }, [analog]);
+    return <>{ analogLines }</>
 } 
