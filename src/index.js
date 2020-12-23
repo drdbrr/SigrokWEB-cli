@@ -5,7 +5,6 @@ import { ApolloProvider } from '@apollo/client';
 import { Client } from './ApolloClient';
 import { Helmet } from 'react-helmet';
 import { App } from './containers/App';
-//import App from './components/Pointcloud';
 import packageJson from '../package.json';
 import { Favicon } from './styled/Favicon';
 

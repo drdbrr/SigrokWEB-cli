@@ -1,19 +1,17 @@
 import * as THREE from 'three';
-import React, { useRef, useMemo, memo, useEffect, useState, useCallback } from 'react';
-import { useThree, useFrame/*, createPortal*/ } from 'react-three-fiber';
+import React, { useRef, useMemo, useState, useCallback } from 'react';
+import { useThree, useFrame } from 'react-three-fiber';
 import { Text, Html } from '@react-three/drei';
-import Roboto from '../fonts/Roboto.woff';
-import _ from 'lodash';
-import { SrChannelPopUp } from './SrChannelPopUp';
-import { SrRowGroupSlider } from './SrRowGroupSlider';
-
-import { SrLogicLine } from './SrLogicLine';
-
-import clamp from 'lodash-es/clamp';
-import swap from 'lodash-move';
-
 import { channelsVar } from '../ApolloClient';
 import { useReactiveVar } from '@apollo/client';
+import { SrChannelPopUp } from './SrChannelPopUp';
+import { SrRowGroupSlider } from './SrRowGroupSlider';
+import { SrLogicLine } from './SrLogicLine';
+
+import Roboto from '../fonts/Roboto.woff';
+import clamp from 'lodash-es/clamp';
+import get from 'lodash-es/get';
+import swap from 'lodash-move';
 
 //const rowHeight = 50;
 
@@ -94,15 +92,10 @@ const SrLogicChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActi
     )
 }
 
-//self._analog_channels.append({'name': item.name, 'text':item.name, 'color':colorsArray[i], 'visible':True, 'pVertDivs':1, 'nVertDivs':1, 'divHeight':50, 'vRes':20.0, 'autoranging':True, 'conversion':'', 'convThres':'', 'showTraces':'' })
-
-
-
 const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, pVertDivs, nVertDivs, divHeight, vRes, autoranging}) =>{
     console.log('SrAnalogChannelRow:', text);
-    const [ popUp, setPopUp ] = useState(false);
-    
     const { size } = useThree();
+    const [ popUp, setPopUp ] = useState(false);
     
     const down = useCallback((e) => {
         rowActionRef.current.index = i;
@@ -174,12 +167,12 @@ function useRowAnimation (arr, rowActionRef, height, lco, vis, gap){
         if (!rowActionRef.current.down){
             let offset = 0
             arr.map((item)=>{
-                const h = parseInt(_.get(item, height));
+                const h = parseInt(get(item, height));
                 item.rowRef.current.position.y = offset;
                 item.lineRef.current.position.y = offset;
                 item.rowRef.current.position.y -= h;
                 item.lineRef.current.position.y -= h / lco;
-                if (_.get(item, vis))
+                if (get(item, vis))
                     offset -= h + gap;
             })
         }
@@ -203,7 +196,7 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
     const analogRowsRef = useRef();
     const analogLinesRef = useRef();
     
-    const order = useRef([]);
+    const order = useRef({});
     
     const [ logicRows, logicLines, analogRows, analogLines ] = useMemo(()=>{
         const logicRows = [];
@@ -264,10 +257,10 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
             />);
         });
         
-        order.current = [
-            {index:0, rowRef:logicRowsRef, lineRef:logicLinesRef, height:rowActionRef.current.logicHeight},
-            {index:1, rowRef:analogRowsRef, lineRef:analogLinesRef, height:rowActionRef.current.analogHeight}
-        ];
+        order.current = {
+            logic:{index:0, rowRef:logicRowsRef, lineRef:logicLinesRef, height:rowActionRef.current.logicHeight},
+            analog:{index:1, rowRef:analogRowsRef, lineRef:analogLinesRef, height:rowActionRef.current.analogHeight}
+        };
         
         return [logicRows, logicLines, analogRows, analogLines]
     }, [logic, analog]);
@@ -276,12 +269,10 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
     //const order = useRef([]);
     //useMemo(()=>logic.map((_, index) =>order.current.push(index)), [logic]);
     
-    setInterval(()=>console.log(rowActionRef.current), 1000);
-    
     //let prevRow = null;
     useFrame(()=>{
-        rowActionRef.current.logicHeight = logic.reduce((total, obj) =>(obj.lineRef.current.visible) ? parseInt(obj.lineRef.current.scale.y) + parseInt(total) + 15 : total, 0);
-        rowActionRef.current.analogHeight = analog.reduce((total, obj) =>(obj.lineRef.current.visible) ? parseInt(obj.pVertDivs + obj.nVertDivs) * obj.divHeight + total + 15 : total, 0);
+        order.current.logic.height = rowActionRef.current.logicHeight = logic.reduce((total, obj) =>(obj.lineRef.current.visible) ? parseInt(obj.lineRef.current.scale.y) + parseInt(total) + 15 : total, 0);
+        order.current.analog.height = rowActionRef.current.analogHeight = analog.reduce((total, obj) =>(obj.lineRef.current.visible) ? parseInt(obj.pVertDivs + obj.nVertDivs) * obj.divHeight + total + 15 : total, 0);
         
         /*
         if (rowActionRef.current.down && rowActionRef.current.index !== null && mouseRef.current.dy ){
@@ -340,19 +331,17 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
             })
         }
         
-        if (!mouseRef.current.rmb || rowsGroupRef.current.position.y > size.height - 100)
-            rowsGroupRef.current.position.y = size.height - 100
-        
         if (!rowActionRef.current.down){
             let offset = 0
-            order.current.map((item, i)=>{
+            Object.values(order.current).map((item, i)=>{
                 item.rowRef.current.position.y = offset;
                 item.lineRef.current.position.y = offset;
-                item.rowRef.current.position.y -= item.height;
-                item.lineRef.current.position.y -= item.height;
                 offset -= item.height;
             })
         }
+        
+        if (!mouseRef.current.rmb || rowsGroupRef.current.position.y > size.height/2 - 40)
+            rowsGroupRef.current.position.y = size.height/2 - 40
     });
     
     //useRowAnimation(order.current, rowActionRef, 'height', 1, 'height', 0);

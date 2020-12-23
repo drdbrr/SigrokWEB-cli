@@ -1,4 +1,4 @@
-import React, { useCallback, useState, memo, useRef } from 'react';
+import React, { useCallback, useState } from 'react';
 import { ScSrApp } from '../styled/ScSrApp';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
 import { lightTheme, darkTheme, blueTheme, redTheme } from "../styled/Themes"

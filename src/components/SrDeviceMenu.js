@@ -1,4 +1,4 @@
-import React, { useState, useCallback, } from 'react';
+import React, { useState } from 'react';
 import { ScSrDropDownContent } from '../styled/ScSrDropDownContent';
 import SrDropDownMenu from './SrDropDownMenu';
 
@@ -6,7 +6,6 @@ const SrDeviceMenuContent = ({toggle, drivers, devices, getScanDevices, getDevic
     console.log('Render SrDeviceMenuContent');
     const [devNum, setDevNum] = useState(true);
     const [driver, setDriver] = useState(false);
-    //const scanCb = useCallback((data)=>setDevices(data.scanDevices), []);
     const closeOk = (devNum) =>{
         getDevice(devNum)
         toggle();
@@ -15,7 +14,6 @@ const SrDeviceMenuContent = ({toggle, drivers, devices, getScanDevices, getDevic
     const selectDriver = (event)=>{
         setDriver(event.target.value);
         setDevNum(true);
-        //setDevices([]);
     };
     
     const selectDevNum = (event)=>setDevNum(event.target.tabIndex);
@@ -63,4 +61,3 @@ const SrDeviceMenu = (props) =>{
 }
 
 export default SrDeviceMenu
-//export default onClickOutside(SrDeviceMenu, clickOutsideConfig); 

@@ -1,10 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Html } from '@react-three/drei';
-import { useFrame } from 'react-three-fiber';
 
 const SrLogicPopUp = ({lineRef, rowRef, rowColor}) =>{
-    //const [clSel, openClsel] = useState(false);
-    
     return(
         <div css={`padding:10px; padding-top:5px; display:flex; flex-direction:column; background-color:#363636; border:1px solid black; border-radius:4px`}>
             <div css={`width: max-content`} >
@@ -25,7 +22,6 @@ const SrLogicPopUp = ({lineRef, rowRef, rowColor}) =>{
                 </datalist>
                 */}
             </div>
-
             
             <div css={`width: max-content;padding-top:10px;`} >
                 <span css={`color:white; padding-right: 10px; position:relative; float:left`}>Height:</span>
@@ -36,9 +32,6 @@ const SrLogicPopUp = ({lineRef, rowRef, rowColor}) =>{
                     onChange={(e)=>{
                         rowRef.current.children[1].scale.y = e.target.value;
                         lineRef.current.scale.y = e.target.value;
-                        
-                        //lineRef.current.position.y -= e.target.value;
-                        //rowRef.current.position.y -= e.target.value;
                     }}
                     css={`height:13px; position:relative; float:left; width:50px`}
                 />
@@ -66,20 +59,11 @@ export const SrChannelPopUp = ({open, setOpen, lineRef, rowRef, rowColor}) =>{
         }
         setOpen(false);// outside click
     };
-    
-    const handleChange = () => setOpen(false);
 
     useEffect(() => {
         document.addEventListener("mousedown", handleClick)
         return () => document.removeEventListener("mousedown", handleClick)
     }, []);
-    
-    /*
-    useFrame(()=>{
-        const pos = node.current.getWorldPosition();
-        node.current.worldToLocal (pos);
-    });
-    */
     
     const content =
         <Html position-x={17} position-y={20} ref={node} >

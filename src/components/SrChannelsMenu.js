@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-//import onClickOutside from "react-onclickoutside";
+import React from 'react';
 import { FormDown } from 'grommet-icons';
 import { ScSrDropDownContent } from '../styled/ScSrDropDownContent';
 import { ScSrDropDown } from '../styled/ScSrDropDown';
@@ -7,7 +6,7 @@ import SrDropDownMenu from './SrDropDownMenu';
 
 import { channelsVar } from '../ApolloClient';
 
-const SrChannelsMenuContent=(/*{logic, analog}*/)=>{
+const SrChannelsMenuContent=()=>{
     console.log('Render SrChannelsMenuContent');
     const {logic, analog } = channelsVar();
     const logicChannels = logic.map((item, i)=>{

@@ -1,14 +1,11 @@
-import React, { memo, useRef, useCallback, useMemo, useEffect, useState } from 'react';
-import * as THREE from 'three';
-import { Canvas, useThree, useFrame, extend } from 'react-three-fiber';
+import React, { useRef, useCallback, useMemo } from 'react';
+import { Canvas, useThree, useFrame } from 'react-three-fiber';
+import { ApolloProvider } from '@apollo/client';
+import { Client } from '../ApolloClient';
+
 import SrTimeLine from './SrTimeLine';
 import SrRowsPanel from './SrRowsPanel';
 import SrZeroLine from './SrZeroLine';
-
-import { SrLineOrthoCamera } from './SrLineOrthoCamera';
-
-import { ApolloProvider } from '@apollo/client';
-import { Client } from '../ApolloClient';
 
 const Layout = ({ws}) =>{
     console.log('Render Layout');
@@ -18,18 +15,7 @@ const Layout = ({ws}) =>{
     const cursorRef = useRef();
     const zeroRef = useRef();
     
-    //const virtualCam = useRef(new SrLineOrthoCamera(0, 0, 0, 0, 0.1, 1000));
-    
-    //virtualCam.current.zoom = 1;
-    
     const mouseRef = useRef({ x: 0, y: 0, dx: 0, dy: 0, rmb: false, cursor:0, cursorY:0, /*scaleX: 1,*/ scaleY:50, zoom:1, offset:0, deltaX:0, scale:0.001 });
-    
-    /*
-    setInterval(()=>{
-        mouseRef.current.dx = -1;
-        console.log(mouseRef.current.cursor);
-    }, 100);
-    */
     
     //scale props
     const zoomSpeed = 2;
@@ -40,11 +26,11 @@ const Layout = ({ws}) =>{
     
     const mouseScaleCallback = useCallback( (event)=>{
         let newScale = null;
-        if ( event.deltaY > 0 ) {
+        ( event.deltaY > 0 ) ?
+            newScale = Math.max(Math.min(linesGroupRef.current.scale.x * Math.pow(3/2, -1), maxZoom), minZoom) :
+        //} else { // if ( event.deltaY < 0 ) {
             newScale = Math.max(Math.min(linesGroupRef.current.scale.x * Math.pow(3/2, 1), maxZoom), minZoom);
-        } else { // if ( event.deltaY < 0 ) {
-            newScale = Math.max(Math.min(linesGroupRef.current.scale.x * Math.pow(3/2, -1), maxZoom), minZoom);
-        }
+        //}
         
         const deltaScale = newScale - linesGroupRef.current.scale.x;
         const deltaX = deltaScale * mouseRef.current.x;
@@ -71,24 +57,19 @@ const Layout = ({ws}) =>{
         linesGroupRef.current.scale.x = ns;
         */
         
-        //virtualCam.current.zoom = zoom;
-        //virtualCam.current.updateProjectionMatrix();
     },[]);
     
     const prevRef = useRef([0, 0]);
-    
-    //const testRef =useRef();
-    
     useFrame(()=>{
         mouseRef.current.dx = mouseRef.current.cursor - prevRef.current[0];
         mouseRef.current.dy = mouseRef.current.cursorY - prevRef.current[1];
         prevRef.current[0] = mouseRef.current.cursor;
         prevRef.current[1] = mouseRef.current.cursorY;
-        
-        
         gl.autoClear = true
         gl.render(scene, camera)
     });
+    
+    //const testRef = useRef();
 
     const mouseMoveCallback = useCallback( (event)=>{
         mouseRef.current.x = event.clientX;
@@ -126,8 +107,6 @@ const Layout = ({ws}) =>{
     const upCallback = useCallback((event)=>{
         if (event.button == 2 ){
             mouseRef.current.rmb = false;
-            //mouseRef.current.offset -= linesGroupRef.current.scale.x * mouseRef.current.deltaX;
-            //mouseRef.current.deltaX = 0;
         }
     },[]);
     
@@ -195,7 +174,7 @@ function Lights() {
   )
 }
 
-export const SrCanvas = memo(({ws}) => {
+export const SrCanvas = ({ws}) => {
     console.log('Render SrCanvas');
     const rmbCallback = useCallback((event)=>event.preventDefault(),[]);
     return(<>
@@ -211,4 +190,4 @@ export const SrCanvas = memo(({ws}) => {
             </ApolloProvider>
         </Canvas>
     </>)
-})
+}
