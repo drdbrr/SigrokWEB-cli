@@ -1,37 +1,20 @@
-import React, { useEffect, useRef, useMemo, createRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { SrApp } from '../components/SrApp';
 import { selectedSessionVar, sessionVar, channelsVar } from '../ApolloClient';
-import { useReactiveVar, useQuery, useLazyQuery } from '@apollo/client';
+import { useReactiveVar, useQuery } from '@apollo/client';
 import { GET_SESSION } from '../operations/queries/getSession';
 
 export const App =()=>{
     const id = useReactiveVar(selectedSessionVar);
     
-    //const [loadGreeting, { called, loading, data }] = useLazyQuery(GET_SESSION, { variables:{id: id}, skip: (!id), onCompleted:(session)=>console.log('OOONMNNNGNGNGNNGDDSS') });
-    
     const {data: { session } = {}} = useQuery(GET_SESSION, { variables:{id: id}, skip: (!id), onCompleted:(session)=>{
         sessionVar(session);
-        //loadGreeting();
         channelsVar({logic:[], analog:[]});
-    }
-    });
-    
-    /*
-    const [ analog, logic ] = useMemo(()=>{
-        const analog = [];
-        const logic = [];
-        if (session.data){
-            if(session.data.session.logic.length){
-                session.data.session.logic.map((item)=>logic.push({name:item.name, rowRef:createRef(), lineRef:createRef()}));
-            }
-        }
-        return [ analog, logic ];
-    }, [session.data]);
-    */
+    } });
     
     const ws = useRef(null);
     useEffect(() => {
-        ws.current = new WebSocket('ws://localhost:3000/srsocket');
+        ws.current = new WebSocket('ws://' + window.location.hostname + ':3000/srsocket');
         ws.current.onopen = () => {
             //ws.current.send(JSON.stringify({srpid:srpid}));
             console.log('ws open',);
