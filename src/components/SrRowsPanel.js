@@ -14,7 +14,6 @@ import { SrLogicChannelsRows, SrAnalogChannelsRows } from './SrRowsChannels';
 const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef})=>{
     console.log('Render SrRowsPannel');
     const { size } = useThree();
-    const barPos = [ (rowsPanelPlaneWidth-size.width)/2, 0, 2];
     const rowActionRef = useRef({ index: null, down: false, moved:false, logicHeight:0, analogHeight:0, dHeight:0});
     
     const { logic, analog } = useReactiveVar(channelsVar);
@@ -41,14 +40,10 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
         /*
         if (rowActionRef.current.down && rowActionRef.current.index !== null && mouseRef.current.dy ){
             const {lineRef, rowRef} = logic[rowActionRef.current.index];
-            lineRef.current.position.y = rowRef.current.position.y -= mouseRef.current.dy;
-            lineRef.current.position.y -= 25;
             
             const curRow = clamp(Math.round(rowRef.current.position.y / rowHeight), 0, logic.length - 1);
             
             if( curRow !== prevRow && prevRow !== null){
-                
-                const newOrder = swap(order.current, rowActionRef.current.index, curRow);
                 
                 const ind = order.current.indexOf(rowActionRef.current.index);
                 
@@ -61,6 +56,8 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
             }
             prevRow = curRow;
         }
+        */
+        /*
         if (!rowActionRef.current.down && rowActionRef.current.index !== null){
             const pos = order.current.indexOf(rowActionRef.current.index) * -rowHeight;
             const { lineRef, rowRef } = logic[rowActionRef.current.index];
@@ -68,10 +65,10 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
             lineRef.current.position.y = pos - 17;
             rowActionRef.current.index = null;
         }*/
-//-------------------        
+//-------------------
         if (!rowActionRef.current.down){
             let offset = 0
-            Object.values(order.current).map((item, i)=>{
+            Object.values(order.current).sort( (a,b)=>a.index-b.index ).map((item, i)=>{
                 item.rowRef.current.position.y = offset;
                 item.lineRef.current.position.y = offset;
                 offset -= item.height;
@@ -83,19 +80,19 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
     });
     
     return(<>
-        <mesh position={barPos} >
+        <mesh position={[(rowsPanelPlaneWidth-size.width)/2, 0, 2]}>
             <planeBufferGeometry attach="geometry" args={[rowsPanelPlaneWidth, size.height]}/>
-            <meshStandardMaterial color="#3c3c3c" roughness={0.75} metalness={0.3} />
+            <meshBasicMaterial color="#1F2833" />
         </mesh>
         <group ref={rowsGroupRef} position-y={size.height/2} >
             
             //ATTENTION rows
             <group ref={logicRowsRef}>
-                <SrLogicChannelsRows rowActionRef={rowActionRef} order={order} />
+                <SrLogicChannelsRows logicRowsRef={logicRowsRef} logicLinesRef={logicLinesRef} rowActionRef={rowActionRef} order={order} />
             </group>
             
             <group ref={analogRowsRef}>
-                <SrAnalogChannelsRows rowActionRef={rowActionRef} order={order} />
+                <SrAnalogChannelsRows analogRowsRef={analogRowsRef} analogLinesRef={analogLinesRef} rowActionRef={rowActionRef} order={order} />
             </group>
             
             //ATTENTION lines

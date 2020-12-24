@@ -2,8 +2,9 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Html } from '@react-three/drei';
 
 const SrLogicPopUp = ({lineRef, rowRef, rowColor}) =>{
+    //#363636
     return(
-        <div css={`padding:10px; padding-top:5px; display:flex; flex-direction:column; background-color:#363636; border:1px solid black; border-radius:4px`}>
+        <div css={`padding:10px; padding-top:5px; display:flex; flex-direction:column; background-color:#24384d; border:1px solid black; border-radius:4px`}>
             <div css={`width: max-content`} >
                 <span css={`color:white; padding-right: 10px; position:relative; float:left`}>Name</span>
                 <input css={`height:13px; position:relative; float:left; width:70px`} type="text" list="list" onChange={(e)=>rowRef.current.children[0].children[0].children[0].text = e.target.value} defaultValue={rowRef.current.children[0].children[0].children[0].text} />

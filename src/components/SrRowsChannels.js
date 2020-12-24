@@ -17,8 +17,46 @@ const labelShape = new THREE.Shape();
     
 const labelGeometry = new THREE.ShapeBufferGeometry( labelShape );
 
-const SrRowGroupSlider = ({height, color, position})=>{
+const SrRowGroupSlider = ({height, color, position, rowActionRef, rowsRef, linesRef})=>{
     const slRef = useRef();
+    const matRef = useRef();
+    
+    let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
+    const rgbColor = new THREE.Color( parseInt(result[1], 16) / 1000, parseInt(result[2], 16) / 1000, parseInt(result[3], 16) / 1000)
+    
+    const over = useCallback(()=>{
+        const overColor = new THREE.Color(0.059, 0.089, 0.120);
+        matRef.current.color.set(overColor);
+    }, []);
+    
+    const out = useCallback(()=>{
+        matRef.current.color.set(rgbColor);
+    }, []);
+    
+    
+    const down = useCallback((e) => {
+        //rowActionRef.current.index = i;
+        rowActionRef.current.down = true;
+        e.stopPropagation();
+        e.target.setPointerCapture(e.pointerId);
+    }, []);
+    
+    const up = useCallback((e) => {
+        rowActionRef.current.down = false;
+        e.stopPropagation();
+        e.target.releasePointerCapture(e.pointerId);
+    }, []);
+    
+    const move = useCallback((event) => {
+        if (rowActionRef.current.down && rowActionRef.current.index === null) {
+            //rowActionRef.current.moved = true;
+            event.stopPropagation();
+            //slRef.current.position.y -= event.movementY;
+            //lineRef.current.position.y -= lineRef.current.scale.y / 2;
+            rowsRef.current.position.y = linesRef.current.position.y -= event.movementY;
+        }
+    }, []);
+    
     /*
     useEffect(()=>{
         const size = new THREE.Vector3()
@@ -27,9 +65,9 @@ const SrRowGroupSlider = ({height, color, position})=>{
     }, []);
     */
     return(
-        <mesh position={position} ref={slRef} >
+        <mesh position={position} ref={slRef} onPointerUp={up} onPointerDown={down} onPointerMove={move} onPointerOut={out} onPointerOver={over} >
             <planeBufferGeometry attach="geometry" args={[50, height]}/>
-            <meshStandardMaterial color={color} roughness={1} />
+            <meshStandardMaterial attach="material" color={color} ref={matRef}/>
         </mesh>
     )
 }
@@ -45,6 +83,7 @@ const SrLogicChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActi
         rowActionRef.current.down = true;
         e.stopPropagation();
         e.target.setPointerCapture(e.pointerId);
+        console.log(e)
     }, []);
 
     const up = useCallback((e) => {
@@ -54,6 +93,7 @@ const SrLogicChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActi
         
         rowActionRef.current.moved = false;
         rowActionRef.current.down = false;
+        rowActionRef.current.index = null;
         e.stopPropagation();
         e.target.releasePointerCapture(e.pointerId);
     }, []);
@@ -68,19 +108,19 @@ const SrLogicChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActi
         }
     }, []);
     
+    const matRef = useRef();
+    
     const over = useCallback(()=>{
-        rowRef.current.children[0].children[1].material.color.set('red');
+        matRef.current.color.set('red');
     }, []);
     
     const out = useCallback(()=>{
-        rowRef.current.children[0].children[1].material.color.set(rowColor);
+        matRef.current.color.set(rowColor)
     }, []);
-    
-    
     
     return(
         <group ref={rowRef} >
-            <group position={[-size.width/2+35, 0, 2]}>
+            <group position={[-size.width/2+35, 0, 3]}>
                 <mesh position={[-3, 0, 0]}>
                     <Text
                         fontSize={12}
@@ -89,7 +129,7 @@ const SrLogicChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActi
                     >{text}</Text>
                 </mesh>
                 <mesh geometry={labelGeometry} onPointerUp={up} onPointerDown={down} onPointerMove={move} onPointerOut={out} onPointerOver={over} >
-                    <meshStandardMaterial color={rowColor} />
+                    <meshStandardMaterial color={rowColor} ref={matRef} />
                 </mesh>
                 
                 <SrChannelPopUp open={popUp} rowColor={rowColor} setOpen={setPopUp} rowRef={rowRef} lineRef={lineRef} />
@@ -103,7 +143,7 @@ const SrLogicChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActi
     )
 }
 
-export const SrLogicChannelsRows = ({rowActionRef, order}) =>{
+export const SrLogicChannelsRows = ({rowActionRef, order, logicRowsRef, logicLinesRef}) =>{
     const { size } = useThree();
     const { logic } = useReactiveVar(channelsVar);
     const logicRows = useMemo(()=>{
@@ -143,6 +183,11 @@ export const SrLogicChannelsRows = ({rowActionRef, order}) =>{
     
     return (<>
         <SrRowGroupSlider
+            
+            rowsRef={logicRowsRef}
+            linesRef={logicLinesRef}
+        
+            rowActionRef={rowActionRef}
             height={rowActionRef.current.logicHeight-60}
             color={'#24384d'}
             position={[-size.width/2+25, -rowActionRef.current.logicHeight/2+32, 2]}
@@ -177,7 +222,7 @@ const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, p
     }, []);
     
     const move = useCallback((event) => {
-        if (rowActionRef.current.down) {
+        if (rowActionRef.current.down && rowActionRef.current.index === i) {
             rowActionRef.current.moved = true;
             event.stopPropagation();
             
@@ -221,7 +266,7 @@ const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, p
     )
 }
 
-export const SrAnalogChannelsRows = ({rowActionRef, order}) =>{
+export const SrAnalogChannelsRows = ({rowActionRef, order, analogRowsRef, analogLinesRef}) =>{
     const { size } = useThree();
     const { analog, logic } = useReactiveVar(channelsVar);
     const analogRows = useMemo(()=>{
@@ -231,7 +276,7 @@ export const SrAnalogChannelsRows = ({rowActionRef, order}) =>{
             analogRows.push(
                 <SrAnalogChannelRow
                     key={item.name + i}
-                    i={-i + logic.length}
+                    i={logic.length + i}
                     text={item.name}
                     rowRef={item.rowRef}
                     lineRef={item.lineRef}
@@ -266,6 +311,9 @@ export const SrAnalogChannelsRows = ({rowActionRef, order}) =>{
     
     return (<>
         <SrRowGroupSlider
+            rowsRef={analogRowsRef}
+            linesRef={analogLinesRef}
+            rowActionRef={rowActionRef}
             height={rowActionRef.current.analogHeight}
             color={'#31363b'}
             position={[-size.width/2+25, -rowActionRef.current.logicHeight/2-15, 2]}
