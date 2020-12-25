@@ -17,7 +17,7 @@ const labelShape = new THREE.Shape();
     
 const labelGeometry = new THREE.ShapeBufferGeometry( labelShape );
 
-const SrRowGroupSlider = ({height, color, position, rowActionRef, rowsRef, linesRef})=>{
+const SrRowGroupSlider = ({order, height, color, position, rowActionRef, rowsRef, linesRef, type})=>{
     const slRef = useRef();
     const matRef = useRef();
     
@@ -33,27 +33,41 @@ const SrRowGroupSlider = ({height, color, position, rowActionRef, rowsRef, lines
         matRef.current.color.set(rgbColor);
     }, []);
     
-    
     const down = useCallback((e) => {
-        //rowActionRef.current.index = i;
+        rowActionRef.current.index = order.current[type].index;
         rowActionRef.current.down = true;
+        rowActionRef.current.type = type;
+        //rowActionRef.current.index = i;
         e.stopPropagation();
         e.target.setPointerCapture(e.pointerId);
     }, []);
     
     const up = useCallback((e) => {
         rowActionRef.current.down = false;
+        rowActionRef.current.type = null;
         e.stopPropagation();
         e.target.releasePointerCapture(e.pointerId);
     }, []);
     
     const move = useCallback((event) => {
-        if (rowActionRef.current.down && rowActionRef.current.index === null) {
+        if (rowActionRef.current.down && rowActionRef.current.type === type/*rowActionRef.current.index === order.current[type].index*/) {
             //rowActionRef.current.moved = true;
             event.stopPropagation();
             //slRef.current.position.y -= event.movementY;
             //lineRef.current.position.y -= lineRef.current.scale.y / 2;
             rowsRef.current.position.y = linesRef.current.position.y -= event.movementY;
+            
+            const prevRow = Object.values(order.current).find( x => order.current[type].index - 1 === x.index)
+            const nextRow = Object.values(order.current).find( x => order.current[type].index + 1 === x.index)
+            
+            if (rowsRef.current.position.y >= prevRow.rowRef.current.position.y - 200){
+                const i = order.current[type].index;
+                
+                order.current[type].index = prevRow.index;
+                prevRow.index = i;
+            }
+            
+
         }
     }, []);
     
@@ -183,7 +197,8 @@ export const SrLogicChannelsRows = ({rowActionRef, order, logicRowsRef, logicLin
     
     return (<>
         <SrRowGroupSlider
-            
+            order={order}
+            type={'logic'}
             rowsRef={logicRowsRef}
             linesRef={logicLinesRef}
         
@@ -311,6 +326,8 @@ export const SrAnalogChannelsRows = ({rowActionRef, order, analogRowsRef, analog
     
     return (<>
         <SrRowGroupSlider
+            order={order}
+            type={'analog'}
             rowsRef={analogRowsRef}
             linesRef={analogLinesRef}
             rowActionRef={rowActionRef}

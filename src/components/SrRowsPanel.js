@@ -5,7 +5,7 @@ import { useReactiveVar } from '@apollo/client';
 import { SrLogicChannelsLines, SrAnalogChannelsLines } from './SrChannelsLines';
 import { SrLogicChannelsRows, SrAnalogChannelsRows } from './SrRowsChannels';
 
-//import clamp from 'lodash-es/clamp';
+import clamp from 'lodash-es/clamp';
 //import get from 'lodash-es/get';
 //import swap from 'lodash-move';
 
@@ -14,7 +14,7 @@ import { SrLogicChannelsRows, SrAnalogChannelsRows } from './SrRowsChannels';
 const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef})=>{
     console.log('Render SrRowsPannel');
     const { size } = useThree();
-    const rowActionRef = useRef({ index: null, down: false, moved:false, logicHeight:0, analogHeight:0, dHeight:0});
+    const rowActionRef = useRef({ index: null, down: false, moved:false, logicHeight:0, analogHeight:0, dHeight:0, type:null});
     
     const { logic, analog } = useReactiveVar(channelsVar);
     
@@ -27,8 +27,8 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
     const analogLinesRef = useRef();
     
     const order = useRef({
-            logic:{index:0, rowRef:logicRowsRef, lineRef:logicLinesRef, height:rowActionRef.current.logicHeight},
-            analog:{index:1, rowRef:analogRowsRef, lineRef:analogLinesRef, height:rowActionRef.current.analogHeight}
+            logic:{index:0, type:'logic', rowRef:logicRowsRef, lineRef:logicLinesRef, height:rowActionRef.current.logicHeight},
+            analog:{index:1, type:'analog', rowRef:analogRowsRef, lineRef:analogLinesRef, height:rowActionRef.current.analogHeight}
         });
     
     //const order = useRef([]);
@@ -38,11 +38,13 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
     useFrame(()=>{
 //-------------------        
         /*
-        if (rowActionRef.current.down && rowActionRef.current.index !== null && mouseRef.current.dy ){
+        if (rowActionRef.current.down && rowActionRef.current.index !== null){
             const {lineRef, rowRef} = logic[rowActionRef.current.index];
             
             const curRow = clamp(Math.round(rowRef.current.position.y / rowHeight), 0, logic.length - 1);
+    */
             
+            /*
             if( curRow !== prevRow && prevRow !== null){
                 
                 const ind = order.current.indexOf(rowActionRef.current.index);
@@ -55,8 +57,8 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
                 ff.rowRef.current.position.y = pp;
             }
             prevRow = curRow;
-        }
-        */
+            */
+        //}
         /*
         if (!rowActionRef.current.down && rowActionRef.current.index !== null){
             const pos = order.current.indexOf(rowActionRef.current.index) * -rowHeight;
@@ -66,14 +68,16 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
             rowActionRef.current.index = null;
         }*/
 //-------------------
-        if (!rowActionRef.current.down){
+        //if (!rowActionRef.current.down){
             let offset = 0
-            Object.values(order.current).sort( (a,b)=>a.index-b.index ).map((item, i)=>{
-                item.rowRef.current.position.y = offset;
-                item.lineRef.current.position.y = offset;
-                offset -= item.height;
+            Object.values(order.current).sort( (a,b)=> a.index - b.index ).map((item, i)=>{
+                if (item.type !== rowActionRef.current.type){
+                    item.rowRef.current.position.y = offset;
+                    item.lineRef.current.position.y = offset;
+                    offset -= item.height;
+                }
             })
-        }
+        //}
         
         if (!mouseRef.current.rmb || rowsGroupRef.current.position.y > size.height/2 - 40)
             rowsGroupRef.current.position.y = size.height/2 - 40

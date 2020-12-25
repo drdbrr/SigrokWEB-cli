@@ -156,14 +156,13 @@ const Layout = ({ws}) =>{
     )
 }
 
-
 function Lights() {
   return (
     <group>
       <ambientLight intensity={0.77} />
       <spotLight
         castShadow
-        intensity={0}
+        intensity={1}
         angle={Math.PI / 7}
         position={[150, 150, 250]}
         penumbra={1}
