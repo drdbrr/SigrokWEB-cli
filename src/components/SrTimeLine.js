@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import React, { useRef, useMemo } from 'react';
 import { useFrame, useThree } from 'react-three-fiber';
 import { Text } from '@react-three/drei';

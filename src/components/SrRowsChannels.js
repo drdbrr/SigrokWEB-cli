@@ -1,4 +1,5 @@
-import * as THREE from 'three';
+//import * as THREE from 'three';
+import { Shape as ThShape, ShapeBufferGeometry as ThShapeBufferGeometry, Color as ThColor } from 'three';
 import React, { useRef, useMemo, useState, useCallback } from 'react';
 import { useThree, useFrame } from 'react-three-fiber';
 import { Text, Html } from '@react-three/drei';
@@ -8,24 +9,24 @@ import Roboto from '../fonts/Roboto.woff';
 import { channelsVar } from '../ApolloClient';
 import { useReactiveVar } from '@apollo/client';
 
-const labelShape = new THREE.Shape();
+const labelShape = new ThShape();
     labelShape.moveTo(-14, 8);
     labelShape.lineTo(5,8);
     labelShape.lineTo(15,0);
     labelShape.lineTo(5,-8);
     labelShape.lineTo(-14,-8);
     
-const labelGeometry = new THREE.ShapeBufferGeometry( labelShape );
+const labelGeometry = new ThShapeBufferGeometry( labelShape );
 
 const SrRowGroupSlider = ({order, height, color, position, rowActionRef, rowsRef, linesRef, type})=>{
     const slRef = useRef();
     const matRef = useRef();
     
     let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
-    const rgbColor = new THREE.Color( parseInt(result[1], 16) / 1000, parseInt(result[2], 16) / 1000, parseInt(result[3], 16) / 1000)
+    const rgbColor = new ThColor( parseInt(result[1], 16) / 1000, parseInt(result[2], 16) / 1000, parseInt(result[3], 16) / 1000)
     
     const over = useCallback(()=>{
-        const overColor = new THREE.Color(0.059, 0.089, 0.120);
+        const overColor = new ThColor(0.059, 0.089, 0.120);
         matRef.current.color.set(overColor);
     }, []);
     
