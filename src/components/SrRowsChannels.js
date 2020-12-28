@@ -3,7 +3,7 @@ import { Shape as ThShape, ShapeBufferGeometry as ThShapeBufferGeometry, Color a
 import React, { useRef, useMemo, useState, useCallback } from 'react';
 import { useThree, useFrame } from 'react-three-fiber';
 import { Text, Html } from '@react-three/drei';
-import { SrChannelPopUp } from './SrChannelPopUp';
+import { SrAnalogPopUp, SrLogicPopUp } from './SrChannelPopUp';
 //import { SrRowGroupSlider } from './SrRowGroupSlider';
 import Roboto from '../fonts/Roboto.woff';
 import { channelsVar } from '../ApolloClient';
@@ -147,7 +147,7 @@ const SrLogicChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActi
                     <meshStandardMaterial color={rowColor} ref={matRef} />
                 </mesh>
                 
-                <SrChannelPopUp open={popUp} rowColor={rowColor} setOpen={setPopUp} rowRef={rowRef} lineRef={lineRef} />
+                <SrLogicPopUp open={popUp} rowColor={rowColor} setOpen={setPopUp} rowRef={rowRef} lineRef={lineRef} />
 
             </group>
             <mesh scale-y={height}>
@@ -269,7 +269,7 @@ const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, p
                     <meshStandardMaterial color={rowColor} />
                 </mesh>
                 
-                <SrChannelPopUp open={popUp} rowColor={rowColor} setOpen={setPopUp} rowRef={rowRef} lineRef={lineRef} pVertDivs={pVertDivs} nVertDivs={nVertDivs} divHeight={divHeight} vRes={vRes} autoranging={autoranging} />
+                <SrAnalogPopUp open={popUp} rowColor={rowColor} setOpen={setPopUp} rowRef={rowRef} lineRef={lineRef} pVertDivs={pVertDivs} nVertDivs={nVertDivs} divHeight={divHeight} vRes={vRes} autoranging={autoranging} />
 
             </group>
             

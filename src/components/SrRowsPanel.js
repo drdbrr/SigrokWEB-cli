@@ -18,6 +18,8 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
     
     const { logic, analog } = useReactiveVar(channelsVar);
     
+    console.log('---->', channelsVar());
+    
     const decoders = [];
     
     const logicRowsRef = useRef();
