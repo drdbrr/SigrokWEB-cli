@@ -4,49 +4,39 @@ import { Html } from '@react-three/drei';
 const SrLogicPopUpContent = ({lineRef, rowRef, rowColor}) =>{
     //#363636
     return(
-        <div css={`padding:10px; padding-top:5px; display:flex; flex-direction:column; background-color:#24384d; border:1px solid black; border-radius:4px`}>
-            <div css={`width: max-content`} >
-                <span css={`color:white; padding-right: 10px; position:relative; float:left`}>Name</span>
-                <input css={`height:13px; position:relative; float:left; width:70px`} type="text" list="list" onChange={(e)=>rowRef.current.children[0].children[0].children[0].text = e.target.value} defaultValue={rowRef.current.children[0].children[0].children[0].text} />
-                {/*
-                <datalist id="list">
-                    <option>DATA</option>
-                    <option>CLK</option>
-                    <option>EN</option>
-                    <option>IN</option>
-                    <option>OUT</option>
-                    <option>RX</option>
-                    <option>TX</option>
-                    <option>SDA</option>
-                    <option>SCL</option>
-                    <option>RST</option>
-                </datalist>
-                */}
-            </div>
-            
-            <div css={`width: max-content;padding-top:10px;`} >
-                <span css={`color:white; padding-right: 10px; position:relative; float:left`}>Height:</span>
-                <input 
-                    name='hg'
-                    type="number"
-                    defaultValue={rowRef.current.children[1].scale.y}
-                    onChange={(e)=>{
-                        rowRef.current.children[1].scale.y = e.target.value;
-                        lineRef.current.scale.y = e.target.value;
-                    }}
-                    css={`height:13px; position:relative; float:left; width:50px`}
-                />
-            </div>
-            
-            <div css={`width: max-content;padding-top:10px;`} >
-                <span css={` color:white; padding-right: 10px; position:relative; float:left`}>Color:</span>
-                <div css={`float:left;background-color: #474747;border: 1px solid black; border-radius: 3px; padding:6px;`}>
+        <div css={`padding:10px; padding-top:5px; background-color:#24384d; border:1px solid black; border-radius:4px;`}>
+            <table css={`color:white; white-space: nowrap;`}>
+                <tr>
+                    <td>Name</td>
+                    <td>
+                        <input css={`width:70px`} type="text" list="list" onChange={(e)=>rowRef.current.children[0].children[0].children[0].text = e.target.value} defaultValue={rowRef.current.children[0].children[0].children[0].text} />
+                    </td>
+                </tr>
+                <tr>
+                    <td>Color</td>
+                    <td>
+                        <div css={`float:left;background-color: #4c647f; border: 1px solid black; border-radius: 3px; padding:6px;`}>
+                            <div css={`width:50px; height:8px; background-color:${rowColor};`}></div>
+                        </div>
+                    </td>
+                </tr>
                 
-                    <div css={`width:50px; height:8px; background-color:${rowColor};`}></div>
-                
-                </div>
-            </div>
-            
+                <tr>
+                    <td>Height</td>
+                    <td>
+                        <input 
+                            name='hg'
+                            type="number"
+                            defaultValue={rowRef.current.children[1].scale.y}
+                            onChange={(e)=>{
+                                rowRef.current.children[1].scale.y = e.target.value;
+                                lineRef.current.scale.y = e.target.value;
+                            }}
+                            css={`height:13px; position:relative; float:left; width:50px`}
+                        />
+                    </td>
+                </tr>
+            </table>
         </div>
     )
 }
