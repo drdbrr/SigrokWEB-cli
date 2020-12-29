@@ -37,6 +37,7 @@ const SrLogicPopUpContent = ({lineRef, rowRef, rowColor}) =>{
                     css={`height:13px; position:relative; float:left; width:50px`}
                 />
             </div>
+            
             <div css={`width: max-content;padding-top:10px;`} >
                 <span css={` color:white; padding-right: 10px; position:relative; float:left`}>Color:</span>
                 <div css={`float:left;background-color: #474747;border: 1px solid black; border-radius: 3px; padding:6px;`}>
@@ -45,6 +46,7 @@ const SrLogicPopUpContent = ({lineRef, rowRef, rowColor}) =>{
                 
                 </div>
             </div>
+            
         </div>
     )
 }
@@ -77,90 +79,108 @@ export const SrLogicPopUp = ({open, setOpen, lineRef, rowRef, rowColor}) =>{
 
 const SrAnalogPopUpContent = ({lineRef, rowRef, rowColor, pVertDivs, nVertDivs, divHeight, vRes, autoranging}) =>{
     return(
-        <div css={`padding:10px; padding-top:5px; display:flex; flex-direction:column; background-color:#24384d; border:1px solid black; border-radius:4px`}>
-            <div css={`width: max-content`} >
-                <span css={`color:white; padding-right: 10px; position:relative; float:left`}>Name</span>
-                <input css={`height:13px; position:relative; float:left; width:70px`} type="text" list="list" onChange={(e)=>rowRef.current.children[0].children[0].children[0].text = e.target.value} defaultValue={rowRef.current.children[0].children[0].children[0].text} />
-            </div>
-            <div css={`width: max-content;padding-top:10px;`} >
-                <span css={` color:white; padding-right: 10px; position:relative; float:left`}>Color:</span>
-                <div css={`float:left;background-color: #474747;border: 1px solid black; border-radius: 3px; padding:6px;`}>
+        <div css={`padding:10px; padding-top:5px; background-color:#24384d; border:1px solid black; border-radius:4px;`}>
+    
+            <table css={`color:white; white-space: nowrap;`}>
+                <tr>
+                    <td>Name</td>
+                    <td>
+                        <input css={`width:70px`} type="text" list="list" onChange={(e)=>rowRef.current.children[0].children[0].children[0].text = e.target.value} defaultValue={rowRef.current.children[0].children[0].children[0].text} />
+                    </td>
+                </tr>
+                <tr>
+                    <td>Color</td>
+                    <td>
+                        <div css={`float:left;background-color: #4c647f; border: 1px solid black; border-radius: 3px; padding:6px;`}>
+                            <div css={`width:50px; height:8px; background-color:${rowColor};`}></div>
+                        </div>
+                    </td>
+                </tr>
                 
-                    <div css={`width:50px; height:8px; background-color:${rowColor};`}></div>
+                <tr>
+                    <td>Pos divs</td>
+                    <td>
+                        <input
+                            name='hg'
+                            type="number"
+                            defaultValue={pVertDivs}
+                            onChange={(e)=>{
+                                rowRef.current.children[1].scale.y = e.target.value;
+                                lineRef.current.scale.y = e.target.value;
+                            }}
+                            css={`height:13px; position:relative; float:left; width:50px`}
+                        />
+                    </td>
+                </tr>
                 
-                </div>
-            </div>
-            
-            
-            <div css={`width: max-content;padding-top:10px;`} >
-                <span css={`color:white; padding-right: 10px; position:relative; float:left`}>Pos divs:</span>
-                <input 
-                    name='hg'
-                    type="number"
-                    defaultValue={pVertDivs}
-                    onChange={(e)=>{
-                        rowRef.current.children[1].scale.y = e.target.value;
-                        lineRef.current.scale.y = e.target.value;
-                    }}
-                    css={`height:13px; position:relative; float:left; width:50px`}
-                />
-            </div>
-            
-            <div css={`width: max-content;padding-top:10px;`} >
-                <span css={`color:white; padding-right: 10px; position:relative; float:left`}>Neg divs:</span>
-                <input 
-                    name='hg'
-                    type="number"
-                    defaultValue={nVertDivs}
-                    onChange={(e)=>{
-                        rowRef.current.children[1].scale.y = e.target.value;
-                        lineRef.current.scale.y = e.target.value;
-                    }}
-                    css={`height:13px; position:relative; float:left; width:50px`}
-                />
-            </div>
-            
-            
-            <div css={`width: max-content;padding-top:10px;`} >
-                <span css={`color:white; padding-right: 10px; position:relative; float:left`}>Div height:</span>
-                <input 
-                    name='hg'
-                    type="number"
-                    defaultValue={divHeight}
-                    onChange={(e)=>{
-                        rowRef.current.children[1].scale.y = e.target.value;
-                        lineRef.current.scale.y = e.target.value;
-                    }}
-                    css={`height:13px; position:relative; float:left; width:50px`}
-                />
-            </div>
-            
-            <div css={`width: max-content;padding-top:10px;`} >
-                <span css={`color:white; padding-right: 10px; position:relative; float:left`}>Vertical resolution:</span>
+                <tr>
+                    <td>Neg divs</td>
+                    <td>
+                        <input
+                            name='hg'
+                            type="number"
+                            defaultValue={nVertDivs}
+                            onChange={(e)=>{
+                                rowRef.current.children[1].scale.y = e.target.value;
+                                lineRef.current.scale.y = e.target.value;
+                            }}
+                            css={`height:13px; position:relative; float:left; width:50px`}
+                        />
+                    </td>
+                </tr>
                 
+                <tr>
+                    <td>Div height</td>
+                    <td>
+                        <input 
+                            name='hg'
+                            type="number"
+                            defaultValue={divHeight}
+                            onChange={(e)=>{
+                                rowRef.current.children[1].scale.y = e.target.value;
+                                lineRef.current.scale.y = e.target.value;
+                            }}
+                            css={`height:13px; position:relative; float:left; width:50px`}
+                        />
+                    </td>
+                </tr>
                 
-                <select defaultValue={ 'DEFAULT' } css={`backgroundColor:#015c93; height:20px`} >
-                    <option value="DEFAULT">{vRes}</option>
+                <tr>
+                    <td>Vertical resolution</td>
+                    <td>
+                        <select defaultValue={ 'DEFAULT' } css={`backgroundColor:#015c93; height:20px`} >
+                            <option value="DEFAULT">{vRes}</option>
+                        </select>
+                    </td>
+                </tr>
                 
-                        { /*drivers.map((item, i)=>
-                            <option key={i} value={item} >{item}</option>
-                        ) */}
-                </select>
+                <tr>
+                    <td>Conversion</td>
+                    <td>
+                        <select defaultValue={ 'DEFAULT' } css={`backgroundColor:#015c93; height:20px`} >
+                            <option value="DEFAULT">none</option>
+                        </select>
+                    </td>
+                </tr>
                 
+                <tr>
+                    <td>Conversion thres</td>
+                    <td>
+                        <select disabled defaultValue={ 'DEFAULT' } css={`backgroundColor:#015c93; height:20px`} >
+                            <option value="DEFAULT">none</option>
+                        </select>
+                    </td>
+                </tr>
                 
-            </div>
-            
-            
-            
-            
-            <div css={`width: max-content;padding-top:10px;`} >
-                <div css={`color:white; padding-right: 10px; position:relative; float:left`}>
-                    <input defaultChecked={autoranging} type="checkbox" />
-                    <label css={`color:white`}>Autoranging</label>
-                </div>
-            </div>
-            
-            
+                <tr>
+                    <td>Show traces</td>
+                    <td>
+                        <select disabled defaultValue={ 'DEFAULT' } css={`backgroundColor:#015c93; height:20px`} >
+                            <option value="DEFAULT">none</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
         </div>
     )
 }

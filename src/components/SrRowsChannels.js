@@ -81,7 +81,7 @@ const SrRowGroupSlider = ({order, height, color, position, rowActionRef, rowsRef
     */
     return(
         <mesh position={position} ref={slRef} onPointerUp={up} onPointerDown={down} onPointerMove={move} onPointerOut={out} onPointerOver={over} >
-            <planeBufferGeometry attach="geometry" args={[50, height]}/>
+            <planeBufferGeometry attach="geometry" args={[25, height]}/>
             <meshStandardMaterial attach="material" color={color} ref={matRef}/>
         </mesh>
     )
@@ -206,7 +206,7 @@ export const SrLogicChannelsRows = ({rowActionRef, order, logicRowsRef, logicLin
             rowActionRef={rowActionRef}
             height={rowActionRef.current.logicHeight-60}
             color={'#24384d'}
-            position={[-size.width/2+25, -rowActionRef.current.logicHeight/2+32, 2]}
+            position={[-size.width/2+12, -rowActionRef.current.logicHeight/2+32, 2]}
         />
         { logicRows }
     </>)
@@ -273,8 +273,13 @@ const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, p
 
             </group>
             
-            <mesh>
-                <planeBufferGeometry attach="geometry" args={[size.width , 1]}/>
+            <mesh position-y={divHeight/2}>
+                <planeBufferGeometry attach="geometry" args={[size.width , divHeight]}/>
+                <meshBasicMaterial attach="material" transparent opacity={0.2}  color={rowColor} />
+            </mesh>
+            
+            <mesh position-y={-divHeight/2} >
+                <planeBufferGeometry attach="geometry" args={[size.width , divHeight]}/>
                 <meshBasicMaterial attach="material" transparent opacity={0.2}  color={rowColor} />
             </mesh>
             
@@ -334,7 +339,7 @@ export const SrAnalogChannelsRows = ({rowActionRef, order, analogRowsRef, analog
             rowActionRef={rowActionRef}
             height={rowActionRef.current.analogHeight}
             color={'#31363b'}
-            position={[-size.width/2+25, -rowActionRef.current.logicHeight/2-15, 2]}
+            position={[-size.width/2+12, -rowActionRef.current.logicHeight/2-15, 2]}
         />
         { analogRows }
     </>)
