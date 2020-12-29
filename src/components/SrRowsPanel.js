@@ -5,7 +5,7 @@ import { useReactiveVar } from '@apollo/client';
 import { SrLogicChannelsLines, SrAnalogChannelsLines } from './SrChannelsLines';
 import { SrLogicChannelsRows, SrAnalogChannelsRows } from './SrRowsChannels';
 
-import clamp from 'lodash-es/clamp';
+//import clamp from 'lodash-es/clamp';
 //import get from 'lodash-es/get';
 //import swap from 'lodash-move';
 
