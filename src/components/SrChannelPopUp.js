@@ -68,6 +68,11 @@ export const SrLogicPopUp = ({open, setOpen, lineRef, rowRef, rowColor}) =>{
 }
 
 const SrAnalogPopUpContent = ({lineRef, rowRef, rowColor, pVertDivs, nVertDivs, divHeight, vRes, autoranging}) =>{
+    
+    const nDivsRef= useRef();
+    const pDivsRef= useRef();
+    const hDivRef= useRef();
+    
     return(
         <div css={`padding:10px; padding-top:5px; background-color:#24384d; border:1px solid black; border-radius:4px;`}>
     
@@ -91,12 +96,21 @@ const SrAnalogPopUpContent = ({lineRef, rowRef, rowColor, pVertDivs, nVertDivs, 
                     <td>Pos divs</td>
                     <td>
                         <input
+                            ref={pDivsRef}
                             name='hg'
                             type="number"
                             defaultValue={pVertDivs}
                             onChange={(e)=>{
-                                rowRef.current.children[1].scale.y = e.target.value;
-                                lineRef.current.scale.y = e.target.value;
+                                const pHeight = e.target.value * hDivRef.current.value;
+                                
+                                const g = new Float32Array ([-840, pHeight - 17, 0, 840, pHeight - 17, 0, -840, -17, 0, 840, -17, 0]);
+                                
+                                rowRef.current.children[1].geometry.attributes.position.array = g;
+                                
+                                rowRef.current.children[1].geometry.attributes.position.needsUpdate = true;
+                                
+                                rowRef.current.children[3].position.y = pHeight;
+                                
                             }}
                             css={`height:13px; position:relative; float:left; width:50px`}
                         />
@@ -107,12 +121,20 @@ const SrAnalogPopUpContent = ({lineRef, rowRef, rowColor, pVertDivs, nVertDivs, 
                     <td>Neg divs</td>
                     <td>
                         <input
+                            ref={nDivsRef}
                             name='hg'
                             type="number"
                             defaultValue={nVertDivs}
                             onChange={(e)=>{
-                                rowRef.current.children[1].scale.y = e.target.value;
-                                lineRef.current.scale.y = e.target.value;
+                                const nHeight = e.target.value * hDivRef.current.value;
+                                
+                                const g = new Float32Array ([-840, -nHeight - 17, 0, 840, -nHeight - 17, 0, -840, -17, 0, 840, -17, 0]);
+                                
+                                rowRef.current.children[2].geometry.attributes.position.array = g;
+                                
+                                rowRef.current.children[2].geometry.attributes.position.needsUpdate = true;
+                                
+                                rowRef.current.children[4].position.y = -nHeight;
                             }}
                             css={`height:13px; position:relative; float:left; width:50px`}
                         />
@@ -122,13 +144,32 @@ const SrAnalogPopUpContent = ({lineRef, rowRef, rowColor, pVertDivs, nVertDivs, 
                 <tr>
                     <td>Div height</td>
                     <td>
-                        <input 
+                        <input
+                            ref={hDivRef}
                             name='hg'
                             type="number"
                             defaultValue={divHeight}
                             onChange={(e)=>{
-                                rowRef.current.children[1].scale.y = e.target.value;
-                                lineRef.current.scale.y = e.target.value;
+                                const pHeight = pDivsRef.current.value * e.target.value;
+                                const nHeight = nDivsRef.current.value * e.target.value;
+                                
+                                const pg = new Float32Array ([-840, pHeight - 17, 0, 840, pHeight - 17, 0, -840, -17, 0, 840, -17, 0]);
+                                
+                                const ng = new Float32Array ([
+                                -840, 17, 0,
+                                840, 17, 0,
+                                -840, -nHeight + 17, 0,
+                                840, -nHeight + 17, 0]);
+                                
+                                rowRef.current.children[1].geometry.attributes.position.array = pg;
+                                rowRef.current.children[2].geometry.attributes.position.array = ng;
+                                
+                                rowRef.current.children[1].geometry.attributes.position.needsUpdate = true;
+                                rowRef.current.children[2].geometry.attributes.position.needsUpdate = true;
+                                
+                                rowRef.current.children[3].position.y = pHeight;
+                                rowRef.current.children[4].position.y = -nHeight;
+                                
                             }}
                             css={`height:13px; position:relative; float:left; width:50px`}
                         />

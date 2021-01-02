@@ -1,21 +1,21 @@
 import { Vector3, BufferGeometry, LineDashedMaterial, Line } from 'three';
 import React, { useEffect, useState } from 'react';
 
-const SrZeroLine = ({zeroRef}) =>{
-    console.log('Render ZeroLine');
+const DashedLine = ({posY}) =>{
     const points = [];
-    points.push( new Vector3( 0, -1000, 0 ) );
-    points.push( new Vector3( 0, 1000, 0 ) );
+    points.push( new Vector3( -1000, 0, 0 ) );
+    points.push( new Vector3( 1000, 0, 0 ) );
 
     const lineGeometry = new BufferGeometry().setFromPoints( points );
-    const lineMaterial = new LineDashedMaterial( { color: 0x131418, linewidth: 2, dashSize: 10, gapSize: 10 } );
+    const lineMaterial = new LineDashedMaterial( { color: 'black', linewidth: 1, dashSize: 3, gapSize: 4 } );
     const [line] = useState(() => new Line(lineGeometry, lineMaterial));
 
     useEffect(()=>line.computeLineDistances(), []);
     
     return (
-        <primitive dispose={undefined} object={line} ref={zeroRef} />
+        <primitive position-y={posY} dispose={undefined} object={line} />
     )
 } 
 
-export default SrZeroLine;
+export default DashedLine;
+ 

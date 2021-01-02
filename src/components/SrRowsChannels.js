@@ -9,6 +9,8 @@ import Roboto from '../fonts/Roboto.woff';
 import { channelsVar } from '../ApolloClient';
 import { useReactiveVar } from '@apollo/client';
 
+import DashedLine from './DashedLine';
+
 const labelShape = new ThShape();
     labelShape.moveTo(-14, 8);
     labelShape.lineTo(5,8);
@@ -282,6 +284,11 @@ const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, p
                 <planeBufferGeometry attach="geometry" args={[size.width , divHeight]}/>
                 <meshBasicMaterial attach="material" transparent opacity={0.2}  color={rowColor} />
             </mesh>
+            
+            <DashedLine posY={divHeight}/>
+            <DashedLine posY={-divHeight}/>
+            
+            <DashedLine posY={0}/>
             
         </group>
     )
