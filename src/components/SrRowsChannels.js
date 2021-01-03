@@ -335,7 +335,7 @@ export const SrAnalogChannelsRows = ({rowActionRef, order, analogRowsRef, analog
             let aoffset = 0;
             analog.map((item)=>{
                 
-                const h = item.rowRef.current.children[1].geometry.attributes.position.array[1] + Math.abs(item.rowRef.current.children[2].geometry.attributes.position.array[7]);
+                const h = item.rowRef.current.children[1].geometry.attributes.position.array[1]// + Math.abs(item.rowRef.current.children[2].geometry.attributes.position.array[7]);
                 
                 console.log(h);
                 
@@ -344,7 +344,7 @@ export const SrAnalogChannelsRows = ({rowActionRef, order, analogRowsRef, analog
                 item.lineRef.current.position.y -= h;//(item.pVertDivs + item.nVertDivs) * item.divHeight;
                 item.rowRef.current.position.y -= h;//(item.pVertDivs + item.nVertDivs) * item.divHeight/2;
                 if (item.lineRef.current.visible)
-                    aoffset -= h + Math.abs(item.rowRef.current.children[2].geometry.attributes.position.array[7]) - 30;//parseInt(item.pVertDivs + item.nVertDivs) * item.divHeight + 8;
+                    aoffset -= h + Math.abs(item.rowRef.current.children[2].geometry.attributes.position.array[7]) + 5;//parseInt(item.pVertDivs + item.nVertDivs) * item.divHeight + 8;
             })
         }
     });
