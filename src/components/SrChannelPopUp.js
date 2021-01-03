@@ -1,6 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Html } from '@react-three/drei';
 
+import { channelsVar } from '../ApolloClient';
+import { useReactiveVar } from '@apollo/client';
+
 const SrLogicPopUpContent = ({lineRef, rowRef, rowColor}) =>{
     //#363636
     return(
@@ -67,11 +70,18 @@ export const SrLogicPopUp = ({open, setOpen, lineRef, rowRef, rowColor}) =>{
     return (<>{ open && content }</>)
 }
 
-const SrAnalogPopUpContent = ({lineRef, rowRef, rowColor, pVertDivs, nVertDivs, divHeight, vRes, autoranging}) =>{
+const SrAnalogPopUpContent = ({text, lineRef, rowRef, rowColor, pVertDivs, nVertDivs, divHeight, vRes, autoranging}) =>{
     
     const nDivsRef= useRef();
     const pDivsRef= useRef();
     const hDivRef= useRef();
+    
+    const channels = useReactiveVar(channelsVar);
+    
+    useEffect(()=>{
+        const item = channels.analog.find((i)=>i.name === text);
+        pDivsRef.current.value = item.pVertDivs;
+    }, []);
     
     return(
         <div css={`padding:10px; padding-top:5px; background-color:#24384d; border:1px solid black; border-radius:4px;`}>
@@ -111,6 +121,14 @@ const SrAnalogPopUpContent = ({lineRef, rowRef, rowColor, pVertDivs, nVertDivs, 
                                 
                                 rowRef.current.children[3].position.y = pHeight;
                                 
+                                const newChannels = {...channels};
+                                
+                                const ind = newChannels.analog.findIndex((i)=>i.name === text);
+                                
+                                newChannels.analog[ind].pVertDivs = parseInt(e.target.value);
+                                
+                                channelsVar(newChannels);
+                                console.log('---->', channelsVar());
                             }}
                             css={`height:13px; position:relative; float:left; width:50px`}
                         />
@@ -216,13 +234,15 @@ const SrAnalogPopUpContent = ({lineRef, rowRef, rowColor, pVertDivs, nVertDivs, 
     )
 }
 
-export const SrAnalogPopUp = ({open, setOpen, lineRef, rowRef, rowColor, pVertDivs, nVertDivs, divHeight, vRes, autoranging}) =>{
+export const SrAnalogPopUp = ({text, open, setOpen, lineRef, rowRef, rowColor, pVertDivs, nVertDivs, divHeight, vRes, autoranging}) =>{
     console.log('Render SrChannelPopUp');
 
-    const toggle = () =>setOpen(!open);
+    //const toggle = () =>setOpen(!open);
+    
     const node = useRef();    
 
     const handleClick = e => {
+        //console.log('---->', channelsVar());
         if (node.current && node.current.contains(e.target)){
             return;// inside click
         }
@@ -237,6 +257,7 @@ export const SrAnalogPopUp = ({open, setOpen, lineRef, rowRef, rowColor, pVertDi
     const content =
         <Html position-x={17} position-y={20} ref={node} >
             <SrAnalogPopUpContent
+                text={text}
                 lineRef={lineRef}
                 rowRef={rowRef}
                 rowColor={rowColor}

@@ -278,7 +278,7 @@ const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, p
                     <meshStandardMaterial color={rowColor} />
                 </mesh>
                 
-                <SrAnalogPopUp open={popUp} rowColor={rowColor} setOpen={setPopUp} rowRef={rowRef} lineRef={lineRef} pVertDivs={pVertDivs} nVertDivs={nVertDivs} divHeight={divHeight} vRes={vRes} autoranging={autoranging} />
+                <SrAnalogPopUp text={text} open={popUp} rowColor={rowColor} setOpen={setPopUp} rowRef={rowRef} lineRef={lineRef} pVertDivs={pVertDivs} nVertDivs={nVertDivs} divHeight={divHeight} vRes={vRes} autoranging={autoranging} />
 
             </group>
             
@@ -334,10 +334,7 @@ export const SrAnalogChannelsRows = ({rowActionRef, order, analogRowsRef, analog
         if (!rowActionRef.current.down){
             let aoffset = 0;
             analog.map((item)=>{
-                
                 const h = item.rowRef.current.children[1].geometry.attributes.position.array[1]// + Math.abs(item.rowRef.current.children[2].geometry.attributes.position.array[7]);
-                
-                console.log(h);
                 
                 item.lineRef.current.position.y = aoffset;
                 item.rowRef.current.position.y = aoffset;
