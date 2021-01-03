@@ -1,6 +1,6 @@
 //import * as THREE from 'three';
 import { Shape as ThShape, ShapeBufferGeometry as ThShapeBufferGeometry, Color as ThColor } from 'three';
-import React, { useRef, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useMemo, useState, useCallback } from 'react';
 import { useThree, useFrame } from 'react-three-fiber';
 import { Text, Html } from '@react-three/drei';
 import { SrAnalogPopUp, SrLogicPopUp } from './SrChannelPopUp';
@@ -245,7 +245,6 @@ const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, p
             event.stopPropagation();
             
             lineRef.current.position.y = rowRef.current.position.y -= event.movementY;
-            lineRef.current.position.y -= lineRef.current.scale.y / 2;
         }
     }, []);
     
@@ -255,6 +254,14 @@ const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, p
     
     const out = useCallback(()=>{
         rowRef.current.children[0].children[1].material.color.set(rowColor);
+    }, []);
+    
+    useEffect(()=>{
+        const pg = new Float32Array ([-840, divHeight, 0, 840, divHeight, 0, -840, 0, 0, 840, 0, 0]);
+        const ng = new Float32Array ([-840, 0, 0, 840, 0, 0, -840, -divHeight, 0, 840, -divHeight, 0]);
+        rowRef.current.children[1].geometry.attributes.position.array = pg;
+        rowRef.current.children[2].geometry.attributes.position.array = ng;
+        console.log('--->', rowRef.current.children[3].position);
     }, []);
     
     return(
@@ -275,13 +282,13 @@ const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, p
 
             </group>
             
-            <mesh position-y={divHeight/2}>
-                <planeBufferGeometry attach="geometry" args={[size.width , divHeight]}/>
+            <mesh>
+                <planeBufferGeometry attach="geometry" args={[size.width , 0]}/>
                 <meshBasicMaterial attach="material" transparent opacity={0.2}  color={rowColor} />
             </mesh>
             
-            <mesh position-y={-divHeight/2} >
-                <planeBufferGeometry attach="geometry" args={[size.width , divHeight]}/>
+            <mesh>
+                <planeBufferGeometry attach="geometry" args={[size.width , 0]}/>
                 <meshBasicMaterial attach="material" transparent opacity={0.2}  color={rowColor} />
             </mesh>
             
@@ -327,12 +334,17 @@ export const SrAnalogChannelsRows = ({rowActionRef, order, analogRowsRef, analog
         if (!rowActionRef.current.down){
             let aoffset = 0;
             analog.map((item)=>{
+                
+                const h = item.rowRef.current.children[1].geometry.attributes.position.array[1] + Math.abs(item.rowRef.current.children[2].geometry.attributes.position.array[7]);
+                
+                console.log(h);
+                
                 item.lineRef.current.position.y = aoffset;
                 item.rowRef.current.position.y = aoffset;
-                item.lineRef.current.position.y -= (item.pVertDivs + item.nVertDivs) * item.divHeight;
-                item.rowRef.current.position.y -= (item.pVertDivs + item.nVertDivs) * item.divHeight/2;
+                item.lineRef.current.position.y -= h;//(item.pVertDivs + item.nVertDivs) * item.divHeight;
+                item.rowRef.current.position.y -= h;//(item.pVertDivs + item.nVertDivs) * item.divHeight/2;
                 if (item.lineRef.current.visible)
-                    aoffset -= parseInt(item.pVertDivs + item.nVertDivs) * item.divHeight + 8;
+                    aoffset -= h + Math.abs(item.rowRef.current.children[2].geometry.attributes.position.array[7]) - 30;//parseInt(item.pVertDivs + item.nVertDivs) * item.divHeight + 8;
             })
         }
     });

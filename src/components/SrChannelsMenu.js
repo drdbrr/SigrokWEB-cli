@@ -54,7 +54,7 @@ const SrChannelsMenuContent=()=>{
     
     return(
         <ScSrDropDownContent>
-        <div>
+        <div css={`padding-bottom: 10px`} >
             { logic ? 
                 <SrChannelsMenuEntries group={logic} label={'Logic'}/>
                 : null

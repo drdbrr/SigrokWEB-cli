@@ -103,7 +103,7 @@ const SrAnalogPopUpContent = ({lineRef, rowRef, rowColor, pVertDivs, nVertDivs, 
                             onChange={(e)=>{
                                 const pHeight = e.target.value * hDivRef.current.value;
                                 
-                                const g = new Float32Array ([-840, pHeight - 17, 0, 840, pHeight - 17, 0, -840, -17, 0, 840, -17, 0]);
+                                const g = new Float32Array ([-840, pHeight, 0, 840, pHeight, 0, -840, 0, 0, 840, 0, 0]);
                                 
                                 rowRef.current.children[1].geometry.attributes.position.array = g;
                                 
@@ -128,7 +128,7 @@ const SrAnalogPopUpContent = ({lineRef, rowRef, rowColor, pVertDivs, nVertDivs, 
                             onChange={(e)=>{
                                 const nHeight = e.target.value * hDivRef.current.value;
                                 
-                                const g = new Float32Array ([-840, -nHeight - 17, 0, 840, -nHeight - 17, 0, -840, -17, 0, 840, -17, 0]);
+                                const g = new Float32Array ([-840, 0, 0, 840, 0, 0, -840, -nHeight, 0, 840, -nHeight, 0]);
                                 
                                 rowRef.current.children[2].geometry.attributes.position.array = g;
                                 
@@ -153,13 +153,13 @@ const SrAnalogPopUpContent = ({lineRef, rowRef, rowColor, pVertDivs, nVertDivs, 
                                 const pHeight = pDivsRef.current.value * e.target.value;
                                 const nHeight = nDivsRef.current.value * e.target.value;
                                 
-                                const pg = new Float32Array ([-840, pHeight - 17, 0, 840, pHeight - 17, 0, -840, -17, 0, 840, -17, 0]);
+                                const pg = new Float32Array ([-840, pHeight, 0, 840, pHeight, 0, -840, 0, 0, 840, 0, 0]);
                                 
                                 const ng = new Float32Array ([
-                                -840, 17, 0,
-                                840, 17, 0,
-                                -840, -nHeight + 17, 0,
-                                840, -nHeight + 17, 0]);
+                                -840, 0, 0,
+                                840, 0, 0,
+                                -840, -nHeight, 0,
+                                840, -nHeight, 0]);
                                 
                                 rowRef.current.children[1].geometry.attributes.position.array = pg;
                                 rowRef.current.children[2].geometry.attributes.position.array = ng;
