@@ -14,7 +14,7 @@ const GlobalStyle = createGlobalStyle`
     }
 `;
 
-export const SrApp = ({ws, session}) =>{
+export const SrApp = ({ws, btnRef, session}) =>{
     console.log('Render SrApp');
     const [ decoderMenu, setDecoderMenul ] = useState(false);
     const [ tabularMenu, setTabularMenu ] = useState(false);
@@ -39,6 +39,7 @@ export const SrApp = ({ws, session}) =>{
                     toggleTabularMenu={toggleTabularMenu}
                     session={session}
                     ws={ws}
+                    btnRef={btnRef}
                 />
                 <SrCanvas ws={ws}/>
                 { (decoderMenu) ? <SrDecoderMenu /> : null }

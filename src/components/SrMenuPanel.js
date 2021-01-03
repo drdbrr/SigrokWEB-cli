@@ -7,7 +7,9 @@ import { Samplerates } from '../containers/Samplerates';
 import { Samples } from '../containers/Samples';
 import { SessionsMenu } from '../containers/SessionsMenu';
 
-export const SrMenuPanel = ({toggleDecoderMenu, toggleTabularMenu, session, logic}) =>{
+import SrRunButton from './SrRunButton';
+
+export const SrMenuPanel = ({ ws, btnRef, toggleDecoderMenu, toggleTabularMenu, session }) =>{
     console.log('Render SrMenuPanel');
     return(
         <ScSrMenuPanel>
@@ -27,6 +29,11 @@ export const SrMenuPanel = ({toggleDecoderMenu, toggleTabularMenu, session, logi
             
             { (session.channels && (session.channels.includes('LOGIC') || session.channels.includes('ANALOG')) )?
                 <ChannelsMenu />
+                : null
+            }
+            
+            { (session.type) ?
+                <SrRunButton ref={btnRef} ws={ws} />
                 : null
             }
             

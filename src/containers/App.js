@@ -7,10 +7,13 @@ import { GET_SESSION } from '../operations/queries/getSession';
 export const App =()=>{
     const id = useReactiveVar(selectedSessionVar);
     
-    const {data: { session } = {}} = useQuery(GET_SESSION, { variables:{id: id}, skip: (!id), onCompleted:(session)=>{
-        sessionVar(session);
+    const { data: { session } = {} } = useQuery(GET_SESSION, { variables:{id: id}, skip: (!id), onCompleted:(session)=>{
+        //sessionVar(session);
+        console.log('--->', session);
         channelsVar({logic:[], analog:[]});
     } });
+    
+    const btnRef = useRef();
     
     const ws = useRef(null);
     useEffect(() => {
@@ -21,9 +24,9 @@ export const App =()=>{
         };
         ws.current.onmessage = (msg) => {
             const sample = JSON.parse(msg.data);
-            //console.log("ws RX data:", sample);
-            /*
+            console.log("ws RX data:", sample);
             if (sample.type == 'data'){
+                /*
                 chanRef.current.logic.map((item)=>{
                     const { data, pos, range } = sample.data[item.name];
                     const mesh_data = new Float32Array( data );
@@ -31,11 +34,12 @@ export const App =()=>{
                     item.lineRef.current.setDrawRange(range[0], range[1]);
                     item.lineRef.current.attributes.position.needsUpdate = true;
                 });
+                */
+                console.log(sample.data);
             }
             else if (sample.type == 'config'){
-                setRun(sample.sessionRun);
+                btnRef.current.setRun(sample.sessionRun);
             }
-            */
         };
         return () => {
             ws.current.close();
@@ -43,6 +47,6 @@ export const App =()=>{
     }, []);
     
     return(
-        <SrApp ws={ws} session={session ? session : {}}/>
+        <SrApp btnRef={btnRef} ws={ws} session={session ? session : {}}/>
     )
 }
