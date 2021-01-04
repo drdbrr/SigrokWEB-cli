@@ -4,23 +4,13 @@ import { selectedSessionVar, sessionVar, channelsVar } from '../ApolloClient';
 import { useReactiveVar, useQuery } from '@apollo/client';
 import { GET_SESSION } from '../operations/queries/getSession';
 
-export const App =()=>{
-    const id = useReactiveVar(selectedSessionVar);
+const SrWs = ({ws, id}) =>{
     
-    const { data: { session } = {} } = useQuery(GET_SESSION, { variables:{id: id}, skip: (!id), onCompleted:(session)=>{
-        //sessionVar(session);
-        console.log('--->', session);
-        channelsVar({logic:[], analog:[]});
-    } });
-    
-    const btnRef = useRef();
-    
-    const ws = useRef(null);
     useEffect(() => {
         ws.current = new WebSocket('ws://' + window.location.hostname + ':3000/srsocket');
         ws.current.onopen = () => {
-            //ws.current.send(JSON.stringify({srpid:srpid}));
-            console.log('ws open',);
+            ws.current.send(JSON.stringify({id:id}));
+            console.log('ws open', id);
         };
         ws.current.onmessage = (msg) => {
             const sample = JSON.parse(msg.data);
@@ -46,7 +36,26 @@ export const App =()=>{
         }
     }, []);
     
-    return(
+    return null
+}
+
+export const App =()=>{
+    const id = useReactiveVar(selectedSessionVar);
+    
+    const { data: { session } = {} } = useQuery(GET_SESSION, { variables:{id: id}, skip: (!id), onCompleted:(session)=>{
+        //sessionVar(session);
+        console.log('--->', session);
+        channelsVar({logic:[], analog:[]});
+    } });
+    
+    const btnRef = useRef();
+    
+    const ws = useRef(null);
+    
+    
+    return(<>
         <SrApp btnRef={btnRef} ws={ws} session={session ? session : {}}/>
+        { (id) ? <SrWs ws={ws} id={id}/> : null}
+        </>
     )
 }

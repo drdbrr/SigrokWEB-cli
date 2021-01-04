@@ -9,6 +9,7 @@ const SELECT_DEVICE = gql`
         selectDevice(id:$id, devNum:$devNum){
             id
             name
+            type
             sourcename
             config
             channels
