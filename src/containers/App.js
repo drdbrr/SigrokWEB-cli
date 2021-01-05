@@ -48,9 +48,7 @@ export const App =()=>{
     } });
     
     const btnRef = useRef();
-    
     const ws = useRef(null);
-    
     
     return(<>
         <SrApp btnRef={btnRef} ws={ws} session={session ? session : {}}/>

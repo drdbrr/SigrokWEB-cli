@@ -1,7 +1,5 @@
 import React, { useRef, useState, useImperativeHandle, forwardRef } from 'react';
 import { ScSrButton } from '../styled/ScSrButton';
-import statusGrey from '../styled/icons/status-grey.svg';
-
 import { CirclePlay, PauseFill }  from 'grommet-icons';
 
 const SrRunButton = forwardRef(({ ws }, ref) =>{
