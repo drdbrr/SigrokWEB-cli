@@ -2,29 +2,21 @@ import React, { useRef, useState, useImperativeHandle, forwardRef } from 'react'
 import { ScSrButton } from '../styled/ScSrButton';
 import statusGrey from '../styled/icons/status-grey.svg';
 
-import { CirclePlay }  from 'grommet-icons';
-
-const SrRunButtonn = ({ws, btnRef}) =>{
-    const [ isRun, setRun ] = useState(false);
-    return(
-        <ScSrButton css={`float:left; padding-right:7px;`} onClick={ ()=> ws.current.send(JSON.stringify({session_run:!isRun})) } >
-            <span>{ isRun ? 'Stop' : 'Run' }</span>
-            <CirclePlay color="white" size='small'/>
-            {/*<img css={`height:15px`} src={statusGrey} className="App-logo" alt="logo" />*/}
-        </ScSrButton>
-    )
-}
+import { CirclePlay, PauseFill }  from 'grommet-icons';
 
 const SrRunButton = forwardRef(({ ws }, ref) =>{
     const [ isRun, setRun ] = useState(false);
     
-    useImperativeHandle(ref, () => (setRun));
+    useImperativeHandle(ref, () => ({
+        startAcq(f){
+            setRun(f);
+        }
+    }));
     
     return(
         <ScSrButton css={`float:left; padding-right:7px;`} onClick={ ()=> ws.current.send(JSON.stringify({session_run:!isRun})) } >
-            <span>{ isRun ? 'Stop' : 'Run' }</span>
-            <CirclePlay color="white" size='small'/>
-            {/*<img css={`height:15px`} src={statusGrey} className="App-logo" alt="logo" />*/}
+            <span css={`width:25px`} >{ isRun ? 'Stop' : 'Run' }</span>
+            { isRun ? <PauseFill color="red" size="small" /> : <CirclePlay color="#3BD16F" size="small" /> }
         </ScSrButton>
     )
 })

@@ -4,7 +4,7 @@ import { selectedSessionVar, sessionVar, channelsVar } from '../ApolloClient';
 import { useReactiveVar, useQuery } from '@apollo/client';
 import { GET_SESSION } from '../operations/queries/getSession';
 
-const SrWs = ({ws, id}) =>{
+const SrWs = ({ws, id, btnRef}) =>{
     
     useEffect(() => {
         ws.current = new WebSocket('ws://' + window.location.hostname + ':3000/srsocket');
@@ -28,7 +28,7 @@ const SrWs = ({ws, id}) =>{
                 console.log(sample.data);
             }
             else if (sample.type == 'config'){
-                btnRef.current.setRun(sample.sessionRun);
+                btnRef.current.startAcq(sample.sessionRun);
             }
         };
         return () => {
@@ -44,7 +44,6 @@ export const App =()=>{
     
     const { data: { session } = {} } = useQuery(GET_SESSION, { variables:{id: id}, skip: (!id), onCompleted:(session)=>{
         //sessionVar(session);
-        console.log('--->', session);
         channelsVar({logic:[], analog:[]});
     } });
     
@@ -55,7 +54,7 @@ export const App =()=>{
     
     return(<>
         <SrApp btnRef={btnRef} ws={ws} session={session ? session : {}}/>
-        { (id) ? <SrWs ws={ws} id={id}/> : null}
+        { (id) ? <SrWs ws={ws} btnRef={btnRef} id={id}/> : null}
         </>
     )
 }
