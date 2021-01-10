@@ -50,16 +50,18 @@ const SrChannelsMenuEntries = ({group, label}) =>{
 
 const SrChannelsMenuContent=()=>{
     console.log('Render SrChannelsMenuContent');
-    const {logic, analog } = channelsVar();
+    const { logic, analog } = channelsVar();
+    
+    console.log('channelsVar---------------->', channelsVar());
     
     return(
         <ScSrDropDownContent>
         <div css={`padding-bottom: 10px`} >
-            { logic ? 
+            { logic.length ? 
                 <SrChannelsMenuEntries group={logic} label={'Logic'}/>
                 : null
             }
-            { analog ? 
+            { analog.length ? 
                 <SrChannelsMenuEntries group={analog} label={'Analog'}/>
                 : null
             }

@@ -15,7 +15,21 @@ const SrWs = ({ws, id, btnRef}) =>{
         ws.current.onmessage = (msg) => {
             const sample = JSON.parse(msg.data);
             console.log("ws RX data:", sample);
-            if (sample.type == 'data'){
+            
+            switch(sample.type){
+                case 'data':
+                    console.log('ws data:', sample.data);
+                    break;
+                case 'config':
+                    //if ('sessionRun' in sample) btnRef.current.startAcq(sample.sessionRun);
+                    //else if ('pck_cnt' in sample) console.log('cnt--->', sample.pck_cnt);
+                    btnRef.current.startAcq(sample.sessionRun);
+                    break;
+                case 'cnt':
+                    console.log('cnt--->', sample.pck_cnt);
+                    break;
+            }
+            
                 /*
                 chanRef.current.logic.map((item)=>{
                     const { data, pos, range } = sample.data[item.name];
@@ -25,11 +39,6 @@ const SrWs = ({ws, id, btnRef}) =>{
                     item.lineRef.current.attributes.position.needsUpdate = true;
                 });
                 */
-                console.log(sample.data);
-            }
-            else if (sample.type == 'config'){
-                btnRef.current.startAcq(sample.sessionRun);
-            }
         };
         return () => {
             ws.current.close();
