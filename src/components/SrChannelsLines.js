@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { channelsVar } from '../ApolloClient';
 import { useReactiveVar } from '@apollo/client';
 
@@ -25,23 +25,22 @@ const fragmentShader = `
 `;
 
 const SrLogicLine = ({height, lineRef}) => {
-    console.log("SR Line:");
+    console.log("SrLogicLine");
+    /*
     const lineArray = [];
     for (let i = 0; i < 3000; i++){
         const val = Math.round(Math.random());
         lineArray.push(i, val, 0, i + 1, val, 0)
     }
+    */
+    const arLen = 300000;
     
-    //const arLen = 300000;
+    const lineData = new Float32Array(arLen);
     
-    const lineData = new Float32Array(lineArray);//arLen);
-    
-    /*
     lineData.set(new Float32Array([0, 0, 0, (arLen / 3) * 50, 0, 0]), 0);
     useEffect(()=>{
         lineRef.current.children[0].geometry.setDrawRange(0, 0);
     });
-    */
     
     const args = useMemo(() => {
         return({
@@ -57,7 +56,7 @@ const SrLogicLine = ({height, lineRef}) => {
     },[]);
     
     return (
-        <mesh   scale-y={height} ref={lineRef}>
+        <mesh scale-y={height} ref={lineRef}>
             <line>
                 <bufferGeometry attach="geometry" >
                     <bufferAttribute
@@ -92,16 +91,43 @@ export const SrLogicChannelsLines = () =>{
     return <>{ logicLines }</>
 }
 
+const SrAnalogLine = ({lineRef}) =>{
+    console.log('SrAnalogLine');
+    const arLen = 300000;
+    
+    const lineData = new Float32Array(arLen);
+    
+    lineData.set(new Float32Array([0, 0, 0, (arLen / 3) * 50, 0, 0]), 0);
+    useEffect(()=>{
+        lineRef.current.children[0].geometry.setDrawRange(0, 0);
+    });
+    
+    return(
+        <mesh ref={lineRef}>
+            <line>
+                <bufferGeometry attach="geometry">
+                    <bufferAttribute
+                        attachObject={['attributes', 'position']}
+                        count={lineData.length / 3}
+                        array={lineData}
+                        itemSize={3}
+                    />
+                </bufferGeometry>
+                <lineBasicMaterial attach="material" color="blue"/>
+            </line>
+        </mesh>
+    )
+}
+
 export const SrAnalogChannelsLines = () =>{
     const { analog } = useReactiveVar(channelsVar);
     const analogLines = useMemo((item, i)=>{
         const analogLines = [];
         analog.map((item, i)=>{
             analogLines.push(
-                <SrLogicLine
+                <SrAnalogLine
                     key={item.name + i + 'sra'}
                     lineRef={item.lineRef}
-                    height={34}
                 />);
         })
         return analogLines

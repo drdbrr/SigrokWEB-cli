@@ -82,7 +82,16 @@ const SrRowGroupSlider = ({order, height, color, position, rowActionRef, rowsRef
     }, []);
     */
     return(
-        <mesh position={position} ref={slRef} onPointerUp={up} onPointerDown={down} onPointerMove={move} onPointerOut={out} onPointerOver={over} >
+        <mesh
+            visible={false}
+            position={position}
+            ref={slRef}
+            onPointerUp={up}
+            onPointerDown={down}
+            onPointerMove={move}
+            onPointerOut={out}
+            onPointerOver={over}
+        >
             <planeBufferGeometry attach="geometry" args={[25, height]}/>
             <meshStandardMaterial attach="material" color={color} ref={matRef}/>
         </mesh>

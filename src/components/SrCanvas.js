@@ -39,6 +39,7 @@ const Layout = ({ws}) =>{
         zeroRef.current.position.x -= deltaX;
         mouseRef.current.cursor += deltaX;        
         linesGroupRef.current.scale.x = newScale;
+        ws.current.send(JSON.stringify( {scale: newScale} ));
 
         /*
         let ns = null;
