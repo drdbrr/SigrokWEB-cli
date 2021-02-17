@@ -36,7 +36,15 @@ const SrDeviceMenuContent = ({toggle, drivers, devices, getScanDevices, getDevic
                 {/*DEVICE SELECT*/}
                 <div>
                     <select size="4" css={`width:300px`} onChange={ selectDevNum }>
-                        { devices.map( (item, i)=>{return( <option value={item.i} key={i} >{item.vendor + ' ' + item.model + ' ' + item.driverName + ' ' + item.connectionId}</option> )}) }
+                        { devices.map( (item, i)=>{
+                            const devStr = [item.vendor, item.model, item.driverName, item.connectionId].filter(Boolean).join(" ");
+                            return(
+                            <option 
+                                value={item.i}
+                                key={i} >
+                                    { devStr }
+                            </option>)
+                        }) }
                     </select>
                 </div>
                 {/*DEVICE SELECT*/}

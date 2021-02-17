@@ -17,22 +17,22 @@ export const SrMenuPanel = ({ ws, btnRef, toggleDecoderMenu, toggleTabularMenu, 
             <SrFileMenu />
             <DeviceMenu label={session.sourcename}/>
             
-            { (session.config && session.config.includes('SAMPLERATE')) ?
+            { (session.config && session.config.includes('samplerate')) ?
                 <Samplerates />
                 : null
             }
             
-            { (session.config && session.config.includes('LIMIT_SAMPLES'))?
+            { (session.config && session.config.includes('limit_samples'))?
                 <Samples sample={session.sample} samples={session.samples} />
                 : null
             }
             
-            { (session.channels && (session.channels.includes('LOGIC') || session.channels.includes('ANALOG')) )?
+            { (session.channels && (session.channels.includes('logic') || session.channels.includes('analog')) )?
                 <ChannelsMenu />
                 : null
             }
             
-            { (session.type) ?
+            { (session.type === 'device') ?
                 <SrRunButton ref={btnRef} ws={ws} />
                 : null
             }

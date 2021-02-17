@@ -7,7 +7,6 @@ export const CREATE_SESSION = gql`
         createSession{
             id
             name
-            config
         }
     }
 `;
