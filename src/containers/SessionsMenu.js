@@ -11,9 +11,26 @@ export const SessionsMenu = ({name})=>{
     const id = useReactiveVar(selectedSessionVar);
     const { mutate: createSession } = useCreateSession();
     const { mutate: deleteSession } = useDeleteSession();
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const srsid = urlParams.get('srsid');
+    
     const { data: {sessions} = [], loading } = useQuery(GET_SESSIONS, { onCompleted: ({sessions})=>{
-        if (sessions.length && !selectedSessionVar())
-            selectedSessionVar(sessions[0].id)
+        if (sessions.length && !selectedSessionVar() && !srsid){
+            selectedSessionVar(sessions[0].id);
+            const refresh = window.location.protocol + "//" + window.location.host + window.location.pathname + '?srsid=' + sessions[0].id;
+            window.history.pushState({ path: refresh }, '', refresh);
+        }
+        else if (srsid){
+            if (sessions.find(item => item.id === srsid)){
+                selectedSessionVar(srsid);
+            }
+            else {
+                selectedSessionVar(sessions[0].id);
+                const refresh = window.location.protocol + "//" + window.location.host + window.location.pathname + '?srsid=' + sessions[0].id;
+                window.history.pushState({ path: refresh }, '', refresh);
+            }
+        }
     } });
     
     if (loading ) return <SrLoading />;
@@ -23,7 +40,11 @@ export const SessionsMenu = ({name})=>{
             sessions={sessions}
             name={name}
             id={id}
-            selectSession={(id)=>selectedSessionVar(id)}
+            selectSession={(id)=>{
+                const refresh = window.location.protocol + "//" + window.location.host + window.location.pathname + '?srsid=' + id;
+                window.history.pushState({ path: refresh }, '', refresh);
+                selectedSessionVar(id);
+            }}
             createSession={createSession}
             deleteSession={(id)=>deleteSession({variables:{id:id}})}
         />
