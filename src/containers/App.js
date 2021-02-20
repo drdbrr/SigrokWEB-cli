@@ -5,8 +5,10 @@ import { useReactiveVar, useQuery } from '@apollo/client';
 import { GET_SESSION } from '../operations/queries/getSession';
 
 const SrWs = ({ws, id, btnRef}) =>{
-    
     useEffect(() => {
+        
+        const refresh = window.location.protocol + "//" + window.location.host + window.location.pathname + '?srsid=' + id;
+        window.history.pushState({ path: refresh }, '', refresh);
         
         ws.current = new WebSocket('ws://' + window.location.hostname + ':3000/srsocket');
         ws.current.onopen = () => {
@@ -35,7 +37,14 @@ const SrWs = ({ws, id, btnRef}) =>{
         return () => {
             ws.current.close();
         }
-    }, []);
+    }, [id]);
+
+    /*
+    useMemo(()=>{
+        if (ws.current)
+            ws.current.send(JSON.stringify('OMGWTF!!!!!'));
+    }, [id]);
+    */
     
     return null
 }

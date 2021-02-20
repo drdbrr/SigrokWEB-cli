@@ -21,23 +21,24 @@ export function useDeleteSession () {
                         sessions.find((item, i, arr)=>{
                             if (item.id === id && selectedSessionVar() === id){
                                 
-                                let srsid = null;
+                                //let srsid = null;
                                 
                                 if(i >= 1){
-                                    srsid = arr[i-1].id;
+                                    //srsid = arr[i-1].id;
                                     selectedSessionVar(arr[i-1].id);
                                 }
                                 else if (i == 0 && sessions.length > 1){
-                                    srsid = arr[0 + 1].id
+                                    //srsid = arr[0 + 1].id
                                     selectedSessionVar(arr[0 + 1].id);
                                 }
                                 else if (i == 0 && sessions.length == 1){
                                     selectedSessionVar('');
                                 }
                                 
+                                /*
                                 const refresh = window.location.protocol + "//" + window.location.host + window.location.pathname + '?srsid=' + srsid;
                                 window.history.pushState({ path: refresh }, '', refresh);
-                                
+                                */
                                 
                             }
                         });
