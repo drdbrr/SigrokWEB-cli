@@ -41,10 +41,6 @@ export const SessionsMenu = ({name})=>{
             name={name}
             id={id}
             selectSession={(id)=>{
-                /*
-                const refresh = window.location.protocol + "//" + window.location.host + window.location.pathname + '?srsid=' + id;
-                window.history.pushState({ path: refresh }, '', refresh);
-                */
                 selectedSessionVar(id);
             }}
             createSession={createSession}

@@ -15,12 +15,6 @@ export function useCreateSession () {
         update(cache, { data }) {
             const newSession = data.createSession;
             const { sessions } = cache.readQuery({query: GET_SESSIONS});
-            
-            /*
-            const refresh = window.location.protocol + "//" + window.location.host + window.location.pathname + '?srsid=' + newSession.id;
-            window.history.pushState({ path: refresh }, '', refresh);
-            */
-            
             cache.writeQuery({
                 query: GET_SESSIONS,
                 data: {

@@ -6,7 +6,6 @@ import { GET_SESSION } from '../operations/queries/getSession';
 
 const SrWs = ({ws, id, btnRef}) =>{
     useEffect(() => {
-        
         const refresh = window.location.protocol + "//" + window.location.host + window.location.pathname + '?srsid=' + id;
         window.history.pushState({ path: refresh }, '', refresh);
         
@@ -16,12 +15,13 @@ const SrWs = ({ws, id, btnRef}) =>{
             console.log('ws open', id);
         };
         ws.current.onmessage = (msg) => {
-            const sample = JSON.parse(msg.data);
-            switch(sample.type){
+            const packet = JSON.parse(msg.data);
+            console.log('RX:', packet);
+            switch(packet.type){
                 case 'data':
                     const { logic } = channelsVar();
                     logic.map((item)=>{
-                        const { data, pos, range } = sample.logic[item.name];
+                        const { data, pos, range } = packet.logic[item.name];
                         const mesh_data = new Float32Array( data );
                         item.lineRef.current.children[0].geometry.attributes.position.array.set(mesh_data, pos);
                         item.lineRef.current.children[0].geometry.setDrawRange(range[0], range[1]);
@@ -30,7 +30,7 @@ const SrWs = ({ws, id, btnRef}) =>{
                     
                     break;
                 case 'config':
-                    btnRef.current.startAcq(sample.sessionRun);
+                    btnRef.current.startAcq(packet.sessionRun);
                     break;
             }
         };
@@ -38,13 +38,6 @@ const SrWs = ({ws, id, btnRef}) =>{
             ws.current.close();
         }
     }, [id]);
-
-    /*
-    useMemo(()=>{
-        if (ws.current)
-            ws.current.send(JSON.stringify('OMGWTF!!!!!'));
-    }, [id]);
-    */
     
     return null
 }
