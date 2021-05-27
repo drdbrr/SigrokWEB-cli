@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FormDown } from 'grommet-icons';
 import { ScSrDropDown } from '../styled/ScSrDropDown';
 
-const SrDropDownMenu = ({ label, icon, children }) =>{
+const SrDropDownMenu = ({ label, icon, children, disabled }) =>{
     const [open, setOpen] = useState(false);
     const toggle = () =>setOpen(!open);
     
@@ -30,7 +30,7 @@ const SrDropDownMenu = ({ label, icon, children }) =>{
     
     return(
         <div ref={node} >
-            <ScSrDropDown onClick={toggle}>
+            <ScSrDropDown onClick={toggle} disabled={disabled} >
                 <span>{ label }</span>
                 { icon }
                 <FormDown size='small' color='white' />

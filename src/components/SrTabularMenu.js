@@ -1,8 +1,15 @@
-import React, { memo } from 'react';
+import React from 'react';
 
-export const SrTabularMenu = memo(() => {
+const TabularList = ()=>{
+    return(<div css={`height:calc(100% - 30px); width:25%; background-color:red; position:absolute; right:0px; top:30px; z-index:200;`} >tabular</div>)
+}
+
+export const SrTabularMenu = ({toggleTabularMenu, tabularMenu}) => {
     console.log('RENDER SrTabularMenu');
     return(
-        <div css={`height:calc(100% - 30px); width:25%; background-color:red; position:absolute; right:0px; top:30px; z-index:200;`} >tabular</div>
+        <>
+            <button  onClick={toggleTabularMenu} >Tabular menu</button>
+            { tabularMenu ? <TabularList /> : null }
+        </>
     )
-}) 
+}

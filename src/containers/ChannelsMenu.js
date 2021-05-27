@@ -3,10 +3,10 @@ import { useQuery, useReactiveVar } from '@apollo/client';
 //import SrDeviceMenu from '../components/SrDeviceMenu';
 import { SrLoading } from '../components/SrLoading';
 import { GET_CHANNELS } from '../operations/queries/getChannels';
-import { selectedSessionVar, channelsVar } from '../ApolloClient';
+import { selectedSessionVar, channelsVar, runStateVar } from '../ApolloClient';
 import { SrChannelsMenu } from '../components/SrChannelsMenu';
 
-export const ChannelsMenu = (props) => {
+export const ChannelsMenu = ({ws}) => {
     const id = useReactiveVar(selectedSessionVar);
     //const channels = useReactiveVar(channelsVar);
     const { data, error, loading }  = useQuery(GET_CHANNELS, { fetchPolicy: 'no-cache', variables:{id:id}, onCompleted:({getChannels})=>{
@@ -21,5 +21,5 @@ export const ChannelsMenu = (props) => {
         channelsVar({logic:logic, analog:analog})
     } });
     if (loading) return <SrLoading />;
-    return <SrChannelsMenu /*logic={channelsVar.logic} analog={channelsVar.analog}*//>
+    return <SrChannelsMenu ws={ws}/*logic={channelsVar.logic} analog={channelsVar.analog}*//>
 }

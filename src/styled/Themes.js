@@ -54,6 +54,7 @@ export const redTheme = {
 }
 
 export const blueTheme = {
+    disabled: '#3e3e3e',
     background: '#24384d',
     button: '#4c647f',
     border: '#374c63',

@@ -93,7 +93,7 @@ export const SrLogicChannelsLines = () =>{
 
 const SrAnalogLine = ({lineRef}) =>{
     console.log('SrAnalogLine');
-    const arLen = 300000;
+    const arLen = 8000 * 3;//400000;
     
     const lineData = new Float32Array(arLen);
     

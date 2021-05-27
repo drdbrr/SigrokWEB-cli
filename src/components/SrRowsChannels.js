@@ -1,7 +1,7 @@
 //import * as THREE from 'three';
 import { Shape as ThShape, ShapeBufferGeometry as ThShapeBufferGeometry, Color as ThColor } from 'three';
 import React, { useEffect, useRef, useMemo, useState, useCallback } from 'react';
-import { useThree, useFrame } from 'react-three-fiber';
+import { useThree, useFrame } from '@react-three/fiber';
 import { Text, Html } from '@react-three/drei';
 import { SrAnalogPopUp, SrLogicPopUp } from './SrChannelPopUp';
 //import { SrRowGroupSlider } from './SrRowGroupSlider';
@@ -99,7 +99,7 @@ const SrRowGroupSlider = ({order, height, color, position, rowActionRef, rowsRef
 }
 
 
-const SrLogicChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActionRef })=>{
+const SrLogicChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActionRef, visible })=>{
     console.log('SrLogicChannelRow:', text);
     const [ popUp, setPopUp ] = useState(false);
     const { size } = useThree();
@@ -145,7 +145,7 @@ const SrLogicChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActi
     }, []);
     
     return(
-        <group ref={rowRef} >
+        <group ref={rowRef} visible={visible}>
             <group position={[-size.width/2+35, 0, 3]}>
                 <mesh position={[-3, 0, 0]}>
                     <Text
@@ -178,6 +178,7 @@ export const SrLogicChannelsRows = ({rowActionRef, order, logicRowsRef, logicLin
             rowActionRef.current.logicHeight += item.traceHeight + 15;
             logicRows.push(
             <SrLogicChannelRow
+                visible={item.visible}
                 key={item.name + i}
                 i={i}
                 text={item.name}
@@ -190,7 +191,7 @@ export const SrLogicChannelsRows = ({rowActionRef, order, logicRowsRef, logicLin
 
         })
         return logicRows
-    }, [logic]);
+    }, [logic, channelsVar()]);
     
     useFrame(()=>{
         order.current.logic.height = rowActionRef.current.logicHeight = logic.reduce((total, obj) =>(obj.lineRef.current.visible) ? parseInt(obj.lineRef.current.scale.y) + parseInt(total) + 15 : total, 0);
@@ -223,7 +224,7 @@ export const SrLogicChannelsRows = ({rowActionRef, order, logicRowsRef, logicLin
     </>)
 }
 
-const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, pVertDivs, nVertDivs, divHeight, vRes, autoranging}) =>{
+const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, pVertDivs, nVertDivs, divHeight, vRes, autoranging, visible}) =>{
     console.log('SrAnalogChannelRow:', text);
     const { size } = useThree();
     const [ popUp, setPopUp ] = useState(false);
@@ -270,11 +271,13 @@ const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, p
         const ng = new Float32Array ([-840, 0, 0, 840, 0, 0, -840, -divHeight, 0, 840, -divHeight, 0]);
         rowRef.current.children[1].geometry.attributes.position.array = pg;
         rowRef.current.children[2].geometry.attributes.position.array = ng;
-        console.log('--->', rowRef.current.children[3].position);
+        rowRef.current.children[1].geometry.attributes.position.needsUpdate = true;
+        rowRef.current.children[2].geometry.attributes.position.needsUpdate = true;
+        //console.log('--->', rowRef.current.children[3].position);//DAHSED LINE POSITION
     }, []);
     
     return(
-        <group ref={rowRef}>
+        <group ref={rowRef} visible={visible}>
             <group position={[-size.width/2+35, 0, 2]}>
                 <mesh position={[-3, 0, 0]}>
                     <Text
@@ -292,20 +295,18 @@ const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, p
             </group>
             
             <mesh>
-                <planeBufferGeometry attach="geometry" args={[size.width , 0]}/>
+                <planeBufferGeometry attach="geometry" args={[size.width, 0]}/>
                 <meshBasicMaterial attach="material" transparent opacity={0.2}  color={rowColor} />
             </mesh>
             
             <mesh>
                 <planeBufferGeometry attach="geometry" args={[size.width , 0]}/>
-                <meshBasicMaterial attach="material" transparent opacity={0.2}  color={rowColor} />
+                <meshBasicMaterial attach="material" transparent opacity={0.2}  color={'red'} />
             </mesh>
             
             <DashedLine posY={divHeight}/>
             <DashedLine posY={-divHeight}/>
-            
             <DashedLine posY={0}/>
-            
         </group>
     )
 }
@@ -314,11 +315,13 @@ export const SrAnalogChannelsRows = ({rowActionRef, order, analogRowsRef, analog
     const { size } = useThree();
     const { analog, logic } = useReactiveVar(channelsVar);
     const analogRows = useMemo(()=>{
+        console.log("RECALC ANALOG");
         const analogRows = [];
         analog.map((item, i)=>{
             rowActionRef.current.analogHeight += (item.pVertDivs + item.nVertDivs) * item.divHeight;
             analogRows.push(
                 <SrAnalogChannelRow
+                    visible={item.visible}
                     key={item.name + i}
                     i={logic.length + i}
                     text={item.name}
@@ -335,7 +338,7 @@ export const SrAnalogChannelsRows = ({rowActionRef, order, analogRowsRef, analog
                 />);
         })
         return analogRows;
-    }, [analog]);
+    }, [analog, channelsVar()]);
     
     useFrame(()=>{
         order.current.analog.height = rowActionRef.current.analogHeight = analog.reduce((total, obj) =>(obj.lineRef.current.visible) ? parseInt(obj.pVertDivs + obj.nVertDivs) * obj.divHeight + total + 15 : total, 0);

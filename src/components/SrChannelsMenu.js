@@ -1,31 +1,47 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { FormDown } from 'grommet-icons';
 import { ScSrDropDownContent } from '../styled/ScSrDropDownContent';
 import { ScSrDropDown } from '../styled/ScSrDropDown';
 import { ScSrButton } from '../styled/ScSrButton';
 import SrDropDownMenu from './SrDropDownMenu';
 
-import { channelsVar } from '../ApolloClient';
+import { channelsVar, runStateVar } from '../ApolloClient';
+import { useReactiveVar } from '@apollo/client';
 
-const SrChannelsMenuEntries = ({group, label}) =>{
+const SrChannelsMenuEntries = ({group, label, ws}) =>{
     console.log('Render SrChannelsMenuEntries')
     const channelGroup = group.map((item, i)=>{
         const ref = useRef()
         return(
             <div key={i + item.name} css={`flex: 1 0 21%; margin: 5px;`} >
-                <input ref={ref} defaultChecked={item.lineRef.current.visible} type="checkbox" name={item.name} value={item.name} onChange={(e)=>{item.rowRef.current.visible = item.lineRef.current.visible = e.target.checked; }} />
+                <input 
+                    ref={ref}
+                    checked={item.visible}
+                    type="checkbox"
+                    name={item.name}
+                    value={item.name}
+                    onChange={(e)=>{
+                        //item.rowRef.current.visible = item.lineRef.current.visible = e.target.checked;
+                        ws.current.send(JSON.stringify({channel:{name: item.name, enable: e.target.checked}}))
+                    }}
+                />
+                
                 <label css={`color:white`}>{item.name}</label>
             </div>
         );
     });
     
-    const enable = ()=>{
-        group.map((item, i)=> channelGroup[i].props.children[0].ref.current.checked = item.rowRef.current.visible = item.lineRef.current.visible = true)
-    }
+    //REBUILD TO ARRAY FOR SINGLE PACKET
+    const enable = ()=>group.map((item, i)=>{
+        channelGroup[i].props.children[0].ref.current.checked = item.rowRef.current.visible = item.lineRef.current.visible = true;
+        ws.current.send(JSON.stringify({channel:{name: item.name, enable: true}}));
+    })
     
-    const disable = ()=>{
-        group.map((item, i)=> channelGroup[i].props.children[0].ref.current.checked = item.rowRef.current.visible = item.lineRef.current.visible = false)
-    }
+    
+    const disable = ()=>group.map((item, i)=>{
+        channelGroup[i].props.children[0].ref.current.checked = item.rowRef.current.visible = item.lineRef.current.visible = false;
+        ws.current.send(JSON.stringify({channel:{name: item.name, enable: false}}));
+    })
     
     return(
         <div>
@@ -48,21 +64,25 @@ const SrChannelsMenuEntries = ({group, label}) =>{
 }
 
 
-const SrChannelsMenuContent=()=>{
+const SrChannelsMenuContent=({ws})=>{
     console.log('Render SrChannelsMenuContent');
-    const { logic, analog } = channelsVar();
+    const { logic, analog } = useReactiveVar(channelsVar);
     
-    console.log('channelsVar---------------->', channelsVar());
+    /*
+    useMemo(()=>{
+        console.log("OMG WE HERE----------------------->");
+    }, [fof, channelsVar()]);
+    */
     
     return(
         <ScSrDropDownContent>
         <div css={`padding-bottom: 10px`} >
             { logic.length ? 
-                <SrChannelsMenuEntries group={logic} label={'Logic'}/>
+                <SrChannelsMenuEntries group={logic} label={'Logic'} ws={ws}/>
                 : null
             }
             { analog.length ? 
-                <SrChannelsMenuEntries group={analog} label={'Analog'}/>
+                <SrChannelsMenuEntries group={analog} label={'Analog'} ws={ws}/>
                 : null
             }
         </div>
@@ -71,8 +91,10 @@ const SrChannelsMenuContent=()=>{
 }
 
 export const SrChannelsMenu = (props) =>{
+    const disabled = useReactiveVar(runStateVar);
+    const {analog, logic} = useReactiveVar(channelsVar);
     return(
-        <SrDropDownMenu label='Channels' >
+        <SrDropDownMenu label='Channels' disabled={disabled} >
             <SrChannelsMenuContent { ...props } />
         </SrDropDownMenu>
     )

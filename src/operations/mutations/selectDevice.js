@@ -1,5 +1,5 @@
 import { gql, useMutation } from "@apollo/client";
-import { GET_SESSION } from "../queries/getSession";
+//import { GET_SESSION } from "../queries/getSession";
 //import { sessionVar } from '../../ApolloClient';
 //import { createRef } from 'react';
 //import { channelsVar } from '../../ApolloClient';

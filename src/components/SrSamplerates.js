@@ -3,6 +3,8 @@ import { ScSrDropDownContent } from '../styled/ScSrDropDownContent';
 import { ScSrDropDownItem } from '../styled/ScSrDropDownItem';
 import { formNum } from '../helpers';
 import SrDropDownMenu from './SrDropDownMenu';
+import { useReactiveVar } from '@apollo/client';
+import { runStateVar } from '../ApolloClient';
 
 const SrSampleratesContent = ({toggle, samplerates, samplerate, selectSamplerate})=>{
     console.log('Render SrSamplerateContent');
@@ -22,9 +24,10 @@ const SrSampleratesContent = ({toggle, samplerates, samplerate, selectSamplerate
 }
 
 const SrSamplerates = (props) =>{
+    const disabled = useReactiveVar(runStateVar);
     const { num, text } = formNum(props.samplerate);
     return(
-        <SrDropDownMenu label={num + text + 'Hz'} >
+        <SrDropDownMenu label={num + text + 'Hz'} disabled={disabled} >
             <SrSampleratesContent { ...props }/>
         </SrDropDownMenu>
     )

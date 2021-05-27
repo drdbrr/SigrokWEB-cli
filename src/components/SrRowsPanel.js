@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { useThree, useFrame } from 'react-three-fiber';
+import { useThree, useFrame } from '@react-three/fiber';
 import { channelsVar } from '../ApolloClient';
 import { useReactiveVar } from '@apollo/client';
 import { SrLogicChannelsLines, SrAnalogChannelsLines } from './SrChannelsLines';
@@ -91,7 +91,7 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
         <group ref={rowsGroupRef} position-y={size.height/2} >
             
             //ATTENTION rows
-            <group ref={logicRowsRef}>
+            <group ref={logicRowsRef} >
                 <SrLogicChannelsRows logicRowsRef={logicRowsRef} logicLinesRef={logicLinesRef} rowActionRef={rowActionRef} order={order} />
             </group>
             

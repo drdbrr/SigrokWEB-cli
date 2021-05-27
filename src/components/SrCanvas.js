@@ -1,5 +1,5 @@
 import React, { useRef, useCallback, useMemo } from 'react';
-import { Canvas, useThree, useFrame } from 'react-three-fiber';
+import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { ApolloProvider } from '@apollo/client';
 import { Client } from '../ApolloClient';
 

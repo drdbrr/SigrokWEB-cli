@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { ScSrMenuPanel } from '../styled/ScSrMenuPanel';
 import SrFileMenu from './SrFileMenu';
 import { ChannelsMenu } from '../containers/ChannelsMenu';
@@ -6,11 +6,27 @@ import { DeviceMenu } from '../containers/DeviceMenu';
 import { Samplerates } from '../containers/Samplerates';
 import { Samples } from '../containers/Samples';
 import { SessionsMenu } from '../containers/SessionsMenu';
-
 import SrRunButton from './SrRunButton';
 
-export const SrMenuPanel = ({ ws, btnRef, toggleDecoderMenu, toggleTabularMenu, session }) =>{
+import { DecodersMenu } from '../containers/DecodersMenu';
+
+import { SrTabularMenu } from './SrTabularMenu';
+
+export const SrMenuPanel = ({ ws, btnRef, session }) =>{
     console.log('Render SrMenuPanel');
+    const [ decoderMenu, setDecoderMenu ] = useState(false);
+    const [ tabularMenu, setTabularMenu ] = useState(false);
+    
+    //ATTENTION https://stackoverflow.com/questions/54847286/member-functions-with-react-hooks
+    const toggleDecoderMenu = useCallback(() =>{
+        setTabularMenu(false);
+        setDecoderMenu(decoderMenu => !decoderMenu)
+    }, []);
+    
+    const toggleTabularMenu = useCallback(() =>{
+        setDecoderMenu(false);
+        setTabularMenu(tabularMenu => !tabularMenu)
+    }, []);
     return(
         <ScSrMenuPanel>
             <SessionsMenu name={session.name} />
@@ -28,7 +44,7 @@ export const SrMenuPanel = ({ ws, btnRef, toggleDecoderMenu, toggleTabularMenu, 
             }
             
             { (session.channels && (session.channels.includes('logic') || session.channels.includes('analog')) )?
-                <ChannelsMenu />
+                <ChannelsMenu ws={ws} />
                 : null
             }
             
@@ -37,9 +53,13 @@ export const SrMenuPanel = ({ ws, btnRef, toggleDecoderMenu, toggleTabularMenu, 
                 : null
             }
             
-            <div css={`margin-left:auto`}>
-                <button  onClick={toggleDecoderMenu} >open decoder</button>
-                <button  onClick={toggleTabularMenu} >open tabular</button>
+            <div css={`margin-left:auto; display:flex; flex-direction:row; align-items:center;`}>
+                <DecodersMenu decoderMenu={decoderMenu} toggleDecoderMenu={toggleDecoderMenu} />
+                <SrTabularMenu tabularMenu={tabularMenu} toggleTabularMenu={toggleTabularMenu} />
+                {/*<button  onClick={toggleTabularMenu} >open tabular</button>*/}
+                
+                {/* (tabularMenu) ? <SrTabularMenu toggleTabularMenu={toggleTabularMenu}/> : null */}
+                
             </div>
         </ScSrMenuPanel>
     )

@@ -35,4 +35,4 @@ export const ScSrDropDownItem = styled.div`
             border-radius: 50%;
         }
     }
-`;  
+`;

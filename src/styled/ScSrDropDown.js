@@ -7,11 +7,14 @@ export const ScSrDropDown = styled.div`
     border-radius: 5px;
     border-style: solid;
     border-width: 1px;
-    background-color: ${props => props.theme.button};
+    background-color: ${props => props.disabled ? props.theme.disabled : props.theme.button};
     margin-left: 5px;
     display: flex;
     flex-direction: row;
     align-items: center;
+    
+    pointer-events: ${props => props.disabled ? 'none' : 'auto'};
+    
     :hover{
         border-style: solid;
         border-color: ${props => props.theme.toggleBorder};

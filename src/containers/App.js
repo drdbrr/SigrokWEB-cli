@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { SrApp } from '../components/SrApp';
-import { selectedSessionVar, sessionVar, channelsVar } from '../ApolloClient';
+import { selectedSessionVar, sessionVar, channelsVar, runStateVar } from '../ApolloClient';
 import { useReactiveVar, useQuery } from '@apollo/client';
 import { GET_SESSION } from '../operations/queries/getSession';
 
 const SrWs = ({ws, id, btnRef}) =>{
+    
     useEffect(() => {
         const refresh = window.location.protocol + "//" + window.location.host + window.location.pathname + '?srsid=' + id;
         window.history.pushState({ path: refresh }, '', refresh);
@@ -19,9 +20,20 @@ const SrWs = ({ws, id, btnRef}) =>{
             console.log('RX:', packet);
             switch(packet.type){
                 case 'data':
-                    const { logic } = channelsVar();
+                    const { logic, analog } = channelsVar();
+                    
+                    /*
                     logic.map((item)=>{
                         const { data, pos, range } = packet.logic[item.name];
+                        const mesh_data = new Float32Array( data );
+                        item.lineRef.current.children[0].geometry.attributes.position.array.set(mesh_data, pos);
+                        item.lineRef.current.children[0].geometry.setDrawRange(range[0], range[1]);
+                        item.lineRef.current.children[0].geometry.attributes.position.needsUpdate = true;
+                    });
+                    */
+                    
+                    analog.map((item)=>{
+                        const { data, pos, range } = packet.data.analog[item.name];
                         const mesh_data = new Float32Array( data );
                         item.lineRef.current.children[0].geometry.attributes.position.array.set(mesh_data, pos);
                         item.lineRef.current.children[0].geometry.setDrawRange(range[0], range[1]);
@@ -30,7 +42,21 @@ const SrWs = ({ws, id, btnRef}) =>{
                     
                     break;
                 case 'config':
-                    btnRef.current.startAcq(packet.sessionRun);
+                    if ('sessionRun' in packet)
+                        runStateVar(Boolean(packet.sessionRun));
+                    if ('channel' in packet){
+                        //const chg = channelsVar();
+                        
+                        const chg = {...channelsVar()};
+                        
+                        Object.values(chg).forEach(group =>{
+                            const ch = group.find(ch => ch.name === packet.channel.name);
+                            if (ch)
+                                ch.visible = packet.channel.enable;
+                        });
+                        channelsVar(chg);
+                        console.log(channelsVar());
+                    }
                     break;
             }
         };
