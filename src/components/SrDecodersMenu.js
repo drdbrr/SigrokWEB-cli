@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { ScSrButton } from '../styled/ScSrButton';
 import { ScSrDecoders } from '../styled/ScSrDecoders';
 import { ScSrDropDownItem } from '../styled/ScSrDropDownItem';
@@ -32,6 +32,7 @@ const ScSrListItem = styled.div`
 const SrDecodersList = ({dataList, selectDecoder}) =>{
     
     const [ dec, setDec] = useState({id:null, doc:null, name:null, longname:null});
+    const [ searchStr, setStr ] = useState("");
     
     const tags = [];
     dataList.map((item, i)=>item.tags.map((tag, i)=>{
@@ -49,7 +50,11 @@ const SrDecodersList = ({dataList, selectDecoder}) =>{
         dataSet[tag] = decList;
     });
     
-    //border: 1px solid rgb(221, 221, 221); display: inline-flex; justify-content: space-between; height: 35px;
+    const setStrCb = useCallback((e)=>setStr(e.target.value), []);
+    
+    const sortedList = useMemo(()=>
+    (searchStr.length) ? dataList.filter( (item)=> (item.longname + item.name).toLowerCase().includes(searchStr.toLowerCase()) ) : dataList
+    , [searchStr]);
     
     return (
         <ScSrDecoders>
@@ -61,6 +66,7 @@ const SrDecodersList = ({dataList, selectDecoder}) =>{
                         <input
                             css={`outline: currentcolor none medium; border: medium none; font-size: 14px; padding: 10px; flex: 1 1 0%; color: rgb(90, 90, 90); font-weight: 100;`}
                             type="text"
+                            onChange={setStrCb}
                         />
                     </div>
                     
@@ -68,10 +74,13 @@ const SrDecodersList = ({dataList, selectDecoder}) =>{
                 
                 <div css={`overflow-y:auto; color:white; background-color:#232629; height:300px; margin-top: 10px; border: 1px solid black;`} >
                     <ul css={`padding-left: 0px;`} >
-                    { dataList.map( (item)=>
+                    { sortedList.map( (item)=>
                             <li key={item.id} css={`list-style-type: none; `} >
-                                <ScSrListItem onClick={()=>setDec(item)} isSelected={ (item.id == dec.id) ? true : false } >
-                                    <span css={`padding-right:10px; width:25%;`} >{item.name}</span>
+                                <ScSrListItem onClick={()=>{
+                                    setDec(item);
+                                    console.log("sortedList:", sortedList);
+                                }} isSelected={ (item.id == dec.id) ? true : false } >
+                                    <span css={`padding-right:10px; width:25%; overflow: hidden; white-space: nowrap;`} >{item.name}</span>
                                     <div css={`overflow: hidden; white-space: nowrap;`} >{item.longname}</div>
                                 </ScSrListItem>
                             </li>
@@ -79,7 +88,7 @@ const SrDecodersList = ({dataList, selectDecoder}) =>{
                     }
                     </ul>
                 </div>
-                <h2 css={`margin-bottom: 3px; color:white;`} >{dec.longname}</h2>
+                <h2 css={`margin-bottom: 3px; color:white;`} >{ (dec.name) ? dec.longname + " (" + dec.name.toLowerCase() + ")" : null}</h2>
                 <span css={`color:white;`} >{dec.desc}</span>
                 <div css={`height:150px; background-color:#2d3033; margin-top: 10px; color:white; padding:5px; overflow-y:auto;`} >
                     { /*TEXT TEXT*/ }

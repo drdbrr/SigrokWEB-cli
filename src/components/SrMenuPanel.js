@@ -1,18 +1,16 @@
 import React, { useState, useCallback } from 'react';
 import { ScSrMenuPanel } from '../styled/ScSrMenuPanel';
 import SrFileMenu from './SrFileMenu';
-import { ChannelsMenu } from '../containers/ChannelsMenu';
 import { DeviceMenu } from '../containers/DeviceMenu';
-import { Samplerates } from '../containers/Samplerates';
-import { Samples } from '../containers/Samples';
 import { SessionsMenu } from '../containers/SessionsMenu';
 import SrRunButton from './SrRunButton';
-
 import { DecodersMenu } from '../containers/DecodersMenu';
-
 import { SrTabularMenu } from './SrTabularMenu';
 
-export const SrMenuPanel = ({ ws, btnRef, session }) =>{
+import { ChannelsMenu } from '../containers/ChannelsMenu';
+import { OptionsPanel } from '../containers/OptionsPanel';
+
+export const SrMenuPanel = ({ ws, session }) =>{
     console.log('Render SrMenuPanel');
     const [ decoderMenu, setDecoderMenu ] = useState(false);
     const [ tabularMenu, setTabularMenu ] = useState(false);
@@ -31,25 +29,20 @@ export const SrMenuPanel = ({ ws, btnRef, session }) =>{
         <ScSrMenuPanel>
             <SessionsMenu name={session.name} />
             <SrFileMenu />
-            <DeviceMenu label={session.sourcename}/>
+            <DeviceMenu label={session.sourcename} />
             
-            { (session.config && session.config.includes('samplerate')) ?
-                <Samplerates />
+            { ('devopts' in session) ?
+                <OptionsPanel devopts={session.devopts} type={session.__typename} />
                 : null
             }
             
-            { (session.config && session.config.includes('limit_samples'))?
-                <Samples sample={session.sample} samples={session.samples} />
+            { ('channels' in session) ?
+                <ChannelsMenu type={session.__typename} />
                 : null
             }
             
-            { (session.channels && (session.channels.includes('logic') || session.channels.includes('analog')) )?
-                <ChannelsMenu ws={ws} />
-                : null
-            }
-            
-            { (session.type === 'device') ?
-                <SrRunButton ref={btnRef} ws={ws} />
+            { (session.__typename === 'DeviceSession') ?
+                <SrRunButton ws={ws} />
                 : null
             }
             

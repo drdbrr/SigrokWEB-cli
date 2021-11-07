@@ -111,11 +111,26 @@ const Layout = ({ws}) =>{
         }
     },[]);
     
+    /*
+    document.addEventListener("contextmenu", (event) => {
+        event.preventDefault();
+        if (event.button == 2 )
+            mouseRef.current.rmb = true;
+    });
+    */
+    
     const downCallback = useCallback((event)=>{
+        /*
         if (event.button == 2 ){
             mouseRef.current.rmb = true;
         }
+        */
     },[]);
+    
+    const mouseRMB = useCallback((event)=>{
+        event.nativeEvent.preventDefault();
+        mouseRef.current.rmb = true;
+    }, []);
     
     const rmbCallback = useCallback((event)=>event.preventDefault(),[]);
     
@@ -142,12 +157,13 @@ const Layout = ({ws}) =>{
             onPointerDown={downCallback}
             onPointerUp={upCallback}
             onWheel={mouseScaleCallback}
+            onContextMenu={mouseRMB}
         >
             <meshBasicMaterial attach="material" color="#2a2a2a" transparent opacity={0.0}/>
             <planeBufferGeometry attach="geometry" args={mainPlaneGeo}/>
         </mesh>
         
-        <SrRowsPanel  mouseRef={mouseRef} linesGroupRef={linesGroupRef} rowsGroupRef={rowsGroupRef} rowsPanelPlaneWidth={rowsPanelPlaneWidth}/>
+        <SrRowsPanel mouseRef={mouseRef} linesGroupRef={linesGroupRef} rowsGroupRef={rowsGroupRef} rowsPanelPlaneWidth={rowsPanelPlaneWidth}/>
 
         <mesh position={[-size.width / 2 + 50 + mouseRef.current.cursor, 0, 0]}>
             <SrZeroLine zeroRef={zeroRef}/>
@@ -176,7 +192,7 @@ function Lights() {
 
 export const SrCanvas = ({ws}) => {
     console.log('Render SrCanvas');
-    const rmbCallback = useCallback((event)=>event.preventDefault(),[]);
+    const rmbCallback = useCallback((event)=>event.preventDefault(),[]);//ATTENTION
     return(<>
         <Canvas
             orthographic

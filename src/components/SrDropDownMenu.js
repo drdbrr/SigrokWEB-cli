@@ -14,11 +14,6 @@ const SrDropDownMenu = ({ label, icon, children, disabled }) =>{
         setOpen(false);// outside click
     };
 
-    const handleChange = selectedValue => {
-        //setVal(selectedValue);
-        setOpen(false);
-    };
-
     useEffect(() => {
         document.addEventListener("mousedown", handleClick);
         return () => {
@@ -35,7 +30,7 @@ const SrDropDownMenu = ({ label, icon, children, disabled }) =>{
                 { icon }
                 <FormDown size='small' color='white' />
             </ScSrDropDown>
-            { open && content }
+            { (open) ? content : null }
         </div>
     )
 }

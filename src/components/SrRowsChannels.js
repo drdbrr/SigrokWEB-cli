@@ -1,13 +1,13 @@
 //import * as THREE from 'three';
 import { Shape as ThShape, ShapeBufferGeometry as ThShapeBufferGeometry, Color as ThColor } from 'three';
-import React, { useEffect, useRef, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useMemo, useState, useCallback, createRef } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import { Text, Html } from '@react-three/drei';
 import { SrAnalogPopUp, SrLogicPopUp } from './SrChannelPopUp';
 //import { SrRowGroupSlider } from './SrRowGroupSlider';
 import Roboto from '../fonts/Roboto.woff';
-import { channelsVar } from '../ApolloClient';
-import { useReactiveVar } from '@apollo/client';
+//import { channelsVar } from '../ApolloClient';
+//import { useReactiveVar } from '@apollo/client';
 
 import DashedLine from './DashedLine';
 
@@ -99,7 +99,7 @@ const SrRowGroupSlider = ({order, height, color, position, rowActionRef, rowsRef
 }
 
 
-const SrLogicChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActionRef, visible })=>{
+const SrLogicChannelRow = ({name, setChannel, height, rowColor, i, text, rowRef, lineRef, rowActionRef, visible, testRef })=>{
     console.log('SrLogicChannelRow:', text);
     const [ popUp, setPopUp ] = useState(false);
     const { size } = useThree();
@@ -109,7 +109,6 @@ const SrLogicChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActi
         rowActionRef.current.down = true;
         e.stopPropagation();
         e.target.setPointerCapture(e.pointerId);
-        console.log(e)
     }, []);
 
     const up = useCallback((e) => {
@@ -135,14 +134,23 @@ const SrLogicChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActi
     }, []);
     
     const matRef = useRef();
+    let origColor = '';
     
     const over = useCallback(()=>{
+        origColor = matRef.current.color.getHexString();
         matRef.current.color.set('red');
     }, []);
     
     const out = useCallback(()=>{
-        matRef.current.color.set(rowColor)
+        //matRef.current.color.set(rowColor);
+        matRef.current.color.setStyle('#' + origColor);
     }, []);
+    
+    /*
+    useEffect(()=>
+        testRef.current = {text:rowRef.current.children[0].children[0].children[0].text, color:matRef.current.color.getHexString(), enabled:rowRef.current.visible, traceHeight:rowRef.current.children[1].scale.y }
+    ,[]);
+    */
     
     return(
         <group ref={rowRef} visible={visible}>
@@ -158,46 +166,55 @@ const SrLogicChannelRow = ({ height, rowColor, i, text, rowRef, lineRef, rowActi
                     <meshStandardMaterial color={rowColor} ref={matRef} />
                 </mesh>
                 
-                <SrLogicPopUp open={popUp} rowColor={rowColor} setOpen={setPopUp} rowRef={rowRef} lineRef={lineRef} />
+                //ATTENTION TODO
+                <SrLogicPopUp setChannel={setChannel} name={name} open={popUp} rowColor={rowColor} setOpen={setPopUp} rowRef={rowRef} lineRef={lineRef} testRef={testRef} />
 
             </group>
             <mesh scale-y={height}>
-                <planeBufferGeometry attach="geometry" args={[size.width , 1]}/>
+                <planeBufferGeometry attach="geometry" args={[size.width, 1]}/>
                 <meshBasicMaterial attach="material" transparent opacity={0.2}  color={rowColor} />
             </mesh>
         </group>
     )
 }
 
-export const SrLogicChannelsRows = ({rowActionRef, order, logicRowsRef, logicLinesRef}) =>{
+export const SrLogicChannelsRows = ({setChannel, logic, rowActionRef, order, logicRowsRef, logicLinesRef}) =>{
     const { size } = useThree();
-    const { logic } = useReactiveVar(channelsVar);
+    //const { logic } = useReactiveVar(channelsVar);
+    
+    //const { logic } = useReactiveVar(channelsVar);
+    
     const logicRows = useMemo(()=>{
         const logicRows = [];
-        logic.map((item, i)=>{
+        Object.values(logic).map((item, i)=>{
             rowActionRef.current.logicHeight += item.traceHeight + 15;
+            
             logicRows.push(
             <SrLogicChannelRow
-                visible={item.visible}
+                visible={item.enabled}
                 key={item.name + i}
                 i={i}
-                text={item.name}
+                text={item.text}
                 rowRef={item.rowRef}
                 lineRef={item.lineRef}
                 rowActionRef={rowActionRef}
                 rowColor={item.color}
                 height={item.traceHeight}
+                
+                name={item.name}
+                setChannel={setChannel}
+                testRef={item.testRef}
             />);
 
         })
         return logicRows
-    }, [logic, channelsVar()]);
+    }, [logic]);
     
     useFrame(()=>{
-        order.current.logic.height = rowActionRef.current.logicHeight = logic.reduce((total, obj) =>(obj.lineRef.current.visible) ? parseInt(obj.lineRef.current.scale.y) + parseInt(total) + 15 : total, 0);
+        //order.current.logic.height = rowActionRef.current.logicHeight = logic.reduce((total, obj) =>(obj.lineRef.current.visible) ? parseInt(obj.lineRef.current.scale.y) + parseInt(total) + 15 : total, 0);
         if (!rowActionRef.current.down){
             let loffset = 0;
-            logic.map((item)=>{
+            Object.values(logic).map((item)=>{//WARNING ATTENTION
                 item.rowRef.current.position.y = loffset;
                 item.lineRef.current.position.y = loffset;
                 item.lineRef.current.position.y -= parseInt(item.lineRef.current.scale.y);
@@ -224,10 +241,14 @@ export const SrLogicChannelsRows = ({rowActionRef, order, logicRowsRef, logicLin
     </>)
 }
 
-const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, pVertDivs, nVertDivs, divHeight, vRes, autoranging, visible}) =>{
+const SrAnalogChannelRow = ({setChannel, i, name, text, rowRef, lineRef, logicLineRef, rowActionRef, rowColor, pVertDivs, nVertDivs, divHeight, vRes, autoranging, visible}) =>{
     console.log('SrAnalogChannelRow:', text);
     const { size } = useThree();
     const [ popUp, setPopUp ] = useState(false);
+    
+    const testRef = useRef(null);
+    
+    useEffect(()=>testRef.current = { name: name, text: text, rowColor: rowColor, pVertDivs: pVertDivs, nVertDivs: nVertDivs, divHeight: divHeight, vRes: vRes, autoranging: autoranging, tt: createRef() }, []);
     
     const down = useCallback((e) => {
         rowActionRef.current.index = i;
@@ -290,7 +311,25 @@ const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, p
                     <meshStandardMaterial color={rowColor} />
                 </mesh>
                 
-                <SrAnalogPopUp text={text} open={popUp} rowColor={rowColor} setOpen={setPopUp} rowRef={rowRef} lineRef={lineRef} pVertDivs={pVertDivs} nVertDivs={nVertDivs} divHeight={divHeight} vRes={vRes} autoranging={autoranging} />
+                <SrAnalogPopUp
+                    open={popUp}
+                    setOpen={setPopUp}
+                    
+                    testRef={testRef}
+                    
+                    setChannel={setChannel}
+                    
+                    name={name}
+                    text={text}
+                    rowColor={rowColor}
+                    rowRef={rowRef}
+                    lineRef={lineRef}
+                    pVertDivs={pVertDivs}
+                    nVertDivs={nVertDivs}
+                    divHeight={divHeight}
+                    vRes={vRes}
+                    autoranging={autoranging}
+                />
 
             </group>
             
@@ -301,7 +340,7 @@ const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, p
             
             <mesh>
                 <planeBufferGeometry attach="geometry" args={[size.width , 0]}/>
-                <meshBasicMaterial attach="material" transparent opacity={0.2}  color={'red'} />
+                <meshBasicMaterial attach="material" transparent opacity={0.2}  color={rowColor} />
             </mesh>
             
             <DashedLine posY={divHeight}/>
@@ -311,22 +350,27 @@ const SrAnalogChannelRow = ({i, text, rowRef, lineRef, rowActionRef, rowColor, p
     )
 }
 
-export const SrAnalogChannelsRows = ({rowActionRef, order, analogRowsRef, analogLinesRef}) =>{
+export const SrAnalogChannelsRows = ({setChannel, analog, rowActionRef, order, analogRowsRef, analogLinesRef}) =>{
     const { size } = useThree();
-    const { analog, logic } = useReactiveVar(channelsVar);
+    //const { analog, logic } = useReactiveVar(channelsVar);
+    
+    //const { analog, logic } = useReactiveVar(channelsVar);
+    
     const analogRows = useMemo(()=>{
-        console.log("RECALC ANALOG");
         const analogRows = [];
-        analog.map((item, i)=>{
+        Object.values(analog).map((item, i)=>{
             rowActionRef.current.analogHeight += (item.pVertDivs + item.nVertDivs) * item.divHeight;
             analogRows.push(
                 <SrAnalogChannelRow
-                    visible={item.visible}
+                    visible={item.enabled}
                     key={item.name + i}
-                    i={logic.length + i}
-                    text={item.name}
+                    i={i}
+                    text={item.text}
                     rowRef={item.rowRef}
                     lineRef={item.lineRef}
+                    
+                    logicLineRef={item.logicLineRef}
+                    
                     rowActionRef={rowActionRef}
                     rowColor={item.color}
                     
@@ -335,17 +379,20 @@ export const SrAnalogChannelsRows = ({rowActionRef, order, analogRowsRef, analog
                     divHeight={item.divHeight}
                     vRes={item.vRes}
                     autoranging={item.autoranging}
+                    
+                    name={item.name}
+                    setChannel={setChannel}
                 />);
         })
         return analogRows;
-    }, [analog, channelsVar()]);
+    }, [analog]);
     
     useFrame(()=>{
-        order.current.analog.height = rowActionRef.current.analogHeight = analog.reduce((total, obj) =>(obj.lineRef.current.visible) ? parseInt(obj.pVertDivs + obj.nVertDivs) * obj.divHeight + total + 15 : total, 0);
+        //order.current.analog.height = rowActionRef.current.analogHeight = analog.reduce((total, obj) =>(obj.lineRef.current.visible) ? parseInt(obj.pVertDivs + obj.nVertDivs) * obj.divHeight + total + 15 : total, 0);
         
         if (!rowActionRef.current.down){
             let aoffset = 0;
-            analog.map((item)=>{
+            Object.values(analog).map((item)=>{//WARNING ATTENTION
                 const h = item.rowRef.current.children[1].geometry.attributes.position.array[1]// + Math.abs(item.rowRef.current.children[2].geometry.attributes.position.array[7]);
                 
                 item.lineRef.current.position.y = aoffset;

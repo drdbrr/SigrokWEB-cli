@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect } from 'react';
-import { channelsVar } from '../ApolloClient';
-import { useReactiveVar } from '@apollo/client';
+//import { channelsVar } from '../ApolloClient';
+//import { useReactiveVar } from '@apollo/client';
 
 //https://github.com/mrdoob/three.js/blob/dev/examples/webgl_custom_attributes_lines.html
 const vertexShader =`
@@ -73,11 +73,11 @@ const SrLogicLine = ({height, lineRef}) => {
 } 
 
 
-export const SrLogicChannelsLines = () =>{
-    const { logic } = useReactiveVar(channelsVar);
+export const SrLogicChannelsLines = ({logic}) =>{
+    //const { logic } = useReactiveVar(channelsVar);
     const logicLines = useMemo((item, i)=>{
         const logicLines = [];
-        logic.map((item, i)=>{
+        Object.values(logic).map((item, i)=>{
             logicLines.push(
                 <SrLogicLine
                     key={item.name + i + 'srl'}
@@ -119,11 +119,11 @@ const SrAnalogLine = ({lineRef}) =>{
     )
 }
 
-export const SrAnalogChannelsLines = () =>{
-    const { analog } = useReactiveVar(channelsVar);
+export const SrAnalogChannelsLines = ({analog}) =>{
+    //const { analog } = useReactiveVar(channelsVar);
     const analogLines = useMemo((item, i)=>{
         const analogLines = [];
-        analog.map((item, i)=>{
+        Object.values(analog).map((item, i)=>{
             analogLines.push(
                 <SrAnalogLine
                     key={item.name + i + 'sra'}

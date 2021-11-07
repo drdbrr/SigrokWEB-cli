@@ -1,26 +1,70 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Html } from '@react-three/drei';
 
 import { channelsVar } from '../ApolloClient';
 import { useReactiveVar } from '@apollo/client';
 
-const SrLogicPopUpContent = ({lineRef, rowRef, rowColor}) =>{
-    //#363636
+import { PopoverPicker } from "./PopoverPicker";
+
+const SrLogicPopUpContent = ({name, setChannel, lineRef, rowRef, rowColor}) =>{
+    //color: '#363636'
+    
+    const colorInRef = useRef(null);
+    
+    useEffect(()=>{
+        //ATTENTION: below onMount
+        const optCopy = {text:rowRef.current.children[0].children[0].children[0].text, color: '#' + rowRef.current.children[1].material.color.getHexString(), enabled:rowRef.current.visible, traceHeight:rowRef.current.children[1].scale.y };
+        
+        colorInRef.current.style.backgroundColor = '#' + rowRef.current.children[1].material.color.getHexString();
+        
+        
+        //ATTENTION: below onUnmount
+        return ()=>{
+            const newOptCopy = {text:rowRef.current.children[0].children[0].children[0].text, color: '#' + rowRef.current.children[1].material.color.getHexString(), enabled:rowRef.current.visible, traceHeight:rowRef.current.children[1].scale.y };
+            
+            let cnt = 0;
+            const inputOpts = {chName: name};
+            for (const [key, value] of Object.entries(newOptCopy)) {
+                if (optCopy[key] !== value){
+                    Object.assign(inputOpts, {[key]:value});
+                    cnt++;
+                }
+            }
+            
+            (cnt) ? setChannel({variables:{input:[inputOpts]}}) : null;
+    
+        }
+    }, []);
+    
+    const setRowColor = useCallback((e)=>{
+        
+        //set label color
+        rowRef.current.children[0].children[1].material.color.setStyle(e);
+        
+        //set row background plane color
+        rowRef.current.children[1].material.color.setStyle(e);
+        
+        //set color selector div color
+        colorInRef.current.style.backgroundColor = e;
+    }, []);
+    
     return(
         <div css={`padding:10px; padding-top:5px; background-color:#24384d; border:1px solid black; border-radius:4px;`}>
             <table css={`color:white; white-space: nowrap;`}>
                 <tr>
                     <td>Name</td>
                     <td>
-                        <input css={`width:70px`} type="text" list="list" onChange={(e)=>rowRef.current.children[0].children[0].children[0].text = e.target.value} defaultValue={rowRef.current.children[0].children[0].children[0].text} />
+                        <input css={`width:70px`} type="text" list="list" onChange={(e)=>{
+                                rowRef.current.children[0].children[0].children[0].text = e.target.value;
+                            }} 
+                            defaultValue={rowRef.current.children[0].children[0].children[0].text} 
+                        />
                     </td>
                 </tr>
                 <tr>
                     <td>Color</td>
                     <td>
-                        <div css={`float:left;background-color: #4c647f; border: 1px solid black; border-radius: 3px; padding:6px;`}>
-                            <div css={`width:50px; height:8px; background-color:${rowColor};`}></div>
-                        </div>
+                        <PopoverPicker inRef={colorInRef} color={'yellow'} onChange={setRowColor} />
                     </td>
                 </tr>
                 
@@ -32,8 +76,8 @@ const SrLogicPopUpContent = ({lineRef, rowRef, rowColor}) =>{
                             type="number"
                             defaultValue={rowRef.current.children[1].scale.y}
                             onChange={(e)=>{
-                                rowRef.current.children[1].scale.y = e.target.value;
-                                lineRef.current.scale.y = e.target.value;
+                                rowRef.current.children[1].scale.y = e.target.valueAsNumber;
+                                lineRef.current.scale.y = e.target.valueAsNumber;
                             }}
                             css={`height:13px; position:relative; float:left; width:50px`}
                         />
@@ -44,7 +88,7 @@ const SrLogicPopUpContent = ({lineRef, rowRef, rowColor}) =>{
     )
 }
 
-export const SrLogicPopUp = ({open, setOpen, lineRef, rowRef, rowColor}) =>{
+export const SrLogicPopUp = ({name, setChannel, open, setOpen, lineRef, rowRef, rowColor, testRef}) =>{
     console.log('Render SrChannelPopUp');
 
     const toggle = () =>setOpen(!open);
@@ -62,35 +106,46 @@ export const SrLogicPopUp = ({open, setOpen, lineRef, rowRef, rowColor}) =>{
         return () => document.removeEventListener("mousedown", handleClick)
     }, []);
 
-    const content =
-        <Html position-x={17} position-y={20} ref={node} >
-            <SrLogicPopUpContent lineRef={lineRef} rowRef={rowRef} rowColor={rowColor} />
-        </Html>
+    const content = <SrLogicPopUpContent name={name} setChannel={setChannel} lineRef={lineRef} rowRef={rowRef} rowColor={rowColor} testRef={testRef}/>
 
-    return (<>{ open && content }</>)
+    return (
+        <Html position-x={17} position-y={20} ref={node}>
+            { (open) ? content : null }
+        </Html>
+    )
 }
 
-const SrAnalogPopUpContent = ({text, lineRef, rowRef, rowColor, pVertDivs, nVertDivs, divHeight, vRes, autoranging}) =>{
+const SrAnalogPopUpContent = ({testRef, name, setChannel, text, lineRef, rowRef, rowColor, pVertDivs, nVertDivs, divHeight, vRes, autoranging}) =>{
+    
+    console.log('testRef----------->', testRef.current);
     
     const nDivsRef= useRef();
     const pDivsRef= useRef();
     const hDivRef= useRef();
     
-    const channels = useReactiveVar(channelsVar);
+    const { analog } = useReactiveVar(channelsVar);
     
+    /*
     useEffect(()=>{
-        const item = channels.analog.find((i)=>i.name === text);
-        pDivsRef.current.value = item.pVertDivs;
+        pDivsRef.current.value = analog[name].pVertDivs;
     }, []);
+    */
     
     return(
         <div css={`padding:10px; padding-top:5px; background-color:#24384d; border:1px solid black; border-radius:4px;`}>
     
             <table css={`color:white; white-space: nowrap;`}>
+                <tbody>
+                
                 <tr>
                     <td>Name</td>
                     <td>
-                        <input css={`width:70px`} type="text" list="list" onChange={(e)=>rowRef.current.children[0].children[0].children[0].text = e.target.value} defaultValue={rowRef.current.children[0].children[0].children[0].text} />
+                        <input css={`width:70px`} type="text" list="list" onChange={(e)=>{
+                                rowRef.current.children[0].children[0].children[0].text = e.target.value;
+                                setChannel({variables:{input:[{chName:name, text:e.target.value}] }});
+                            }}
+                            defaultValue={rowRef.current.children[0].children[0].children[0].text}
+                        />
                     </td>
                 </tr>
                 <tr>
@@ -121,14 +176,19 @@ const SrAnalogPopUpContent = ({text, lineRef, rowRef, rowColor, pVertDivs, nVert
                                 
                                 rowRef.current.children[3].position.y = pHeight;
                                 
-                                const newChannels = {...channels};
                                 
-                                const ind = newChannels.analog.findIndex((i)=>i.name === text);
+                                setChannel({variables:{input:[{chName:name, pVertDivs: parseInt(e.target.value)}] }});
+                                //setChannel({variables:{chName:name, param:'pVertDivs', value:e.target.value}});
                                 
-                                newChannels.analog[ind].pVertDivs = parseInt(e.target.value);
+                                //const newChannels = {...channels};
                                 
-                                channelsVar(newChannels);
-                                console.log('---->', channelsVar());
+                                //const newChannels = {...channelsVar()};
+                                
+                                //const ind = newChannels.analog.findIndex((i)=>i.name === text);
+                                
+                                //newChannels.analog[name].pVertDivs = parseInt(e.target.value);
+                                
+                                //channelsVar(newChannels);
                             }}
                             css={`height:13px; position:relative; float:left; width:50px`}
                         />
@@ -166,8 +226,9 @@ const SrAnalogPopUpContent = ({text, lineRef, rowRef, rowColor, pVertDivs, nVert
                             ref={hDivRef}
                             name='hg'
                             type="number"
-                            defaultValue={divHeight}
+                            defaultValue={testRef.current.divHeight}
                             onChange={(e)=>{
+                                testRef.current.divHeight = e.target.value;
                                 const pHeight = pDivsRef.current.value * e.target.value;
                                 const nHeight = nDivsRef.current.value * e.target.value;
                                 
@@ -229,20 +290,18 @@ const SrAnalogPopUpContent = ({text, lineRef, rowRef, rowColor, pVertDivs, nVert
                         </select>
                     </td>
                 </tr>
+                </tbody>
             </table>
         </div>
     )
 }
 
-export const SrAnalogPopUp = ({text, open, setOpen, lineRef, rowRef, rowColor, pVertDivs, nVertDivs, divHeight, vRes, autoranging}) =>{
+export const SrAnalogPopUp = ({setChannel, name, text, open, setOpen, lineRef, rowRef, rowColor, pVertDivs, nVertDivs, divHeight, vRes, autoranging, testRef}) =>{
     console.log('Render SrChannelPopUp');
 
-    //const toggle = () =>setOpen(!open);
-    
-    const node = useRef();    
+    const node = useRef();
 
     const handleClick = e => {
-        //console.log('---->', channelsVar());
         if (node.current && node.current.contains(e.target)){
             return;// inside click
         }
@@ -253,21 +312,27 @@ export const SrAnalogPopUp = ({text, open, setOpen, lineRef, rowRef, rowColor, p
         document.addEventListener("mousedown", handleClick)
         return () => document.removeEventListener("mousedown", handleClick)
     }, []);
-
+    
     const content =
-        <Html position-x={17} position-y={20} ref={node} >
-            <SrAnalogPopUpContent
-                text={text}
-                lineRef={lineRef}
-                rowRef={rowRef}
-                rowColor={rowColor}
-                pVertDivs={pVertDivs}
-                nVertDivs={nVertDivs}
-                divHeight={divHeight}
-                vRes={vRes}
-                autoranging={autoranging}
-            />
-        </Html>
+        <SrAnalogPopUpContent
+            text={text}
+            lineRef={lineRef}
+            rowRef={rowRef}
+            rowColor={rowColor}
+            pVertDivs={pVertDivs}
+            nVertDivs={nVertDivs}
+            divHeight={divHeight}
+            vRes={vRes}
+            autoranging={autoranging}
+            
+            name={name}
+            setChannel={setChannel}
+            testRef={testRef}
+        />
 
-    return (<>{ open && content }</>)
+    return (
+        <Html position-x={17} position-y={20} ref={node}>
+            { (open) ? content : null }
+        </Html>
+    )
 }

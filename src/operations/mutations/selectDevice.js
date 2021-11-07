@@ -1,30 +1,16 @@
 import { gql, useMutation } from "@apollo/client";
-//import { GET_SESSION } from "../queries/getSession";
-//import { sessionVar } from '../../ApolloClient';
-//import { createRef } from 'react';
-//import { channelsVar } from '../../ApolloClient';
+import { SESSION_FIELDS } from '../fragments/SessionFields';
 
 const SELECT_DEVICE = gql`
     mutation SelectDevice($id:ID!, $devNum:Int!){
         selectDevice(id:$id, devNum:$devNum){
-            id
-            name
-            type
-            sourcename
-            config
-            channels
+            ...SessionFields
         }
     }
+    ${SESSION_FIELDS}
 `;
 
 export function useSelectDevice(){
-    const [ mutate, { data, error } ] = useMutation(SELECT_DEVICE/*, { onCompleted:()=>channelsVar({logic:[], analog:[]}) }*/ /*{
-        update (cache, { data }) {
-            const { selectDevice } = data;
-            const { session } = cache.readQuery({query: GET_SESSION, variables:{id:selectDevice.id}});
-            //sessionVar( {...session, ref:createRef() });
-            //console.log('session==========>', session);
-        }
-    }*/);
+    const [ mutate, { data, error } ] = useMutation(SELECT_DEVICE);
     return { mutate, data, error };
 }

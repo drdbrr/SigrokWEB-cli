@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScSrDropDownContent } from '../styled/ScSrDropDownContent';
 import SrDropDownMenu from './SrDropDownMenu';
 
 import { runStateVar } from '../ApolloClient';
 import { useReactiveVar } from '@apollo/client';
 
-const SrDeviceMenuContent = ({toggle, drivers, devices, getScanDevices, getDevice})=>{
+const SrDeviceMenuContent = ({toggle, drivers, devices, getScanDevices, getDevice, setDevices})=>{
     console.log('Render SrDeviceMenuContent');
     const [devNum, setDevNum] = useState(true);
     const [driver, setDriver] = useState(false);
@@ -18,6 +18,10 @@ const SrDeviceMenuContent = ({toggle, drivers, devices, getScanDevices, getDevic
         setDriver(event.target.value);
         setDevNum(true);
     };
+    
+    useEffect(()=>{
+        return ()=>setDevices([]);
+    }, []);
     
     const selectDevNum = (event)=>setDevNum(event.target.tabIndex);
     
@@ -65,6 +69,7 @@ const SrDeviceMenuContent = ({toggle, drivers, devices, getScanDevices, getDevic
 
 const SrDeviceMenu = (props) =>{
     const disabled = useReactiveVar(runStateVar);
+    
     return(
         <SrDropDownMenu label={ (props.label) ? props.label : 'Device' } disabled={disabled} >
             <SrDeviceMenuContent { ...props }/>

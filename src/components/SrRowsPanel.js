@@ -1,9 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
-import { channelsVar } from '../ApolloClient';
-import { useReactiveVar } from '@apollo/client';
+import { selectedSessionVar, channelsVar } from '../ApolloClient';
+import { useReactiveVar, useApolloClient } from '@apollo/client';
 import { SrLogicChannelsLines, SrAnalogChannelsLines } from './SrChannelsLines';
 import { SrLogicChannelsRows, SrAnalogChannelsRows } from './SrRowsChannels';
+
+import { useSetChannel } from '../operations/mutations/setChannel';
 
 //import clamp from 'lodash-es/clamp';
 //import get from 'lodash-es/get';
@@ -16,7 +18,14 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
     const { size } = useThree();
     const rowActionRef = useRef({ index: null, down: false, moved:false, logicHeight:0, analogHeight:0, dHeight:0, type:null});
     
-    const { logic, analog } = useReactiveVar(channelsVar);
+    const id = useReactiveVar(selectedSessionVar);
+    
+    //ATTENTION
+    const { mutate: setChannel } = useSetChannel(id);
+    
+    const order = useRef({});
+    
+    const channelGroups = useReactiveVar(channelsVar);
     
     const decoders = [];
     
@@ -26,15 +35,6 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
     const analogRowsRef = useRef();
     const analogLinesRef = useRef();
     
-    const order = useRef({
-            logic:{index:0, type:'logic', rowRef:logicRowsRef, lineRef:logicLinesRef, height:rowActionRef.current.logicHeight},
-            analog:{index:1, type:'analog', rowRef:analogRowsRef, lineRef:analogLinesRef, height:rowActionRef.current.analogHeight}
-        });
-    
-    //const order = useRef([]);
-    //useMemo(()=>logic.map((_, index) =>order.current.push(index)), [logic]);
-    
-    //let prevRow = null;
     useFrame(()=>{
 //-------------------        
         /*
@@ -68,7 +68,8 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
             rowActionRef.current.index = null;
         }*/
 //-------------------
-        //if (!rowActionRef.current.down){
+/*
+        if (!rowActionRef.curren.down){//ATTENTION
             let offset = 0
             Object.values(order.current).sort( (a,b)=> a.index - b.index ).map((item, i)=>{
                 if (item.type !== rowActionRef.current.type){
@@ -77,8 +78,8 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
                     offset -= item.height;
                 }
             })
-        //}
-        
+        }
+  */      
         if (!mouseRef.current.rmb || rowsGroupRef.current.position.y > size.height/2 - 40)
             rowsGroupRef.current.position.y = size.height/2 - 40
     });
@@ -91,22 +92,29 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
         <group ref={rowsGroupRef} position-y={size.height/2} >
             
             //ATTENTION rows
+            { ('logic' in channelGroups)?
             <group ref={logicRowsRef} >
-                <SrLogicChannelsRows logicRowsRef={logicRowsRef} logicLinesRef={logicLinesRef} rowActionRef={rowActionRef} order={order} />
-            </group>
+                <SrLogicChannelsRows setChannel={setChannel} logic={channelGroups.logic} logicRowsRef={logicRowsRef} logicLinesRef={logicLinesRef} rowActionRef={rowActionRef} order={order} />
+            </group> : null }
             
+            
+            { ('analog' in channelGroups) ?
             <group ref={analogRowsRef}>
-                <SrAnalogChannelsRows analogRowsRef={analogRowsRef} analogLinesRef={analogLinesRef} rowActionRef={rowActionRef} order={order} />
-            </group>
+                <SrAnalogChannelsRows setChannel={setChannel} analog={channelGroups.analog} analogRowsRef={analogRowsRef} analogLinesRef={analogLinesRef} rowActionRef={rowActionRef} order={order} />
+            </group> : null }
             
             //ATTENTION lines
             <group position={[-size.width / 2 + 50 + mouseRef.current.cursor, 0, 1]} ref={linesGroupRef}>
+                { ('logic' in channelGroups) ?
                 <group ref={logicLinesRef}>
-                    <SrLogicChannelsLines />
-                </group>
+                    <SrLogicChannelsLines logic={channelGroups.logic} />
+                </group> : null }
+                
+                { ('analog' in channelGroups) ?
                 <group ref={analogLinesRef}>
-                    <SrAnalogChannelsLines />
-                </group>
+                    <SrAnalogChannelsLines analog={channelGroups.analog}/>
+                </group> : null }
+                
             </group>
                 
         </group>

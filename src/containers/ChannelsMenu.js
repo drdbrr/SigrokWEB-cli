@@ -1,25 +1,30 @@
-import React, { createRef } from 'react';
+import React, { createRef, useEffect } from 'react';
 import { useQuery, useReactiveVar } from '@apollo/client';
-//import SrDeviceMenu from '../components/SrDeviceMenu';
 import { SrLoading } from '../components/SrLoading';
-import { GET_CHANNELS } from '../operations/queries/getChannels';
-import { selectedSessionVar, channelsVar, runStateVar } from '../ApolloClient';
+import { GET_CHANNELS_LIST } from '../operations/queries/getChannelsList';
+import { selectedSessionVar, channelsVar } from '../ApolloClient';
 import { SrChannelsMenu } from '../components/SrChannelsMenu';
 
-export const ChannelsMenu = ({ws}) => {
+import { useSetChannel } from '../operations/mutations/setChannel';
+
+export const ChannelsMenu = ({type}) => {
     const id = useReactiveVar(selectedSessionVar);
-    //const channels = useReactiveVar(channelsVar);
-    const { data, error, loading }  = useQuery(GET_CHANNELS, { fetchPolicy: 'no-cache', variables:{id:id}, onCompleted:({getChannels})=>{
-        const logic = [];
-        const analog = [];
-        if (getChannels.logic){
-            getChannels.logic.map((item)=>logic.push({...item, lineRef: createRef(), rowRef:createRef()}))
-        }
-        if (getChannels.analog){
-            getChannels.analog.map((item)=>analog.push({...item, lineRef: createRef(), rowRef:createRef()}))
-        }
-        channelsVar({logic:logic, analog:analog})
-    } });
+    const channelGroups = useReactiveVar(channelsVar);
+    
+    const { mutate: setChannel } = useSetChannel(id);
+    
+    const { data, error, loading, refetch }  = useQuery(GET_CHANNELS_LIST, { variables:{id:id}});
+    
+    useEffect(()=>{
+        if (type === 'DeviceSession')
+            refetch()
+    }, [id]);
+    
     if (loading) return <SrLoading />;
-    return <SrChannelsMenu ws={ws}/*logic={channelsVar.logic} analog={channelsVar.analog}*//>
-}
+    return (
+        <SrChannelsMenu
+            channelGroups={channelGroups}
+            setChannel={setChannel}
+        />
+    )
+} 

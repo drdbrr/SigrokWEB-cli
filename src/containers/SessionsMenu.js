@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import SrSessionsMenu from '../components/SrSessionsMenu';
 import { useCreateSession } from '../operations/mutations/createSession';
 import { useDeleteSession } from '../operations/mutations/deleteSession';
 import { selectedSessionVar } from '../ApolloClient';
-import { useQuery, useReactiveVar } from '@apollo/client';
+import { useQuery, useReactiveVar/*, useApolloClient*/ } from '@apollo/client';
 import { GET_SESSIONS } from '../operations/queries/getSessions';
 import { SrLoading } from '../components/SrLoading';
 
@@ -12,10 +12,14 @@ export const SessionsMenu = ({name})=>{
     const { mutate: createSession } = useCreateSession();
     const { mutate: deleteSession } = useDeleteSession();
     
-    const urlParams = new URLSearchParams(window.location.search);
-    const srsid = urlParams.get('srsid');
+    //const client = useApolloClient();
+    //useEffect(()=>client.refetchQueries({include: "active",}), [id]);
     
-    const { data: {sessions} = [], loading } = useQuery(GET_SESSIONS, { onCompleted: ({sessions})=>{
+    
+    //const urlParams = new URLSearchParams(window.location.search);
+    //const srsid = urlParams.get('srsid');
+    
+    const { data: {sessions} = [], loading } = useQuery(GET_SESSIONS/*, { onCompleted: ({sessions})=>{
         if (sessions.length && !selectedSessionVar() && !srsid){
             selectedSessionVar(sessions[0].id);
             const refresh = window.location.protocol + "//" + window.location.host + window.location.pathname + '?srsid=' + sessions[0].id;
@@ -31,7 +35,7 @@ export const SessionsMenu = ({name})=>{
                 window.history.pushState({ path: refresh }, '', refresh);
             }
         }
-    } });
+    } }*/);
     
     if (loading ) return <SrLoading />;
     
@@ -40,9 +44,7 @@ export const SessionsMenu = ({name})=>{
             sessions={sessions}
             name={name}
             id={id}
-            selectSession={(id)=>{
-                selectedSessionVar(id);
-            }}
+            selectSession={ (id)=>selectedSessionVar(id) }
             createSession={createSession}
             deleteSession={(id)=>deleteSession({variables:{id:id}})}
         />
