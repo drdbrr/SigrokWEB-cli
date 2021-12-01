@@ -1,10 +1,17 @@
 import { gql } from "@apollo/client";
+import { SESSION_FIELDS } from '../fragments/SessionFields';
 
 export const GET_SESSIONS = gql`
     query GetSessions{
         sessions{
-            id
-            name
+            sesList{
+                id
+                name
+            }
+            session {
+                ...SessionFields
+            }
         }
     }
+    ${SESSION_FIELDS}
 `;

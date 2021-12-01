@@ -4,7 +4,7 @@ import { ScSrDropDownContent } from '../styled/ScSrDropDownContent';
 import { ScSrDropDownItem } from '../styled/ScSrDropDownItem';
 import SrDropDownMenu from './SrDropDownMenu';
 
-import { runStateVar } from '../ApolloClient';
+import { stateVar } from '../ApolloClient';
 import { useReactiveVar } from '@apollo/client';
 
 const SrSessionsMenuContent = ({id, sessions, toggle, createSession, selectSession, deleteSession})=>{
@@ -32,10 +32,10 @@ const SrSessionsMenuContent = ({id, sessions, toggle, createSession, selectSessi
 }
 
 const SrSessionsMenu = (props) =>{
-    const disabled = useReactiveVar(runStateVar);
+    //const { disabled } = useReactiveVar(stateVar);
     const icon = <Menu size='small' color='white' />;
     return(
-        <SrDropDownMenu label={ props.name } icon={icon} disabled={disabled} >
+        <SrDropDownMenu label={ props.name } icon={icon} disabled={false} >
             <SrSessionsMenuContent { ...props }/>
         </SrDropDownMenu>
     )

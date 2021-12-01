@@ -1,3 +1,4 @@
+/*
 export const lightTheme = {
     body: '#FFF',
     text: '#363537',
@@ -52,8 +53,9 @@ export const redTheme = {
         extend: undefined,
     },
 }
+*/
 
-export const blueTheme = {
+export const defaultTheme = {
     disabled: '#3e3e3e',
     background: '#24384d',
     button: '#4c647f',

@@ -2,8 +2,8 @@ import { gql, useMutation } from "@apollo/client";
 import { SESSION_FIELDS } from '../fragments/SessionFields';
 
 const SELECT_DEVICE = gql`
-    mutation SelectDevice($id:ID!, $devNum:Int!){
-        selectDevice(id:$id, devNum:$devNum){
+    mutation SelectDevice($devNum: Int!){
+        selectDevice(devNum: $devNum){
             ...SessionFields
         }
     }

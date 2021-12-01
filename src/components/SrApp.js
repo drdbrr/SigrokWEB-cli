@@ -16,9 +16,6 @@ const GlobalStyle = createGlobalStyle`
 
 export const SrApp = ({ws, session}) =>{
     console.log('Render SrApp');
-
-    //ATTENTION https://stackoverflow.com/questions/54847286/member-functions-with-react-hooks
-
     return(
         <ThemeProvider theme={blueTheme}>
             <GlobalStyle />
@@ -28,8 +25,6 @@ export const SrApp = ({ws, session}) =>{
                     ws={ws}
                 />
                 <SrCanvas ws={ws}/>
-                {/* (decoderMenu) ? <SrDecoderMenu /> : null */}
-                {/* (tabularMenu) ? <SrTabularMenu /> : null */}
             </ScSrApp>
         </ThemeProvider>
     )

@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
 export const GET_DECODERS_LIST = gql`
-    query getDecodersList($id: ID!){
-        decodersList(id: $id){
+    query getDecodersList{
+        decodersList{
             id
             name
             longname

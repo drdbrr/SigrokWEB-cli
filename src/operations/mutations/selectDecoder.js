@@ -1,8 +1,8 @@
 import { gql, useMutation } from "@apollo/client";
 
 export const SELECT_DECODER = gql`
-    mutation SelectDecoder($id: ID!, $pdId:String!){
-        selectDecoder(id: $id, pdId:$pdId){
+    mutation SelectDecoder($pdId:String!){
+        selectDecoder(pdId:$pdId){
             id
             name
             longname

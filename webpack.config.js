@@ -1,8 +1,8 @@
 const webpack = require('webpack');
 
 const config = {
-    //mode: 'development',
-    mode: 'production',
+    mode: 'development',
+    //mode: 'production',
     //watch: true,
     entry: __dirname + '/src/index.js',
     output: {

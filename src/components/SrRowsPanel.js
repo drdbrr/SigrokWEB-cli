@@ -1,6 +1,6 @@
 import React, { useRef, useMemo } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
-import { selectedSessionVar, channelsVar } from '../ApolloClient';
+import { sidVar, channelsVar } from '../ApolloClient';
 import { useReactiveVar, useApolloClient } from '@apollo/client';
 import { SrLogicChannelsLines, SrAnalogChannelsLines } from './SrChannelsLines';
 import { SrLogicChannelsRows, SrAnalogChannelsRows } from './SrRowsChannels';
@@ -18,7 +18,7 @@ const SrRowsPanel =({linesGroupRef, rowsGroupRef, rowsPanelPlaneWidth, mouseRef}
     const { size } = useThree();
     const rowActionRef = useRef({ index: null, down: false, moved:false, logicHeight:0, analogHeight:0, dHeight:0, type:null});
     
-    const id = useReactiveVar(selectedSessionVar);
+    const id = useReactiveVar(sidVar);
     
     //ATTENTION
     const { mutate: setChannel } = useSetChannel(id);

@@ -2,8 +2,8 @@ import React from 'react';
 import { ScSrDropDownContent } from '../styled/ScSrDropDownContent';
 import { ScSrDropDownItem } from '../styled/ScSrDropDownItem';
 import SrDropDownMenu from './SrDropDownMenu';
-import { useReactiveVar } from '@apollo/client';
-import { runStateVar } from '../ApolloClient';
+//import { useReactiveVar } from '@apollo/client';
+//import { runStateVar } from '../ApolloClient';
 
 const SrListOptionContent = React.memo(({toggle, value, values, setOption, keyName})=>{
     console.log('Render SrOptionContent');
@@ -16,8 +16,7 @@ const SrListOptionContent = React.memo(({toggle, value, values, setOption, keyNa
                     <span onClick={()=>{
                         setOption({variables:{ opt: keyName, value: item }});
                         toggle()
-                    }
-                    } > {item} </span>
+                    }} > {item} </span>
                 </ScSrDropDownItem>)}
             ) }
             </div>
@@ -26,7 +25,7 @@ const SrListOptionContent = React.memo(({toggle, value, values, setOption, keyNa
 })
 
 export const SrListOption = (props) =>{
-    const disabled = useReactiveVar(runStateVar);
+    const { disabled } = eventsVar();//useReactiveVar(eventsVar);
     return(
         <SrDropDownMenu label={props.value} disabled={disabled} >
             <SrListOptionContent { ...props }/>

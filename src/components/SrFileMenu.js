@@ -3,9 +3,6 @@ import { Document } from 'grommet-icons';
 import { ScSrDropDownContent } from '../styled/ScSrDropDownContent';
 import SrDropDownMenu from './SrDropDownMenu';
 
-import { runStateVar } from '../ApolloClient';
-import { useReactiveVar } from '@apollo/client';
-
 const SrFileMenuContent=()=>{
     console.log('Render SrFileMenuContent');
     return(
@@ -16,7 +13,7 @@ const SrFileMenuContent=()=>{
 }
 
 const SrFileMenu = (props) =>{
-    const disabled = useReactiveVar(runStateVar);
+    const disabled = false;
     const icon = <Document size='small' color='white' />
     return(
         <SrDropDownMenu icon={icon} disabled={disabled} >

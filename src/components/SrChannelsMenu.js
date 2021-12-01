@@ -5,10 +5,7 @@ import { ScSrDropDown } from '../styled/ScSrDropDown';
 import { ScSrButton } from '../styled/ScSrButton';
 import SrDropDownMenu from './SrDropDownMenu';
 
-import { runStateVar } from '../ApolloClient';
-import { useReactiveVar } from '@apollo/client';
-
-const SrChannelsMenuEntries = ({group, label, setChannel}) =>{
+const SrChannelsMenuEntries = ({group, label}) =>{
     console.log('Render SrChannelsMenuEntries')
     const channelGroup = group.map((item, i)=>{
         const ref = useRef()
@@ -20,10 +17,9 @@ const SrChannelsMenuEntries = ({group, label, setChannel}) =>{
                     type="checkbox"
                     name={item.name}
                     value={item.name}
-                    onChange={(e)=>{
-                        item.rowRef.current.visible = item.lineRef.current.visible = e.target.checked;
-                        setChannel({ variables: { input:[ { chName: item.name, enabled: e.target.checked } ]}});
-                    }}
+                    onChange={(e)=>
+                        item.rowRef.current.visible = item.lineRef.current.visible = e.target.checked
+                    }
                 />
                 <label css={`color:white`}>{item.name}</label>
             </div>
@@ -31,22 +27,10 @@ const SrChannelsMenuEntries = ({group, label, setChannel}) =>{
     });
     
     //ENABLE ALL
-    const enable = ()=>{
-        const optsInput = group.map((item, i)=>{
-            channelGroup[i].props.children[0].ref.current.checked = item.rowRef.current.visible = item.lineRef.current.visible = true;
-            return {chName: item.name, enabled:true};
-        })
-        setChannel({ variables: { input:optsInput}});
-    };
+    const enable = useCallback(()=>group.forEach((item, i)=>channelGroup[i].props.children[0].ref.current.checked = item.rowRef.current.visible = item.lineRef.current.visible = true));
     
     //DISABLE ALL
-    const disable = ()=>{
-        const optsInput = group.map((item, i)=>{
-            channelGroup[i].props.children[0].ref.current.checked = item.rowRef.current.visible = item.lineRef.current.visible = false;
-            return {chName: item.name, enabled:false};
-        })
-        setChannel({ variables: { input:optsInput}});
-    };
+    const disable = useCallback(()=>group.forEach((item, i)=>channelGroup[i].props.children[0].ref.current.checked = item.rowRef.current.visible = item.lineRef.current.visible = false));
     
     return(
         <div>
@@ -69,27 +53,26 @@ const SrChannelsMenuEntries = ({group, label, setChannel}) =>{
 }
 
 
-const SrChannelsMenuContent=({channelGroups, setChannel})=>{
+const SrChannelsMenuContent=({channelGroups})=>{
     console.log('Render SrChannelsMenuContent');
-    const ent = [];
+    const channelsList = [];
 
-    for (const [key, value] of Object.entries(channelGroups)) {
-        ent.push(<SrChannelsMenuEntries setChannel={setChannel} key={key} group={Object.values(value)} label={key.charAt(0).toUpperCase() + key.slice(1)} />)
+    for (const [ key, value ] of Object.entries(channelGroups)) {
+        channelsList.push(<SrChannelsMenuEntries key={key} group={Object.values(value)} label={key.charAt(0).toUpperCase() + key.slice(1)} />)
     }
     
     return(
         <ScSrDropDownContent >
             <div css={`padding-bottom: 10px`} >
-                { ent }
+                { channelsList }
             </div>
         </ScSrDropDownContent>
     )
 }
 
 export const SrChannelsMenu = (props) =>{
-    const disabled = useReactiveVar(runStateVar);
     return(
-        <SrDropDownMenu label='Channels' disabled={disabled} >
+        <SrDropDownMenu label='Channels' >
             <SrChannelsMenuContent { ...props } />
         </SrDropDownMenu>
     )
