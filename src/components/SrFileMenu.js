@@ -12,7 +12,7 @@ const SrFileMenuContent=()=>{
     )
 }
 
-const SrFileMenu = (props) =>{
+export const SrFileMenu = (props) =>{
     const disabled = false;
     const icon = <Document size='small' color='white' />
     return(
@@ -21,5 +21,3 @@ const SrFileMenu = (props) =>{
         </SrDropDownMenu>
     )
 }
-
-export default SrFileMenu

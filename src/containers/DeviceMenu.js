@@ -9,7 +9,7 @@ import { GET_SCAN_DEVICES } from '../operations/queries/getScanDevices';
 import { useSelectDevice } from '../operations/mutations/selectDevice';
 //import { sidVar } from '../ApolloClient';
 
-const DeviceMenu = ({session}) => {
+export const DeviceMenu = ({session}) => {
     //const id = useReactiveVar(sidVar);
     //const { data: sessions, loading } = useQuery(GET_SESSIONS);
     const { data: { drivers } = [] }  = useQuery(GET_DRIVERS);
@@ -52,5 +52,3 @@ const DeviceMenu = ({session}) => {
         />
     )
 }
-
-export default DeviceMenu;

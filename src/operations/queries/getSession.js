@@ -3,7 +3,7 @@ import { SESSION_FIELDS } from '../fragments/SessionFields';
 
 export const GET_SESSION = gql`
     query GetSession{
-        session{
+        session @client {
             ...SessionFields
         }
     }

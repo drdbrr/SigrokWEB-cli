@@ -1,23 +1,20 @@
 import React, { useState, useCallback } from 'react';
 import { ScSrMenuPanel } from '../styled/ScSrMenuPanel';
-import SrFileMenu from '../components/SrFileMenu';
-import DeviceMenu from '../containers/DeviceMenu';
 import { SessionsMenu } from '../containers/SessionsMenu';
-import SrRunButton from '../components/SrRunButton';
+import { DeviceMenu } from '../containers/DeviceMenu';
+import { OptionsPanel } from '../containers/OptionsPanel';
+import { ChannelsMenu } from '../containers/ChannelsMenu';
 import { DecodersMenu } from '../containers/DecodersMenu';
+import { SrFileMenu } from '../components/SrFileMenu';
+import { SrRunButton } from '../components/SrRunButton';
+import SrLoading from '../components/SrLoading';
 import { SrTabularMenu } from '../components/SrTabularMenu';
 
-import { ChannelsMenu } from '../containers/ChannelsMenu';
-import { OptionsPanel } from '../containers/OptionsPanel';
-
-import SrLoading from '../components/SrLoading';
-
-import { GET_SESSIONS } from '../operations/queries/getSessions';
-import { useQuery } from '@apollo/client'
+import { useGetSessions } from '../operations/queries/useGetSessions';
 
 const MenuPanelLayout = () =>{
     console.log('Render MenuPanelLayout');
-    const { data: { sessions } = {}, error, loading } = useQuery(GET_SESSIONS, { extensions: { 'hereIam': '123123' } } );
+    const [ select, {data: {sessions, session}, loading} ] = useGetSessions();
     
     //------------------------------------------------------------
     const [ decoderMenu, setDecoderMenu ] = useState(false);
@@ -36,12 +33,10 @@ const MenuPanelLayout = () =>{
     //------------------------------------------------------------
     
     if (loading) return <SrLoading />
-    
-    const { session, sesList } = sessions;
-        
+
     return(
         <ScSrMenuPanel>
-            <SessionsMenu sesList={sesList} session={session} />
+            <SessionsMenu sessions={sessions} session={session} />
             <SrFileMenu />
             <DeviceMenu session={session} />
             

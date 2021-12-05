@@ -1,20 +1,20 @@
 import { ApolloClient, HttpLink, ApolloLink, InMemoryCache, makeVar, from, setContext } from '@apollo/client';
 import { createRef } from 'react';
 
+import { select } from './operations/mutations/sessionHandlers';
+
 export const sidVar = makeVar('');
 export const stateVar = makeVar({ disabled: [], isRun: false });
 export const channelsVar = makeVar({});
 
+export const sessionVar = makeVar('');
+
 const ChannelsTypes = ['analog', 'logic'];
 
 const customFetch = (uri, options) => {
-    
 //     const param = options.headers['x-custom-param'];
-//     
 //     if ( param )
 //         return fetch(`${uri}${window.location.search}`, options);
-    
-    
     return fetch(`${uri}${window.location.search}`, options);
 };
 
@@ -26,13 +26,35 @@ const link = new HttpLink({
 
 const cache = new InMemoryCache({
     possibleTypes:{
-        Session:["BlankSession", "DeviceSession"],
-        Channel:["AnalogChannel", "LogicChannel"],
+        Session: ["BlankSession", "DeviceSession"],
+        Channel: ["AnalogChannel", "LogicChannel"],
         Option: ["ValueOpt", "ListOpt", "VlOpt", "EmptyOpt"],
     },
     typePolicies:{
         Query:{
             fields:{
+                session:{
+                    read(_, { readField }){
+                        const sid = sessionVar();
+                        
+                        //const sessionsRefs = readField('sessions');
+                        //console.log('sessionsRefs ===>', sessionsRefs);
+                        
+                        //return {};
+                        
+                        //const sessions = readField(sessions);
+                        //const session = sessionRefs.find(sesRef => sid === readField('id', sesRef));
+                        //return sessions.find(item => item.id === sid);
+                        
+                        //const sessionsRefs = readField(sessions);
+                        //return sessionsRefs.at(sessionsRefs.findIndex(sesRef => sid === readField('id', sesRef)));
+                        
+                        const sessionsRefs = readField('sessions');
+                        const session = sessionsRefs.find(sesRef => sid === readField('id', sesRef));
+                        console.log('READ===========>', session);
+                        return session
+                    },
+                },
                 options:{
                     merge(current, list){
                         const newState = {...stateVar()};

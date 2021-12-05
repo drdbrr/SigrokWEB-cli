@@ -4,7 +4,7 @@ import { CirclePlay, PauseFill }  from 'grommet-icons';
 import { runStateVar } from '../ApolloClient';
 import { useReactiveVar } from '@apollo/client';
 
-const SrRunButton = ({ws}) =>{
+export const SrRunButton = ({ws}) =>{
     const isRun = useReactiveVar(runStateVar);
     
     return(
@@ -14,5 +14,3 @@ const SrRunButton = ({ws}) =>{
         </ScSrButton>
     )
 }
-
-export default SrRunButton

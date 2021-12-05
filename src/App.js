@@ -1,8 +1,8 @@
 import React from 'react';
 import { ApolloProvider } from '@apollo/client';
-import { Client, sidVar } from './ApolloClient';
+import { Client /*, sidVar*/ } from './ApolloClient';
 import { Helmet } from 'react-helmet';
-import { /*createGlobalStyle,*/ ThemeProvider } from 'styled-components';
+import { createGlobalStyle, ThemeProvider } from 'styled-components';
 import { defaultTheme } from "./styled/Themes";
 import { Favicon } from "./styled/Favicon";
 import MainViewLayout from './layouts/MainViewLayout';
@@ -10,7 +10,6 @@ import WsProvider from './containers/WsContext';
 
 import packageJson from '../package.json';
 
-/*
 const GlobalStyle = createGlobalStyle`
     body {
         margin: 0;
@@ -19,12 +18,8 @@ const GlobalStyle = createGlobalStyle`
         scrollbar-color: #90A4AE #CFD8DC;
     }
 `;
-*/
 
 const App = () =>{
-    const urlParams = new URLSearchParams(window.location.search);
-    const sid = urlParams.get('sid');
-    sidVar(sid);
     return(
         <ThemeProvider theme={defaultTheme}>
             <ApolloProvider client={Client}>
@@ -37,7 +32,7 @@ const App = () =>{
                         <link rel="icon" type="image/x-icon" href={Favicon} sizes="16x16" />
                     </Helmet>
                 
-                    {/* <GlobalStyle /> */}
+                    <GlobalStyle />
                     
                     <MainViewLayout />
                     
