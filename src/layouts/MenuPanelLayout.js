@@ -1,6 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { ScSrMenuPanel } from '../styled/ScSrMenuPanel';
-import { SessionsMenu } from '../containers/SessionsMenu';
+//import { SessionsMenu } from '../containers/SessionsMenu';
+
+import { SrSessionsMenu } from '../components/SrSessionsMenu';
+
 import { DeviceMenu } from '../containers/DeviceMenu';
 import { OptionsPanel } from '../containers/OptionsPanel';
 import { ChannelsMenu } from '../containers/ChannelsMenu';
@@ -10,11 +13,14 @@ import { SrRunButton } from '../components/SrRunButton';
 import SrLoading from '../components/SrLoading';
 import { SrTabularMenu } from '../components/SrTabularMenu';
 
-import { useGetSessions } from '../operations/queries/useGetSessions';
+//import { useGetSessions } from '../operations/queries/useGetSessions';
+import { useSessionHandlers } from '../operations/mutations/sessionHandlers';
 
 const MenuPanelLayout = () =>{
     console.log('Render MenuPanelLayout');
-    const [ select, {data: {sessions, session}, loading} ] = useGetSessions();
+    
+    //const [ select, {data: {sessions, session}, loading} ] = useGetSessions();
+    const [ select, create, remove, {data: {sessions, session}, loading} ] = useSessionHandlers();
     
     //------------------------------------------------------------
     const [ decoderMenu, setDecoderMenu ] = useState(false);
@@ -36,7 +42,15 @@ const MenuPanelLayout = () =>{
 
     return(
         <ScSrMenuPanel>
-            <SessionsMenu sessions={sessions} session={session} />
+            <SrSessionsMenu
+                sessions={sessions}
+                name={session.name}
+                select={select}
+                create={create}
+                remove={remove}
+            />
+            
+            
             <SrFileMenu />
             <DeviceMenu session={session} />
             

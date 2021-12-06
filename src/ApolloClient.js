@@ -137,7 +137,7 @@ class TestMiddleware extends ApolloLink {
 
 
 const srNameSpace = [
-    ['srmng', ['DeleteSession', 'CreateSession', 'SelectSession' ,'GetSessions', 'GetDriversList', 'getDecodersList']],
+    ['srmng', ['RemoveSession', 'CreateSession', 'SelectSession' ,'GetSessions', 'GetDriversList', 'getDecodersList']],
 ].reduce((obj, [value, keys]) => {
     for (const key of keys) {
         Object.defineProperty(obj, key, { value })

@@ -7,10 +7,10 @@ import { useSessionHandlers } from '../operations/mutations/sessionHandlers';
 //import { GET_SESSIONS } from '../operations/queries/getSessions';
 //import SrLoading from '../components/SrLoading';
 
-export const SessionsMenu = ({sesList, session})=>{
+export const SessionsMenu = ({sessions, session, select})=>{
     //const id='123';  //= useReactiveVar(sidVar);
     
-    const { select, create, remove } = useSessionHandlers();
+    const { create, remove } = useSessionHandlers();
     //const { data, loading } = useQuery(GET_SESSIONS);
     
     /*
@@ -41,9 +41,9 @@ export const SessionsMenu = ({sesList, session})=>{
     return (
         <SrSessionsMenu
             name={session.name}
-            sessions={sesList}
+            sessions={sessions}
             id={session.id}
-            selectSession={(id)=>select({variables:{id:id}})}
+            selectSession={(id)=>select(sessions, id)}
             createSession={create}
             deleteSession={(id)=>remove({variables:{id:id}})}
         />
